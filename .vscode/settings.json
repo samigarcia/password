@@ -1,0 +1,5 @@
+{
+    "FSharp.suggestGitignore": false,
+    "java.compile.nullAnalysis.mode": "disabled",
+    "dotnet.defaultSolution": "disable"
+}
