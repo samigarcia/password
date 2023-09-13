@@ -17,15 +17,14 @@ class MyInicio extends StatelessWidget {
         dark: ThemeData.dark(),
         light: ThemeData.light(),
         initial: AdaptiveThemeMode.light,
-        builder: (theme, darkTheme){
+        builder: (theme, darkTheme) {
           return MaterialApp(
             title: 'Gestory Password',
             theme: theme,
             darkTheme: darkTheme,
-            home: MyHomePage(),
+            home: const MyHomePage(),
           );
-        }
-    );
+        });
   }
 }
 
@@ -36,7 +35,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   File? _image; //se crea una variable de tipo archivo
   int _selectedChipIndex = -1;
 
@@ -49,7 +47,9 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
   }
-  Future<void> _getImageFromGallery() async { //funcion asincrona
+
+  Future<void> _getImageFromGallery() async {
+    //funcion asincrona
     final picker = ImagePicker(); //se crea una instacia de la clase ImagePicker
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -58,6 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
   }
+
   Future<void> _showImagePickerDialog() async {
     showDialog(
       context: context,
@@ -92,12 +93,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Color botonColor = Theme.of(context).brightness == Brightness.light ? Color(0xFFFFFF) : Color(0xFF14181B);
-    Color textColor = Theme.of(context).brightness == Brightness.light ? Color(0xFF57636C) : Color(0xFF95A1AC);
-    Color chiocColor = Theme.of(context).brightness == Brightness.light ? Color(0xFFE0E3E7) : Color(0xFF262D34);
-    Color bordeColor = Theme.of(context).brightness == Brightness.light ? Color(0xFFF1F4F8) : Color(0xFF1D2428);
+    Color botonColor = Theme.of(context).brightness == Brightness.light
+        ? Color(0xFFFFFF)
+        : Color(0xFF14181B);
+    Color textColor = Theme.of(context).brightness == Brightness.light
+        ? Color(0xFF57636C)
+        : Color(0xFF95A1AC);
+    Color chiocColor = Theme.of(context).brightness == Brightness.light
+        ? Color(0xFFE0E3E7)
+        : Color(0xFF262D34);
+    Color bordeColor = Theme.of(context).brightness == Brightness.light
+        ? Color(0xFFF1F4F8)
+        : Color(0xFF1D2428);
     //bool isDarkMode = AdaptiveTheme.of(context).mode == AdaptiveThemeMode.light;
-
 
     return Scaffold(
       body: Stack(
@@ -107,7 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
               Column(
                 children: [
                   Container(
-                    margin: EdgeInsets.only(left: 20,top: 40),
+                    margin: EdgeInsets.only(left: 20, top: 40),
                     child: Row(
                       children: [
                         GestureDetector(
@@ -121,7 +129,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                 radius: 30,
                                 backgroundImage: _image != null
                                     ? FileImage(_image!)
-                                    : AssetImage('assets/imagen.jpg') as ImageProvider<Object>,
+                                    : AssetImage('assets/imagen.jpg')
+                                        as ImageProvider<Object>,
                               ),
                             ),
                           ),
@@ -133,8 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               'Gestory Password',
                               style: TextStyle(
                                 fontSize: 22,
-                                fontFamily:
-                                'Title Large',
+                                fontFamily: 'Title Large',
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -155,20 +163,24 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: Stack(
                             children: [
                               const Positioned(
-                                left: 6, // Alinea el icono de modo claro a la izquierda
+                                left:
+                                    6, // Alinea el icono de modo claro a la izquierda
                                 top: 8,
                                 child: Icon(
                                   Icons.wb_sunny_rounded,
-                                  color: Color(0xFF57636C), // Cambia el color según el modo
+                                  color: Color(
+                                      0xFF57636C), // Cambia el color según el modo
                                   size: 24.0,
                                 ),
                               ),
                               const Positioned(
-                                right: 0, // Alinea el icono de modo oscuro a la derecha
+                                right:
+                                    0, // Alinea el icono de modo oscuro a la derecha
                                 top: 8,
                                 child: Icon(
                                   Icons.mode_night_rounded,
-                                  color: Colors.white, // Cambia el color según el modo
+                                  color: Colors
+                                      .white, // Cambia el color según el modo
                                   size: 24.0,
                                 ),
                               ),
@@ -178,7 +190,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                 child: Align(
                                   alignment: Alignment.bottomRight,
                                   child: Switch(
-                                    value: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.light,
+                                    value: AdaptiveTheme.of(context).mode ==
+                                        AdaptiveThemeMode.light,
                                     onChanged: (bool value) {
                                       if (value) {
                                         AdaptiveTheme.of(context).setLight();
@@ -186,13 +199,17 @@ class _MyHomePageState extends State<MyHomePage> {
                                         AdaptiveTheme.of(context).setDark();
                                       }
                                     },
-                                    activeColor: Colors.transparent, // Pulgar transparente en modo oscuro y claro
-                                    activeTrackColor: Colors.transparent, // Riel transparente en modo oscuro y claro
-                                    inactiveThumbColor: Colors.transparent, // Color del pulgar del interruptor cuando está desactivado
-                                    inactiveTrackColor: Colors.transparent, // Color del riel cuando el interruptor está desactivado
-                                  ),
+                                    activeColor: Colors
+                                        .transparent, // Pulgar transparente en modo oscuro y claro
+                                    activeTrackColor: Colors
+                                        .transparent, // Riel transparente en modo oscuro y claro
+                                    inactiveThumbColor: Colors
+                                        .transparent, // Color del pulgar del interruptor cuando está desactivado
+                                    inactiveTrackColor: Colors
+                                        .transparent, // Color del riel cuando el interruptor está desactivado
                                   ),
                                 ),
+                              ),
                             ],
                           ),
                         ),
@@ -205,12 +222,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         SizedBox(width: 20),
                         ChoiceChip(
-                          label: Text('Bancaria',
+                          label: Text(
+                            'Bancaria',
                             style: TextStyle(
                               fontSize: 18, // Tamaño de fuente personalizado
                             ),
                           ),
-                          selected: _selectedChipIndex == 0, // Verifica si este ChoiceChip está seleccionado
+                          selected: _selectedChipIndex ==
+                              0, // Verifica si este ChoiceChip está seleccionado
                           backgroundColor: chiocColor,
                           labelStyle: TextStyle(
                             color: textColor,
@@ -220,18 +239,22 @@ class _MyHomePageState extends State<MyHomePage> {
                               color: bordeColor, // Color del borde
                               width: 1.0, // Ancho del borde
                             ),
-                            borderRadius: BorderRadius.circular(16.0), // Radio del borde
+                            borderRadius:
+                                BorderRadius.circular(16.0), // Radio del borde
                           ),
                           onSelected: (isSelected) {
                             setState(() {
-                              _selectedChipIndex = isSelected ? 0 : -1;// Selecciona o deselecciona este ChoiceChip
+                              _selectedChipIndex = isSelected
+                                  ? 0
+                                  : -1; // Selecciona o deselecciona este ChoiceChip
                               print('Bancaria');
                             });
                           },
                         ),
                         SizedBox(width: 8),
                         ChoiceChip(
-                          label: Text('Redes sociales',
+                          label: Text(
+                            'Redes sociales',
                             style: TextStyle(
                               fontSize: 18, // Tamaño de fuente personalizado
                             ),
@@ -246,7 +269,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               color: bordeColor, // Color del borde
                               width: 1.0, // Ancho del borde
                             ),
-                            borderRadius: BorderRadius.circular(16.0), // Radio del borde
+                            borderRadius:
+                                BorderRadius.circular(16.0), // Radio del borde
                           ),
                           onSelected: (isSelected) {
                             setState(() {
@@ -257,7 +281,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                         SizedBox(width: 8),
                         ChoiceChip(
-                          label: Text('Lista de compras',
+                          label: Text(
+                            'Lista de compras',
                             style: TextStyle(
                               fontSize: 18, // Tamaño de fuente personalizado
                             ),
@@ -272,7 +297,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               color: bordeColor, // Color del borde
                               width: 1.0, // Ancho del borde
                             ),
-                            borderRadius: BorderRadius.circular(16.0), // Radio del borde
+                            borderRadius:
+                                BorderRadius.circular(16.0), // Radio del borde
                           ),
                           onSelected: (isSelected) {
                             setState(() {
@@ -283,7 +309,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                         SizedBox(width: 8),
                         ChoiceChip(
-                          label: Text('Trabajo',
+                          label: Text(
+                            'Trabajo',
                             style: TextStyle(
                               fontSize: 18, // Tamaño de fuente personalizado
                             ),
@@ -298,7 +325,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               color: bordeColor, // Color del borde
                               width: 1.0, // Ancho del borde
                             ),
-                            borderRadius: BorderRadius.circular(16.0), // Radio del borde
+                            borderRadius:
+                                BorderRadius.circular(16.0), // Radio del borde
                           ),
                           onSelected: (isSelected) {
                             setState(() {
@@ -309,7 +337,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                         SizedBox(width: 8),
                         ChoiceChip(
-                          label: Text('Lista de compras',
+                          label: Text(
+                            'Lista de compras',
                             style: TextStyle(
                               fontSize: 18, // Tamaño de fuente personalizado
                             ),
@@ -324,7 +353,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               color: bordeColor, // Color del borde
                               width: 1.0, // Ancho del borde
                             ),
-                            borderRadius: BorderRadius.circular(16.0), // Radio del borde
+                            borderRadius:
+                                BorderRadius.circular(16.0), // Radio del borde
                           ),
                           onSelected: (isSelected) {
                             setState(() {
@@ -335,7 +365,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                         SizedBox(width: 8),
                         ChoiceChip(
-                          label: Text('Escuela',
+                          label: Text(
+                            'Escuela',
                             style: TextStyle(
                               fontSize: 18, // Tamaño de fuente personalizado
                             ),
@@ -350,7 +381,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               color: bordeColor, // Color del borde
                               width: 1.0, // Ancho del borde
                             ),
-                            borderRadius: BorderRadius.circular(16.0), // Radio del borde
+                            borderRadius:
+                                BorderRadius.circular(16.0), // Radio del borde
                           ),
                           onSelected: (isSelected) {
                             setState(() {
@@ -361,7 +393,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                         SizedBox(width: 8),
                         ChoiceChip(
-                          label: Text('Otros',
+                          label: Text(
+                            'Otros',
                             style: TextStyle(
                               fontSize: 18, // Tamaño de fuente personalizado
                             ),
@@ -376,7 +409,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               color: bordeColor, // Color del borde
                               width: 1.0, // Ancho del borde
                             ),
-                            borderRadius: BorderRadius.circular(16.0), // Radio del borde
+                            borderRadius:
+                                BorderRadius.circular(16.0), // Radio del borde
                           ),
                           onSelected: (isSelected) {
                             setState(() {
@@ -393,7 +427,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
               Divider(
-                color: Color(0xFF2874cf).withOpacity(0.2), // Cambiar a tu color deseado
+                color: Color(0xFF2874cf)
+                    .withOpacity(0.2), // Cambiar a tu color deseado
                 thickness: 2,
               ),
 
@@ -403,7 +438,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Column(
                     children: [
                       Padding(
-                        padding: EdgeInsets.only(left: 20,top: 10, right: 20),
+                        padding: EdgeInsets.only(left: 20, top: 10, right: 20),
                         child: Row(
                           children: [
                             Expanded(
@@ -417,31 +452,35 @@ class _MyHomePageState extends State<MyHomePage> {
                                       width: 330,
                                       height: 100,
                                       decoration: BoxDecoration(
-                                        color: Color(0xFF96692c),
-                                        borderRadius: BorderRadius.circular(8)
-                                      ),
-
+                                          color: Color(0xFF96692c),
+                                          borderRadius:
+                                              BorderRadius.circular(8)),
                                       child: const Padding(
-                                        padding: EdgeInsets.only(left: 20, right: 20),
+                                        padding: EdgeInsets.only(
+                                            left: 20, right: 20),
                                         child: Row(
                                           children: [
                                             Column(
                                               children: [
-                                                Text('Hello world',
+                                                Text(
+                                                  'Hello world',
                                                   style: TextStyle(
-                                                    fontSize: 19, // Tamaño de fuente
+                                                    fontSize:
+                                                        19, // Tamaño de fuente
                                                     fontFamily:
-                                                    'Headline Small',
-                                                    fontWeight: FontWeight.w500,// Peso de fuente
+                                                        'Headline Small',
+                                                    fontWeight: FontWeight
+                                                        .w500, // Peso de fuente
                                                   ),
                                                 ),
-
-                                                Text('Hello World',
+                                                Text(
+                                                  'Hello World',
                                                   style: TextStyle(
-                                                    fontSize: 14, // Tamaño de fuente
-                                                    fontFamily:
-                                                    'Body Small',
-                                                    fontWeight: FontWeight.normal, // Peso de fuente
+                                                    fontSize:
+                                                        14, // Tamaño de fuente
+                                                    fontFamily: 'Body Small',
+                                                    fontWeight: FontWeight
+                                                        .normal, // Peso de fuente
                                                   ),
                                                 ),
                                               ],
@@ -456,29 +495,34 @@ class _MyHomePageState extends State<MyHomePage> {
                                       height: 100,
                                       decoration: BoxDecoration(
                                           color: Color(0xFF96692c),
-                                          borderRadius: BorderRadius.circular(8)
-                                      ),
+                                          borderRadius:
+                                              BorderRadius.circular(8)),
                                       child: const Padding(
-                                        padding: EdgeInsets.only(left: 20, right: 20),
+                                        padding: EdgeInsets.only(
+                                            left: 20, right: 20),
                                         child: Row(
                                           children: [
                                             Column(
                                               children: [
-                                                Text('Hello world',
+                                                Text(
+                                                  'Hello world',
                                                   style: TextStyle(
-                                                    fontSize: 19, // Tamaño de fuente
+                                                    fontSize:
+                                                        19, // Tamaño de fuente
                                                     fontFamily:
-                                                    'Headline Small',
-                                                    fontWeight: FontWeight.w500, // Peso de fuente
+                                                        'Headline Small',
+                                                    fontWeight: FontWeight
+                                                        .w500, // Peso de fuente
                                                   ),
                                                 ),
-
-                                                Text('Hello World',
+                                                Text(
+                                                  'Hello World',
                                                   style: TextStyle(
-                                                    fontSize: 14, // Tamaño de fuente
-                                                    fontFamily:
-                                                    'Body Small',
-                                                    fontWeight: FontWeight.normal, // Peso de fuente
+                                                    fontSize:
+                                                        14, // Tamaño de fuente
+                                                    fontFamily: 'Body Small',
+                                                    fontWeight: FontWeight
+                                                        .normal, // Peso de fuente
                                                   ),
                                                 ),
                                               ],
@@ -493,29 +537,34 @@ class _MyHomePageState extends State<MyHomePage> {
                                       height: 100,
                                       decoration: BoxDecoration(
                                           color: Color(0xFF96692c),
-                                          borderRadius: BorderRadius.circular(8)
-                                      ),
+                                          borderRadius:
+                                              BorderRadius.circular(8)),
                                       child: const Padding(
-                                        padding: EdgeInsets.only(left: 20, right: 20),
+                                        padding: EdgeInsets.only(
+                                            left: 20, right: 20),
                                         child: Row(
                                           children: [
                                             Column(
                                               children: [
-                                                Text('Hello world',
+                                                Text(
+                                                  'Hello world',
                                                   style: TextStyle(
-                                                    fontSize: 19, // Tamaño de fuente
+                                                    fontSize:
+                                                        19, // Tamaño de fuente
                                                     fontFamily:
-                                                    'Headline Small',
-                                                    fontWeight: FontWeight.w500, // Peso de fuente
+                                                        'Headline Small',
+                                                    fontWeight: FontWeight
+                                                        .w500, // Peso de fuente
                                                   ),
                                                 ),
-
-                                                Text('Hello World',
+                                                Text(
+                                                  'Hello World',
                                                   style: TextStyle(
-                                                    fontSize: 14, // Tamaño de fuente
-                                                    fontFamily:
-                                                    'Body Small',
-                                                    fontWeight: FontWeight.normal, // Peso de fuente
+                                                    fontSize:
+                                                        14, // Tamaño de fuente
+                                                    fontFamily: 'Body Small',
+                                                    fontWeight: FontWeight
+                                                        .normal, // Peso de fuente
                                                   ),
                                                 ),
                                               ],
@@ -530,29 +579,34 @@ class _MyHomePageState extends State<MyHomePage> {
                                       height: 100,
                                       decoration: BoxDecoration(
                                           color: Color(0xFFfc6849),
-                                          borderRadius: BorderRadius.circular(8)
-                                      ),
+                                          borderRadius:
+                                              BorderRadius.circular(8)),
                                       child: const Padding(
-                                        padding: EdgeInsets.only(left: 20, right: 20),
+                                        padding: EdgeInsets.only(
+                                            left: 20, right: 20),
                                         child: Row(
                                           children: [
                                             Column(
                                               children: [
-                                                Text('Hello world',
+                                                Text(
+                                                  'Hello world',
                                                   style: TextStyle(
-                                                    fontSize: 19, // Tamaño de fuente
+                                                    fontSize:
+                                                        19, // Tamaño de fuente
                                                     fontFamily:
-                                                    'Headline Small',
-                                                    fontWeight: FontWeight.w500, // Peso de fuente
+                                                        'Headline Small',
+                                                    fontWeight: FontWeight
+                                                        .w500, // Peso de fuente
                                                   ),
                                                 ),
-
-                                                Text('Hello World',
+                                                Text(
+                                                  'Hello World',
                                                   style: TextStyle(
-                                                    fontSize: 14, // Tamaño de fuente
-                                                    fontFamily:
-                                                    'Body Small',
-                                                    fontWeight: FontWeight.normal, // Peso de fuente
+                                                    fontSize:
+                                                        14, // Tamaño de fuente
+                                                    fontFamily: 'Body Small',
+                                                    fontWeight: FontWeight
+                                                        .normal, // Peso de fuente
                                                   ),
                                                 ),
                                               ],
@@ -567,28 +621,34 @@ class _MyHomePageState extends State<MyHomePage> {
                                       height: 100,
                                       decoration: BoxDecoration(
                                           color: Color(0xFFfc6849),
-                                          borderRadius: BorderRadius.circular(8)
-                                      ),
+                                          borderRadius:
+                                              BorderRadius.circular(8)),
                                       child: const Padding(
-                                        padding: EdgeInsets.only(left: 20, right: 20),
+                                        padding: EdgeInsets.only(
+                                            left: 20, right: 20),
                                         child: Row(
                                           children: [
                                             Column(
                                               children: [
-                                                Text('Hello world',
+                                                Text(
+                                                  'Hello world',
                                                   style: TextStyle(
-                                                    fontSize: 19, // Tamaño de fuente
+                                                    fontSize:
+                                                        19, // Tamaño de fuente
                                                     fontFamily:
-                                                    'Headline Small',
-                                                    fontWeight: FontWeight.w500, // Peso de fuente
+                                                        'Headline Small',
+                                                    fontWeight: FontWeight
+                                                        .w500, // Peso de fuente
                                                   ),
                                                 ),
-                                                Text('Hello World',
+                                                Text(
+                                                  'Hello World',
                                                   style: TextStyle(
-                                                    fontSize: 14, // Tamaño de fuente
-                                                    fontFamily:
-                                                    'Body Small',
-                                                    fontWeight: FontWeight.normal, // Peso de fuente
+                                                    fontSize:
+                                                        14, // Tamaño de fuente
+                                                    fontFamily: 'Body Small',
+                                                    fontWeight: FontWeight
+                                                        .normal, // Peso de fuente
                                                   ),
                                                 ),
                                               ],
@@ -603,28 +663,34 @@ class _MyHomePageState extends State<MyHomePage> {
                                       height: 100,
                                       decoration: BoxDecoration(
                                           color: Color(0xFFfc6849),
-                                          borderRadius: BorderRadius.circular(8)
-                                      ),
+                                          borderRadius:
+                                              BorderRadius.circular(8)),
                                       child: const Padding(
-                                        padding: EdgeInsets.only(left: 20, right: 20),
+                                        padding: EdgeInsets.only(
+                                            left: 20, right: 20),
                                         child: Row(
                                           children: [
                                             Column(
                                               children: [
-                                                Text('Hello world',
+                                                Text(
+                                                  'Hello world',
                                                   style: TextStyle(
-                                                    fontSize: 19, // Tamaño de fuente
+                                                    fontSize:
+                                                        19, // Tamaño de fuente
                                                     fontFamily:
-                                                    'Headline Small',
-                                                    fontWeight: FontWeight.w500, // Peso de fuente
+                                                        'Headline Small',
+                                                    fontWeight: FontWeight
+                                                        .w500, // Peso de fuente
                                                   ),
                                                 ),
-                                                Text('Hello World',
+                                                Text(
+                                                  'Hello World',
                                                   style: TextStyle(
-                                                    fontSize: 14, // Tamaño de fuente
-                                                    fontFamily:
-                                                    'Body Small',
-                                                    fontWeight: FontWeight.normal, // Peso de fuente
+                                                    fontSize:
+                                                        14, // Tamaño de fuente
+                                                    fontFamily: 'Body Small',
+                                                    fontWeight: FontWeight
+                                                        .normal, // Peso de fuente
                                                   ),
                                                 ),
                                               ],

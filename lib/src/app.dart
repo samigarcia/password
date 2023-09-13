@@ -102,7 +102,7 @@ class _MyAppFormState extends State<MyAppForm> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => MyInicio()),
+                                      builder: (context) => const MyInicio()),
                                 );
                               },
                             ),
@@ -240,29 +240,19 @@ class _MyAppFormState extends State<MyAppForm> {
               SizedBox(
                 width: double.infinity,
                 height: 45,
-                child: TextField(
-                  enabled: false,
-                  decoration: const InputDecoration(
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: 'seleciona una pregunta',
-                    suffixIcon: Icon(
-                      Icons.navigate_next,
-                      color: Colors.black,
-                    ),
-                    hintStyle: TextStyle(
-                      color: Colors.black,
-                      fontFamily: 'Roboto',
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  onSubmitted: (valor) {
-                    debugPrint('la respuesta es: $_respuesta');
+                child: DropdownMenu<String>(
+                  initialSelection: list.first,
+                  onSelected: (String? value) {
+                    // This is called when the user selects an item.
+                    setState(() {
+                      dropdownValue = value!;
+                    });
                   },
+                  dropdownMenuEntries:
+                      list.map<DropdownMenuEntry<String>>((String value) {
+                    return DropdownMenuEntry<String>(
+                        value: value, label: value);
+                  }).toList(),
                 ),
               ),
               const Divider(
@@ -296,3 +286,10 @@ class _MyAppFormState extends State<MyAppForm> {
     );
   }
 }
+
+const List<String> list = [
+  "nombre de su mascota",
+  "comida favorita",
+  "color favorito"
+];
+String dropdownValue = list.first;
