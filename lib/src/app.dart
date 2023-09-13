@@ -1,6 +1,9 @@
+//importaciones de paquetes de dart
+import 'package:app_2/values/temas.dart';
 import 'package:flutter/material.dart';
 import 'package:app_2/src/inicio.dart';
 
+//clase principal, se manda a llamar desde el main
 class MyAppForm extends StatefulWidget {
   const MyAppForm({super.key});
 
@@ -9,6 +12,7 @@ class MyAppForm extends StatefulWidget {
 }
 
 class _MyAppFormState extends State<MyAppForm> {
+  //variables para capturar los datos ingresados del usuario
   String _user = "";
   String _password = "";
   String _password1 = "";
@@ -17,17 +21,22 @@ class _MyAppFormState extends State<MyAppForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      //el color de toda la pantalla 'blanco'
       backgroundColor: const Color.fromARGB(255, 247, 245, 245),
+      //se crea la vista principal
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 5.0),
         children: <Widget>[
           Column(
+            //se crea una lista de witgets
             children: [
               Align(
                 alignment: const AlignmentDirectional(0, 0),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
+                  //se crea otra lista de witgets
                   children: [
+                    //se crea el color azol de la parte de arriba
                     Container(
                       width: double.infinity,
                       height: 300,
@@ -46,7 +55,9 @@ class _MyAppFormState extends State<MyAppForm> {
                         ),
                       ),
                       child: Stack(
+                        //se crea otra lista de widgets
                         children: [
+                          //se crea el contorno y le logo del refgistro de usuario
                           Align(
                             alignment: const AlignmentDirectional(-1, 0.14),
                             child: Container(
@@ -78,6 +89,7 @@ class _MyAppFormState extends State<MyAppForm> {
                                   ),
                                 )),
                           ),
+                          //le agregamos 'Registro' al tema de color azul
                           const Align(
                             alignment: AlignmentDirectional(0.14, 0.07),
                             child: Text(
@@ -89,6 +101,7 @@ class _MyAppFormState extends State<MyAppForm> {
                               ),
                             ),
                           ),
+                          //se crea el boton guardar
                           Align(
                             alignment: const AlignmentDirectional(-1.00, 0.80),
                             child: ElevatedButton(
@@ -113,6 +126,7 @@ class _MyAppFormState extends State<MyAppForm> {
                   ],
                 ),
               ),
+              //se crea la etiqueta usuario
               Container(
                 margin: const EdgeInsets.only(right: 280),
                 child: const Text(
@@ -124,6 +138,7 @@ class _MyAppFormState extends State<MyAppForm> {
                   'Usuario',
                 ),
               ),
+              //se crea la caja de texto donde contendra el usuario
               SizedBox(
                 height: 45,
                 child: TextField(
@@ -154,9 +169,11 @@ class _MyAppFormState extends State<MyAppForm> {
                   },
                 ),
               ),
+              //un divizor
               const Divider(
                 height: 15.0,
               ),
+              //se crea la etiqueta 'crear contraseña'
               Container(
                 margin: const EdgeInsets.only(right: 210),
                 child: const Text(
@@ -168,6 +185,7 @@ class _MyAppFormState extends State<MyAppForm> {
                   'Crear contraseña',
                 ),
               ),
+              //se crea la caja de texto donde contendra la contraseña
               SizedBox(
                 height: 45,
                 child: TextField(
@@ -192,9 +210,11 @@ class _MyAppFormState extends State<MyAppForm> {
                   },
                 ),
               ),
+              //divizor
               const Divider(
                 height: 15.0,
               ),
+              //se crea la etiqueta 'Confirmar contraseña'
               Container(
                 margin: const EdgeInsets.only(
                   right: 170,
@@ -208,6 +228,7 @@ class _MyAppFormState extends State<MyAppForm> {
                   'Confirmar contraseña',
                 ),
               ),
+              //se crea la caja de texto donde se guarda la confirmacion de contraseña
               SizedBox(
                 height: 45,
                 child: TextField(
@@ -234,30 +255,41 @@ class _MyAppFormState extends State<MyAppForm> {
                   },
                 ),
               ),
+              //divisor
               const Divider(
-                height: 15.0,
+                height: 10.0,
               ),
-              SizedBox(
-                width: double.infinity,
-                height: 45,
-                child: DropdownMenu<String>(
-                  initialSelection: list.first,
-                  onSelected: (String? value) {
-                    // This is called when the user selects an item.
-                    setState(() {
-                      dropdownValue = value!;
-                    });
-                  },
-                  dropdownMenuEntries:
-                      list.map<DropdownMenuEntry<String>>((String value) {
-                    return DropdownMenuEntry<String>(
-                        value: value, label: value);
-                  }).toList(),
+              // se crea el menu desplegable "dificil por cierto!"
+              DropdownMenu<String>(
+                width: 350,
+                label: const Text('Selecciona una prengunta'),
+                inputDecorationTheme: const InputDecorationTheme(
+                  border: OutlineInputBorder(),
+                  fillColor: Colors.black,
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                 ),
+                textStyle: const TextStyle(
+                  fontFamily: 'Roboto',
+                  color: Colors.black,
+                  fontSize: 20,
+                ),
+                onSelected: (String? value) {
+                  // This is called when the user selects an item.
+                  setState(() {
+                    dropdownValue = value!;
+                  });
+                },
+                dropdownMenuEntries:
+                    list.map<DropdownMenuEntry<String>>((String value) {
+                  return DropdownMenuEntry<String>(value: value, label: value);
+                }).toList(),
               ),
+              //divisor
               const Divider(
-                height: 15.0,
+                height: 10.0,
               ),
+              //se crea la caja de texto donde se guarda la respuesta del usuario
               SizedBox(
                 height: 45,
                 width: double.infinity,
@@ -287,9 +319,11 @@ class _MyAppFormState extends State<MyAppForm> {
   }
 }
 
+//se crea las preguntas en forma de una lista
 const List<String> list = [
   "nombre de su mascota",
   "comida favorita",
   "color favorito"
 ];
+//variable que se encarga de poner la primera pregunta de la lista "no lo use!"
 String dropdownValue = list.first;
