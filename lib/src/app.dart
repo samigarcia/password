@@ -2,16 +2,19 @@
 import 'package:app_2/values/temas.dart';
 import 'package:flutter/material.dart';
 import 'package:app_2/src/inicio.dart';
+import 'package:sqflite/sqflite.dart';
 
 //clase principal, se manda a llamar desde el main
 class MyAppForm extends StatefulWidget {
   const MyAppForm({super.key});
-
   @override
   State<MyAppForm> createState() => _MyAppFormState();
 }
 
 class _MyAppFormState extends State<MyAppForm> {
+  //iniciamos la instancia db para usar los metodos del archivo "basedatos.dart"
+  //LlamandoDatabase db = LlamandoDatabase();
+
   //variables para capturar los datos ingresados del usuario
   String _user = "";
   String _password = "";
