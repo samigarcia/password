@@ -1,5 +1,7 @@
 //importaciones de paquetes de dart
+import 'package:app_2/db/usuarioDao.dart';
 import 'package:app_2/values/temas.dart';
+import 'package:app_2/db/usuario.dart';
 import 'package:flutter/material.dart';
 import 'package:app_2/src/inicio.dart';
 import 'package:sqflite/sqflite.dart';
@@ -12,10 +14,38 @@ class MyAppForm extends StatefulWidget {
 }
 
 class _MyAppFormState extends State<MyAppForm> {
-  //iniciamos la instancia db para usar los metodos del archivo "basedatos.dart"
-  //LlamandoDatabase db = LlamandoDatabase();
+  //creamos una lista de usuario para guardar todo los datos
+  List<UserModel> users = [];
+  //inicializamos la clase UserDao
+  final dao = UserDao();
+
+  //inicializamos bade de datos
+  @override
+  void initState() {
+    super.initState();
+    dao.readAll().then((value) {
+      setState(() {
+        users = value;
+      });
+    });
+  }
+
+  //controlamos la cancelacion de usuario exporatico
+  @override
+  void dispose() {
+    userin.dispose();
+    password.dispose();
+    password1.dispose();
+    respuesta.dispose();
+    super.dispose();
+  }
 
   //variables para capturar los datos ingresados del usuario
+  //creamos un metodo de obtencion de datos propio de fllutter
+  final userin = TextEditingController();
+  final password = TextEditingController();
+  final password1 = TextEditingController();
+  final respuesta = TextEditingController();
   String _user = "";
   String _password = "";
   String _password1 = "";
@@ -114,12 +144,26 @@ class _MyAppFormState extends State<MyAppForm> {
                                     const Color.fromARGB(255, 43, 73, 245),
                               ),
                               child: const Text('Guardar'),
-                              onPressed: () {
+                              onPressed: () async {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => const MyInicio()),
                                 );
+                                _user = userin.text;
+                                _password = password.text;
+                                _password1 = password1.text;
+                                _respuesta = respuesta.text;
+                                UserModel user = UserModel(
+                                    name: _user,
+                                    password: _password,
+                                    rpassword: _password1,
+                                    res: _respuesta);
+                                //final id = await dao.insert(user);
+                                //user = user.copyWith(id: id);
+                                setState(() {
+                                  users.add(user);
+                                });
                               },
                             ),
                           ),
@@ -145,6 +189,7 @@ class _MyAppFormState extends State<MyAppForm> {
               SizedBox(
                 height: 45,
                 child: TextField(
+                  controller: userin,
                   enableInteractiveSelection: false,
                   autofocus: true,
                   //textCapitalization: TextCapitalization.characters,
@@ -192,6 +237,7 @@ class _MyAppFormState extends State<MyAppForm> {
               SizedBox(
                 height: 45,
                 child: TextField(
+                  controller: password,
                   enableInteractiveSelection: false,
                   obscureText: true,
                   decoration: const InputDecoration(
@@ -235,6 +281,7 @@ class _MyAppFormState extends State<MyAppForm> {
               SizedBox(
                 height: 45,
                 child: TextField(
+                  controller: password1,
                   enableInteractiveSelection: false,
                   obscureText: true,
                   decoration: const InputDecoration(
@@ -264,6 +311,7 @@ class _MyAppFormState extends State<MyAppForm> {
               ),
               // se crea el menu desplegable "dificil por cierto!"
               DropdownMenu<String>(
+                controller: respuesta,
                 width: 350,
                 label: const Text('Selecciona una prengunta'),
                 inputDecorationTheme: const InputDecorationTheme(

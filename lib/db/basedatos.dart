@@ -9,12 +9,11 @@ class DatabaseHelper {
 
   Database? _db;
   Database get db => _db!;
-  String sql =
-      "CREATE TABLE usuario (id INT PRIMARY KEY AUTOINCREMENT, nombre TEXT, contra TEXT, rcontra TEXT,respuesta TEXT)";
 
   Future<void> init() async {
     _db = await openDatabase('datos.db', version: 1, onCreate: (db, version) {
-      db.execute(sql);
+      db.execute(
+          "CREATE TABLE usuario (id INT PRIMARY KEY AUTOINCREMENT, nombre TEXT, contra TEXT, rcontra TEXT,respuesta TEXT)");
     });
   }
 }
