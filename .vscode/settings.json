@@ -1,5 +1,6 @@
 {
     "FSharp.suggestGitignore": false,
     "java.compile.nullAnalysis.mode": "disabled",
-    "dotnet.defaultSolution": "disable"
+    "dotnet.defaultSolution": "disable",
+    "cmake.sourceDirectory": "C:/Users/samig/Documents/Programacion/Flutter/VSC/gestor-de-password/linux"
 }
