@@ -1,10 +1,6 @@
 //importaciones de paquetes de dart
-import 'package:app_2/db/usuarioDao.dart';
-import 'package:app_2/values/temas.dart';
-import 'package:app_2/db/usuario.dart';
 import 'package:flutter/material.dart';
 import 'package:app_2/src/inicio.dart';
-import 'package:sqflite/sqflite.dart';
 
 //clase principal, se manda a llamar desde el main
 class MyAppForm extends StatefulWidget {
@@ -14,34 +10,7 @@ class MyAppForm extends StatefulWidget {
 }
 
 class _MyAppFormState extends State<MyAppForm> {
-  //creamos una lista de usuario para guardar todo los datos
-  List<UserModel> users = [];
-  //inicializamos la clase UserDao
-  final dao = UserDao();
-
-  //inicializamos bade de datos
-  @override
-  void initState() {
-    super.initState();
-    dao.readAll().then((value) {
-      setState(() {
-        users = value;
-      });
-    });
-  }
-
-  //controlamos la cancelacion de usuario exporatico
-  @override
-  void dispose() {
-    userin.dispose();
-    password.dispose();
-    password1.dispose();
-    respuesta.dispose();
-    super.dispose();
-  }
-
   //variables para capturar los datos ingresados del usuario
-  //creamos un metodo de obtencion de datos propio de fllutter
   final userin = TextEditingController();
   final password = TextEditingController();
   final password1 = TextEditingController();
@@ -145,25 +114,16 @@ class _MyAppFormState extends State<MyAppForm> {
                               ),
                               child: const Text('Guardar'),
                               onPressed: () async {
+                                _user = userin.text;
+                                _password = password.text;
+                                _password1 = password1.text;
+                                _respuesta = respuesta.text;
+                                debugPrint("added");
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => const MyInicio()),
                                 );
-                                _user = userin.text;
-                                _password = password.text;
-                                _password1 = password1.text;
-                                _respuesta = respuesta.text;
-                                UserModel user = UserModel(
-                                    name: _user,
-                                    password: _password,
-                                    rpassword: _password1,
-                                    res: _respuesta);
-                                //final id = await dao.insert(user);
-                                //user = user.copyWith(id: id);
-                                setState(() {
-                                  users.add(user);
-                                });
                               },
                             ),
                           ),
