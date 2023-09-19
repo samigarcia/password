@@ -1,3 +1,4 @@
+// es unaa clase para crear un objeto persona
 class Persona {
   int id = 0;
   String name = "";
@@ -15,10 +16,10 @@ class Persona {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'name': name,
-      'password': password,
-      'rpassword': rpassword,
-      'res': res
+      'nombre': name,
+      'contra': password,
+      'rcontra': rpassword,
+      'respuesta': res
     };
   }
 }

@@ -1,6 +1,10 @@
 //importaciones de paquetes de dart
+import 'package:app_2/db/db.dart';
+import 'package:app_2/db/persona.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:app_2/src/inicio.dart';
+import 'package:sqflite/sqflite.dart';
 
 //clase principal, se manda a llamar desde el main
 class MyAppForm extends StatefulWidget {
@@ -19,7 +23,19 @@ class _MyAppFormState extends State<MyAppForm> {
   String _password = "";
   String _password1 = "";
   String _respuesta = "";
+  String ver = "";
 
+  List<Persona> person = [];
+
+  cargaPersonas() async {
+    List<Persona> auxPersona = await DB.personas();
+
+    setState(() {
+      person = auxPersona;
+    });
+  }
+
+//aqui empieza la creacion de los widgets
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,7 +134,13 @@ class _MyAppFormState extends State<MyAppForm> {
                                 _password = password.text;
                                 _password1 = password1.text;
                                 _respuesta = respuesta.text;
-                                debugPrint("added");
+                                DB.insert(Persona(
+                                    id: 1,
+                                    name: _user,
+                                    password: _password,
+                                    rpassword: _password1,
+                                    res: _respuesta));
+                                debugPrint("no se imprime:/");
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -271,7 +293,6 @@ class _MyAppFormState extends State<MyAppForm> {
               ),
               // se crea el menu desplegable "dificil por cierto!"
               DropdownMenu<String>(
-                controller: respuesta,
                 width: 350,
                 label: const Text('Selecciona una prengunta'),
                 inputDecorationTheme: const InputDecorationTheme(
@@ -305,6 +326,7 @@ class _MyAppFormState extends State<MyAppForm> {
                 height: 45,
                 width: double.infinity,
                 child: TextField(
+                  controller: respuesta,
                   decoration: const InputDecoration(
                     contentPadding:
                         EdgeInsets.symmetric(vertical: 10, horizontal: 10),
