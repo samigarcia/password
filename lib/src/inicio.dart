@@ -3,6 +3,8 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:app_2/src/note.dart';
+
+import '../db/databaseCategory.dart';
 /*
 void main() {
   runApp(const MyApp());
@@ -22,7 +24,7 @@ class MyInicio extends StatelessWidget {
             title: 'Gestory Password',
             theme: theme,
             darkTheme: darkTheme,
-            home: const MyHomePage(),
+            home: MyHomePage(),
           );
         });
   }
@@ -37,6 +39,23 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   File? _image; //se crea una variable de tipo archivo
   int _selectedChipIndex = -1;
+  List<Category> _categories = [];
+
+  @override
+  void initState() {
+    super.initState(); // Llama a super.initState() primero
+    _loadCategories(); // Llama a _loadCategories al iniciar la pantalla
+  }
+
+  void _loadCategories() async {
+    final dbHelper = DatabaseHelper();
+    final categories = await dbHelper
+        .getCategories(); // Supongamos que esta función devuelve una lista de categorías
+
+    setState(() {
+      _categories = categories;
+    });
+  }
 
   Future<void> _getImageFromCamera() async {
     final picker = ImagePicker();
@@ -94,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     Color botonColor = Theme.of(context).brightness == Brightness.light
-        ? Color(0xFFFFFF)
+        ? Color(0xFFFFFFFF)
         : Color(0xFF14181B);
     Color textColor = Theme.of(context).brightness == Brightness.light
         ? Color(0xFF57636C)
@@ -105,9 +124,12 @@ class _MyHomePageState extends State<MyHomePage> {
     Color bordeColor = Theme.of(context).brightness == Brightness.light
         ? Color(0xFFF1F4F8)
         : Color(0xFF1D2428);
-    //bool isDarkMode = AdaptiveTheme.of(context).mode == AdaptiveThemeMode.light;
+    Color backgroudcolor = Theme.of(context).brightness == Brightness.light
+        ? Color(0xFFF1F4F8)
+        : Color(0xFF1D2428);
 
     return Scaffold(
+      backgroundColor: backgroudcolor,
       body: Stack(
         children: [
           Column(
@@ -221,206 +243,47 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Row(
                       children: [
                         SizedBox(width: 20),
-                        ChoiceChip(
-                          label: Text(
-                            'Bancaria',
-                            style: TextStyle(
-                              fontSize: 18, // Tamaño de fuente personalizado
+
+                        for (int index = 0; index < _categories.length; index++)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: ChoiceChip(
+                              label: Text(
+                                _categories[index].name,
+                                style: TextStyle(
+                                  fontSize:
+                                      18, // Tamaño de fuente personalizado
+                                ),
+                              ),
+                              selected: _selectedChipIndex ==
+                                  index, // Verifica si este ChoiceChip está seleccionado
+                              backgroundColor: chiocColor,
+                              labelStyle: TextStyle(
+                                color: textColor,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                  color: bordeColor, // Color del borde
+                                  width: 1.0, // Ancho del borde
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                    16.0), // Radio del borde
+                              ),
+                              onSelected: (isSelected) {
+                                setState(() {
+                                  _selectedChipIndex = isSelected
+                                      ? index
+                                      : -1; // Selecciona o deselecciona este ChoiceChip
+                                  print(
+                                      'Categoria Seleccionada: ${_categories[index].name}');
+                                });
+                              },
                             ),
                           ),
-                          selected: _selectedChipIndex ==
-                              0, // Verifica si este ChoiceChip está seleccionado
-                          backgroundColor: chiocColor,
-                          labelStyle: TextStyle(
-                            color: textColor,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                              color: bordeColor, // Color del borde
-                              width: 1.0, // Ancho del borde
-                            ),
-                            borderRadius:
-                                BorderRadius.circular(16.0), // Radio del borde
-                          ),
-                          onSelected: (isSelected) {
-                            setState(() {
-                              _selectedChipIndex = isSelected
-                                  ? 0
-                                  : -1; // Selecciona o deselecciona este ChoiceChip
-                              print('Bancaria');
-                            });
-                          },
-                        ),
-                        SizedBox(width: 8),
-                        ChoiceChip(
-                          label: Text(
-                            'Redes sociales',
-                            style: TextStyle(
-                              fontSize: 18, // Tamaño de fuente personalizado
-                            ),
-                          ),
-                          selected: _selectedChipIndex == 1,
-                          backgroundColor: chiocColor,
-                          labelStyle: TextStyle(
-                            color: textColor,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                              color: bordeColor, // Color del borde
-                              width: 1.0, // Ancho del borde
-                            ),
-                            borderRadius:
-                                BorderRadius.circular(16.0), // Radio del borde
-                          ),
-                          onSelected: (isSelected) {
-                            setState(() {
-                              _selectedChipIndex = isSelected ? 1 : -1;
-                              print('Redes sociales');
-                            });
-                          },
-                        ),
-                        SizedBox(width: 8),
-                        ChoiceChip(
-                          label: Text(
-                            'Lista de compras',
-                            style: TextStyle(
-                              fontSize: 18, // Tamaño de fuente personalizado
-                            ),
-                          ),
-                          selected: _selectedChipIndex == 2,
-                          backgroundColor: chiocColor,
-                          labelStyle: TextStyle(
-                            color: textColor,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                              color: bordeColor, // Color del borde
-                              width: 1.0, // Ancho del borde
-                            ),
-                            borderRadius:
-                                BorderRadius.circular(16.0), // Radio del borde
-                          ),
-                          onSelected: (isSelected) {
-                            setState(() {
-                              _selectedChipIndex = isSelected ? 2 : -1;
-                              print('Lista de compras');
-                            });
-                          },
-                        ),
-                        SizedBox(width: 8),
-                        ChoiceChip(
-                          label: Text(
-                            'Trabajo',
-                            style: TextStyle(
-                              fontSize: 18, // Tamaño de fuente personalizado
-                            ),
-                          ),
-                          selected: _selectedChipIndex == 3,
-                          backgroundColor: chiocColor,
-                          labelStyle: TextStyle(
-                            color: textColor,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                              color: bordeColor, // Color del borde
-                              width: 1.0, // Ancho del borde
-                            ),
-                            borderRadius:
-                                BorderRadius.circular(16.0), // Radio del borde
-                          ),
-                          onSelected: (isSelected) {
-                            setState(() {
-                              _selectedChipIndex = isSelected ? 3 : -1;
-                              print('Trabajo');
-                            });
-                          },
-                        ),
-                        SizedBox(width: 8),
-                        ChoiceChip(
-                          label: Text(
-                            'Lista de compras',
-                            style: TextStyle(
-                              fontSize: 18, // Tamaño de fuente personalizado
-                            ),
-                          ),
-                          selected: _selectedChipIndex == 4,
-                          backgroundColor: chiocColor,
-                          labelStyle: TextStyle(
-                            color: textColor,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                              color: bordeColor, // Color del borde
-                              width: 1.0, // Ancho del borde
-                            ),
-                            borderRadius:
-                                BorderRadius.circular(16.0), // Radio del borde
-                          ),
-                          onSelected: (isSelected) {
-                            setState(() {
-                              _selectedChipIndex = isSelected ? 4 : -1;
-                              print('Lista de compras');
-                            });
-                          },
-                        ),
-                        SizedBox(width: 8),
-                        ChoiceChip(
-                          label: Text(
-                            'Escuela',
-                            style: TextStyle(
-                              fontSize: 18, // Tamaño de fuente personalizado
-                            ),
-                          ),
-                          selected: _selectedChipIndex == 5,
-                          backgroundColor: chiocColor,
-                          labelStyle: TextStyle(
-                            color: textColor,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                              color: bordeColor, // Color del borde
-                              width: 1.0, // Ancho del borde
-                            ),
-                            borderRadius:
-                                BorderRadius.circular(16.0), // Radio del borde
-                          ),
-                          onSelected: (isSelected) {
-                            setState(() {
-                              _selectedChipIndex = isSelected ? 5 : -1;
-                              print('Escuela');
-                            });
-                          },
-                        ),
-                        SizedBox(width: 8),
-                        ChoiceChip(
-                          label: Text(
-                            'Otros',
-                            style: TextStyle(
-                              fontSize: 18, // Tamaño de fuente personalizado
-                            ),
-                          ),
-                          selected: _selectedChipIndex == 6,
-                          backgroundColor: chiocColor,
-                          labelStyle: TextStyle(
-                            color: textColor,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                              color: bordeColor, // Color del borde
-                              width: 1.0, // Ancho del borde
-                            ),
-                            borderRadius:
-                                BorderRadius.circular(16.0), // Radio del borde
-                          ),
-                          onSelected: (isSelected) {
-                            setState(() {
-                              _selectedChipIndex = isSelected ? 6 : -1;
-                              print('Otros');
-                            });
-                          },
-                        ),
+                        SizedBox(width: 12),
+
                         // ... Repite el patrón para otros ChoiceChips
-                        SizedBox(width: 20),
+                        //SizedBox(width: 20),
                       ],
                     ),
                   )
