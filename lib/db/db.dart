@@ -3,6 +3,11 @@ import 'package:path/path.dart';
 import 'package:app_2/db/persona.dart';
 
 class DB {
+  static Future<String> getDatabaseName() async {
+    final databasesPath = await getDatabasesPath();
+    final databasePath = join(databasesPath, 'persona.db');
+    return databasePath;
+  }
 // Este metodo sirve para crear y/o llamar la base de datos ya creada y crea una tabla
 //llamada usuario
   static Future<Database> _openDB() async {
@@ -15,6 +20,9 @@ class DB {
 
 // Un metodo que inserta datos a la tabla usuario
   static Future<int> insert(Persona persona) async {
+    final databaseName = await DB.getDatabaseName();
+    print('Nombre de la base de datos: $databaseName');
+
     Database database = await _openDB();
     return database.insert('usuario', persona.toMap());
   }
