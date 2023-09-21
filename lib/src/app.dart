@@ -52,7 +52,7 @@ class _MyAppFormState extends State<MyAppForm> {
                   mainAxisSize: MainAxisSize.max,
                   //se crea otra lista de witgets
                   children: [
-                    //se crea el color azol de la parte de arriba
+                    //se crea el color azul caracteristico de la parte de arriba
                     Container(
                       width: double.infinity,
                       height: 300,
@@ -138,7 +138,6 @@ class _MyAppFormState extends State<MyAppForm> {
                                     password: _password,
                                     rpassword: _password1,
                                     res: _respuesta));
-                                debugPrint("no se imprime:/");
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
