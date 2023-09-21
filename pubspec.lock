@@ -5,10 +5,10 @@ packages:
     dependency: "direct dev"
     description:
       name: adaptive_theme
-      sha256: "2d791cade8cc88a51f5410c963374ae552ebb234e804fe0e37dc0a0fef647d01"
+      sha256: "28df95a6b86993b38a51ee97d33a9f1d845fd1c7320c21c5d5e2183b5605e152"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.1"
+    version: "3.4.0"
   async:
     dependency: transitive
     description:
@@ -152,6 +152,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fluttertoast:
+    dependency: "direct dev"
+    description:
+      name: fluttertoast
+      sha256: "474f7d506230897a3cd28c965ec21c5328ae5605fc9c400cd330e9e9d6ac175c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "8.2.2"
   http:
     dependency: transitive
     description:
@@ -503,4 +511,4 @@ packages:
     version: "1.0.3"
 sdks:
   dart: ">=3.1.0 <4.0.0"
-  flutter: ">=3.7.0"
+  flutter: ">=3.10.0"

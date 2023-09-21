@@ -37,10 +37,6 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-
-
-
-
 class _MyHomePageState extends State<MyHomePage> {
 
   File? _image; //se crea una variable de tipo archivo
@@ -195,7 +191,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                   size: 24.0,
                                 ),
                               ),
-                              //Icon(Icons.wb_sunny),
                               Transform.scale(
                                 scale: 2.0,
                                 child: Align(
@@ -258,17 +253,13 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                           ),
                         SizedBox(width: 12),
-
-
-                        // ... Repite el patrón para otros ChoiceChips
-                        //SizedBox(width: 20),
                       ],
                     ),
                   )
                 ],
               ),
               Divider(
-                color: Color(0xFF2874cf).withOpacity(0.2), // Cambiar a tu color deseado
+                color: Color(0xFF2874cf).withOpacity(0.2), // se le asigno un color
                 thickness: 2,
               ),
 
@@ -283,9 +274,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           children: [
                             Expanded(
                               child: Center(
-                                //padding: EdgeInsets.only(left: 20),
                                 child: Column(
-                                  //crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     SizedBox(height: 24),
                                     Container(
