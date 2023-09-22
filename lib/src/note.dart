@@ -14,6 +14,8 @@ class Note {
 }
 
 class MyNote extends StatelessWidget {
+  const MyNote({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
