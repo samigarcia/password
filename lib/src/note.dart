@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:app_2/src/inicio.dart';
 import '../db/databaseCategory.dart';
+import '../db/databaseNota.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Note {
   String title;
@@ -30,6 +32,8 @@ class _NoteScreenState extends State<NoteScreen> {
   TextEditingController _titleController = TextEditingController();
   TextEditingController _contentController = TextEditingController();
   List<Note> _notes = [];
+  List<Notea> notes =
+      []; // Lista para almacenar las notas desde la base de datos
 
   String _selectedCategory = ''; // Sin opción "Seleccionar"
   Color _selectedColor = Colors.white; // Color como nullable
@@ -277,18 +281,80 @@ class _NoteScreenState extends State<NoteScreen> {
     }
   }
 
-  void _addNote() {
+  void _addNotea() async {
+    final title = _titleController.text;
+    final content = _contentController.text;
+
+    if (title.isNotEmpty && content.isNotEmpty) {
+      final dbNota = DatabaseNota.instance;
+      final newNotea = Notea(
+        title: title,
+        content: content,
+      );
+
+      try {
+        final noteId = await dbNota.insert(newNotea);
+
+        if (noteId != null && noteId > 0) {
+          Fluttertoast.showToast(
+            msg: 'Nota guardada con éxito',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+          );
+          // Espera a que se inserte la nueva nota y luego carga las notas desde la base de datos
+          loadNotesFromDatabase();
+
+          setState(() {
+            // Aquí es donde se convierte el objeto Notea en Note
+            _notes.add(
+              Note(
+                title,
+                content,
+                _selectedColor,
+                _selectedCategory,
+              ),
+            );
+            _titleController.clear();
+            _contentController.clear();
+            _showAddButton = true;
+          });
+        } else {
+          Fluttertoast.showToast(
+            msg: 'Error al guardar la nota',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+          );
+        }
+      } catch (e) {
+        print('Error al insertar nota en la base de datos: $e');
+        Fluttertoast.showToast(
+          msg: 'Error al guardar la nota',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+      }
+    }
+  }
+
+  //Se creo una funcion para poder ver las notas en la consola,
+  // aparecen al dar clic en el boton crear nota
+  void loadNotesFromDatabase() async {
+    final allNotes = await DatabaseNota.instance.getAllNotes();
     setState(() {
-      _notes.add(Note(
-        _titleController.text,
-        _contentController.text,
-        _selectedColor,
-        _selectedCategory,
-      ));
-      _titleController.clear();
-      _contentController.clear();
-      _showAddButton = true; // Mostrar el botón "+" después de agregar una nota
+      notes = allNotes;
     });
+
+    // Imprimir las notas en la consola
+    for (final note in notes) {
+      print(
+          'ID: ${note.id}, Título: ${note.title}, Contenido: ${note.content}');
+    }
   }
 
   @override
@@ -502,7 +568,7 @@ class _NoteScreenState extends State<NoteScreen> {
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: _addNote,
+              onPressed: _addNotea,
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius:

@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:app_2/src/note.dart';
 
 import '../db/databaseCategory.dart';
+
+import '../db/databaseCategory.dart';
 /*
 void main() {
   runApp(const MyApp());
@@ -49,6 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _loadCategories() async {
     final dbHelper = DatabaseHelper();
+
     final categories = await dbHelper
         .getCategories(); // Supongamos que esta función devuelve una lista de categorías
 
