@@ -253,7 +253,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: ChoiceChip(
                               label: Text(
                                 _categories[index].name,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize:
                                       18, // Tamaño de fuente personalizado
                                 ),
