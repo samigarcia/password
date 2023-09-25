@@ -3,6 +3,10 @@ import 'package:app_2/db/db.dart';
 import 'package:app_2/db/persona.dart';
 import 'package:flutter/material.dart';
 import 'package:app_2/src/inicio.dart';
+import 'package:flutter/services.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:local_auth_ios/local_auth_ios.dart';
+import 'dart:io';
 
 //clase principal, se manda a llamar desde el main
 class MyAppForm extends StatefulWidget {
@@ -128,6 +132,7 @@ class _MyAppFormState extends State<MyAppForm> {
                               ),
                               child: const Text('Guardar'),
                               onPressed: () async {
+                                Audtentiqueiro();
                                 _user = userin.text;
                                 _password = password.text;
                                 _password1 = password1.text;
@@ -357,3 +362,28 @@ const List<String> list = [
 ];
 //variable que se encarga de poner la primera pregunta de la lista "no lo use!"
 String dropdownValue = list.first;
+
+//Metodo para la Autenticacion por Huella y/o Face ID
+class Audtentiqueiro {
+  final LocalAuthentication _auth = LocalAuthentication();
+
+  bool _autenticacion = false;
+
+  Future<bool> checkBiometrics() async => await _auth.canCheckBiometrics;
+
+  Future getAvailableMethods() async {
+    return await _auth.getAvailableBiometrics();
+  }
+
+  Future<bool> autentication() async {
+    try {
+      _autenticacion = await _auth.authenticate(
+        localizedReason: 'Nesesito comprobar tu identidad',
+      );
+      return _autenticacion;
+    } on PlatformException catch (e) {
+      debugPrint(e.message);
+      return false;
+    }
+  }
+}
