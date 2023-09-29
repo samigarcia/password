@@ -4,10 +4,11 @@ import 'package:app_2/db/persona.dart';
 import 'package:flutter/material.dart';
 import 'package:app_2/src/inicio.dart';
 import 'package:flutter/services.dart';
+import 'package:local_auth/error_codes.dart';
 import 'package:local_auth/local_auth.dart';
-import 'dart:io';
+//import 'dart:io';
 
-//clase principal, se manda a llamar desde el main
+//clase principal, la cual se manda a llamar desde el main
 class MyAppForm extends StatefulWidget {
   const MyAppForm({super.key});
   @override
@@ -15,22 +16,164 @@ class MyAppForm extends StatefulWidget {
 }
 
 class _MyAppFormState extends State<MyAppForm> {
+  //varaibles para la autenticacion--------------------------------
+  final LocalAuthentication auth = LocalAuthentication();
+  _SupportState _supportState = _SupportState.desconocido;
+  // ignore: unused_field
+  bool? _canCheckBiometrics;
+  // ignore: unused_field
+  List<BiometricType>? _availableBiometrics;
+  // ignore: unused_field
+  String _authorized = 'Not Authorized';
+  // ignore: unused_field
+  bool _isAuthenticating = false;
+
+  final LocalAuthentication _autenticacion = LocalAuthentication();
+  // ignore: unused_field
+  final bool _podemosUsarAutorizacion = false;
+  // ignore: unused_field
+  final String _autorizado = "No autorizado";
+  // ignore: unused_field
+  List<BiometricType>? _autorizacionesDisponibles;
+  //----------------------------------------------------------------
+
   //variables para capturar los datos ingresados del usuario
   final userin = TextEditingController();
   final password = TextEditingController();
   final password1 = TextEditingController();
   final respuesta = TextEditingController();
-  String _user = "";
-  String _password = "";
-  String _password1 = "";
-  String _respuesta = "";
-  String ver = "";
-
   List<Persona> person = [];
 
+//metodos para la autenticacion #############################################
+  Future<void> _listaAutenticacionesDisponibles() async {
+    late List<BiometricType> listaAutenticacion;
+    try {
+      listaAutenticacion = await _autenticacion.getAvailableBiometrics();
+      print("Podemos usar: ${listaAutenticacion.toString()}");
+    } on PlatformException catch (e) {
+      print(e);
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _autorizacionesDisponibles = listaAutenticacion = [];
+    });
+  }
+
+  Future<void> _checkBiometrics() async {
+    late bool canCheckBiometrics;
+    try {
+      canCheckBiometrics = await auth.canCheckBiometrics;
+      debugPrint("${canCheckBiometrics.toString()}");
+    } on PlatformException catch (e) {
+      canCheckBiometrics = false;
+      print(e);
+    }
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _canCheckBiometrics = canCheckBiometrics;
+    });
+  }
+
+  Future<void> _authenticate() async {
+    bool authenticated = false;
+    try {
+      setState(() {
+        _isAuthenticating = true;
+        _authorized = 'Authenticating';
+      });
+      authenticated = await auth.authenticate(
+        localizedReason: 'Let OS determine authentication method',
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+        ),
+      );
+      setState(() {
+        _isAuthenticating = false;
+      });
+    } on PlatformException catch (e) {
+      print(e);
+      setState(() {
+        _isAuthenticating = false;
+        _authorized = 'Error - ${e.message}';
+      });
+      return;
+    }
+    if (!mounted) {
+      return;
+    }
+
+    setState(
+        () => _authorized = authenticated ? 'Autorizado' : 'No Autorizado');
+  }
+
+  Future<void> _authenticateWithBiometrics() async {
+    bool authenticated = false;
+    try {
+      setState(() {
+        _isAuthenticating = true;
+        _authorized = 'Authenticating';
+      });
+      authenticated = await auth.authenticate(
+        localizedReason:
+            'Scan your fingerprint (or face or whatever) to authenticate',
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true,
+        ),
+      );
+      if (authenticated == true) {
+        // ignore: use_build_context_synchronously
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MyInicio()),
+        );
+      }
+      setState(() {
+        _isAuthenticating = false;
+        _authorized = 'Authenticating';
+      });
+    } on PlatformException catch (e) {
+      print(e);
+      setState(() {
+        _isAuthenticating = false;
+        _authorized = 'Error - ${e.message}';
+      });
+      return;
+    }
+    if (!mounted) {
+      return;
+    }
+
+    final String mensaje = authenticated ? 'AUTORIZADO' : 'NO AUTORIZADO';
+    setState(() {
+      _authorized = mensaje;
+    });
+  }
+
+  Future<void> _cancelAuthentication() async {
+    await auth.stopAuthentication();
+    setState(() => _isAuthenticating = false);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    auth.isDeviceSupported().then(
+          (bool isSupported) => setState(() => _supportState = isSupported
+              ? _SupportState.soportado
+              : _SupportState.nosoportado),
+        );
+  }
+// ############################################################################
+
+//metood para ver datos en la base de datos no usado!
   cargaPersonas() async {
     List<Persona> auxPersona = await DB.personas();
-
     setState(() {
       person = auxPersona;
     });
@@ -110,7 +253,7 @@ class _MyAppFormState extends State<MyAppForm> {
                           ),
                           //le agregamos 'Registro' al tema de color azul
                           const Align(
-                            alignment: AlignmentDirectional(0.14, 0.07),
+                            alignment: AlignmentDirectional(0.30, 0.10),
                             child: Text(
                               'Registro',
                               style: TextStyle(
@@ -123,6 +266,7 @@ class _MyAppFormState extends State<MyAppForm> {
                           //se crea el boton guardar
                           Align(
                             alignment: const AlignmentDirectional(-1.00, 0.80),
+                            //Creacion del Boton de Guardar
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 shape: const StadiumBorder(),
@@ -131,22 +275,19 @@ class _MyAppFormState extends State<MyAppForm> {
                               ),
                               child: const Text('Guardar'),
                               onPressed: () async {
-                                Audtentiqueiro();
-                                _user = userin.text;
-                                _password = password.text;
-                                _password1 = password1.text;
-                                _respuesta = respuesta.text;
-                                DB.insert(Persona(
-                                    id: 1,
-                                    name: _user,
-                                    password: _password,
-                                    rpassword: _password1,
-                                    res: _respuesta));
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const MyInicio()),
-                                );
+                                if (_supportState == _SupportState.soportado) {
+                                  debugPrint("es soportado");
+                                  //imprime la lista disponibles de autenticacion
+                                  _listaAutenticacionesDisponibles();
+                                  //funcion donde se pide la la huella o Face ID
+                                  _authenticateWithBiometrics();
+                                  DB.insert(Persona(
+                                      id: 1,
+                                      name: userin.text,
+                                      password: password.text,
+                                      rpassword: password1.text,
+                                      res: respuesta.text));
+                                }
                               },
                             ),
                           ),
@@ -158,7 +299,7 @@ class _MyAppFormState extends State<MyAppForm> {
               ),
               //se crea la etiqueta usuario
               Container(
-                margin: const EdgeInsets.only(right: 280),
+                margin: const EdgeInsets.only(right: 260),
                 child: const Text(
                   textAlign: TextAlign.left,
                   style: TextStyle(
@@ -195,8 +336,7 @@ class _MyAppFormState extends State<MyAppForm> {
                     ),
                   ),
                   onSubmitted: (valor) {
-                    _user = valor;
-                    debugPrint('el nombre es: $_user');
+                    debugPrint('el nombre es: $userin');
                   },
                 ),
               ),
@@ -206,9 +346,8 @@ class _MyAppFormState extends State<MyAppForm> {
               ),
               //se crea la etiqueta 'crear contraseña'
               Container(
-                margin: const EdgeInsets.only(right: 210),
+                margin: const EdgeInsets.only(right: 180.0),
                 child: const Text(
-                  textAlign: TextAlign.left,
                   style: TextStyle(
                     fontSize: 18.0,
                     color: Colors.black,
@@ -237,8 +376,7 @@ class _MyAppFormState extends State<MyAppForm> {
                     hintStyle: TextStyle(color: Colors.black),
                   ),
                   onSubmitted: (valor) {
-                    _password = valor;
-                    debugPrint('la contraseña es: $_password');
+                    debugPrint('la contraseña es: $password');
                   },
                 ),
               ),
@@ -248,11 +386,8 @@ class _MyAppFormState extends State<MyAppForm> {
               ),
               //se crea la etiqueta 'Confirmar contraseña'
               Container(
-                margin: const EdgeInsets.only(
-                  right: 170,
-                ),
+                margin: const EdgeInsets.only(right: 150.0),
                 child: const Text(
-                  textAlign: TextAlign.left,
                   style: TextStyle(
                     fontSize: 18.0,
                     color: Colors.black,
@@ -283,8 +418,7 @@ class _MyAppFormState extends State<MyAppForm> {
                     ),
                   ),
                   onSubmitted: (valor1) {
-                    _password1 = valor1;
-                    debugPrint('la confirmacion de contraseña es: $_password1');
+                    debugPrint('la confirmacion de contraseña es: $password1');
                   },
                 ),
               ),
@@ -340,8 +474,7 @@ class _MyAppFormState extends State<MyAppForm> {
                     ),
                   ),
                   onSubmitted: (valor) {
-                    _respuesta = valor;
-                    debugPrint('la respuesta es: $_respuesta');
+                    debugPrint('la respuesta es: $respuesta');
                   },
                 ),
               ),
@@ -359,30 +492,13 @@ const List<String> list = [
   "comida favorita",
   "color favorito"
 ];
-//variable que se encarga de poner la primera pregunta de la lista "no lo use!"
+//variable que se encarga de poner la primera pregunta de la lista "no lo usé"
 String dropdownValue = list.first;
 
-//Metodo para la Autenticacion por Huella y/o Face ID
-class Audtentiqueiro {
-  final LocalAuthentication _auth = LocalAuthentication();
-
-  bool _autenticacion = false;
-
-  Future<bool> checkBiometrics() async => await _auth.canCheckBiometrics;
-
-  Future getAvailableMethods() async {
-    return await _auth.getAvailableBiometrics();
-  }
-
-  Future<bool> autentication() async {
-    try {
-      _autenticacion = await _auth.authenticate(
-        localizedReason: 'Nesesito comprobar tu identidad',
-      );
-      return _autenticacion;
-    } on PlatformException catch (e) {
-      debugPrint(e.message);
-      return false;
-    }
-  }
+//Metodo para la Autenticacion por Huella Dactilar
+enum _SupportState {
+  desconocido,
+  soportado,
+  nosoportado,
 }
+//------------------------------------------------
