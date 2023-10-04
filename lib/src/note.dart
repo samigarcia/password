@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:app_2/src/inicio.dart';
 import '../db/databaseCategory.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
 import '../db/notesdb.dart';
-
+import 'package:adaptive_theme/adaptive_theme.dart';
 class Note {
   String title;
   String content;
@@ -17,13 +16,29 @@ class Note {
 class MyNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: NoteScreen(),
+    final brightness = MediaQuery.of(context).platformBrightness;
+    final initialMode = brightness == Brightness.dark ? AdaptiveThemeMode.dark : AdaptiveThemeMode.light;
+    // Devuelve un AdaptiveTheme, que permite cambiar entre temas oscuros y claros
+    return AdaptiveTheme(
+      // Tema oscuro
+        dark: ThemeData.dark(),
+        // Tema claro
+        light: ThemeData.light(),
+        // Modo de tema inicial
+        initial: initialMode,
+        // Builder que configura el tema en función del AdaptiveTheme
+        builder: (theme, darkTheme){
+          // Devuelve un MaterialApp que utiliza el tema proporcionado
+          return MaterialApp(
+            title: 'Gestory Password',
+            theme: theme,
+            darkTheme: darkTheme,
+            home: NoteScreen(),// Define la página de inicio como MyHomePage
+          );
+        }
     );
   }
 }
-
 class NoteScreen extends StatefulWidget {
   @override
   NoteScreenState createState() => NoteScreenState();
@@ -33,11 +48,10 @@ class NoteScreenState extends State<NoteScreen> {
   TextEditingController _titleController = TextEditingController();
   TextEditingController _contentController = TextEditingController();
   List<Note> _notes = [];
-  List<Notea> notes =
-      []; // Lista para almacenar las notas desde la base de datos
+  List<Notea> notes = []; // Lista para almacenar las notas desde la base de datos
 
   String _selectedCategory = ''; // Sin opción "Seleccionar"
-  Color? _selectedColor = Colors.white; // Color como nullable
+  Color? _selectedColor = Colors.transparent; // Color como nullable
   List<String> _categories = [];
   List<Color> _categoryColors = [];
   bool _showAddButton = true; // Mostrar el botón "+" al inicio
@@ -56,7 +70,7 @@ class NoteScreenState extends State<NoteScreen> {
     if (!_categoriesLoaded) {
       //se utiliza para asegurarse de que las categorías se carguen solo una vez
       final dbHelper =
-          DatabaseHelper(); //se crea una instancia de la clase DatabaseHelper
+      DatabaseHelper(); //se crea una instancia de la clase DatabaseHelper
       final categories = await dbHelper
           .getCategories(); //llama al método getCategories() de la instancia de DatabaseHelper creada anteriormente
 
@@ -73,8 +87,8 @@ class NoteScreenState extends State<NoteScreen> {
           final newCategoryColor = getColorByIndex(
               colorIndex); //devuelve un color de la lista de colores disponibles, basado en el índice proporcionad
           //Se crea un nuevo objeto Category con dos atributos
-          final newCategory = Category(
-              id: idCounter, name: category, color: newCategoryColor!.value);
+          final newCategory =
+          Category(id: idCounter, name: category, color: newCategoryColor!.value);
           await dbHelper.insertCategory(
               newCategory); //insertar este nuevo objeto Category en la base de datos local.
           idCounter++;
@@ -137,36 +151,12 @@ class NoteScreenState extends State<NoteScreen> {
           _selectedCategory =
               category; //Actualiza la variable _selectedCategory con el nombre de la nueva categoría. Esto significa que después de agregar una categoría, _selectedCategory contendrá el nombre de la categoría recién agregada.
           _showAddButton =
-              false; // para ocultar el botón de agregar al agregar una categoría.
+          false; // para ocultar el botón de agregar al agregar una categoría.
         });
-        /*
-        if (_categoryColors.length >= availableColors.length) {
-          availableColors.clear(); // Vacía la lista de colores disponibles
-        }*/
       }
     }
   }
-
-/*
-  void _handleDeleteCategory(String categoryName) async {
-    final dbHelper = DatabaseHelper();
-    final rowsDeleted = await dbHelper.deleteCategory(categoryName);
-
-    if (rowsDeleted > 0) {
-      setState(() {
-        _categories.remove(categoryName);
-
-        int index = _categories.indexOf(categoryName);
-        if (index >= 0 && index < _categoryColors.length) {
-          _categoryColors.removeAt(index);
-        }
-      });
-    }
-  }
-*/
-  //Se crea una lista llamada availableColors que contiene objetos de tipo color
-
-  //Esto define una función llamada _getColorByIndex que toma un parámetro index, que representa la posición en la lista de colores. El ? después de Color indica que el valor de retorno puede ser nulo (null)
+  //Esto define una función de tipo color
   Color? getColorByIndex(int index) {
     List<Color> availableColors = [
       Colors.red,
@@ -177,9 +167,7 @@ class NoteScreenState extends State<NoteScreen> {
       Colors.yellow
     ];
 
-    //    index >= 0 && index < availableColors.length: Esto verifica si el índice proporcionado está dentro del rango válido de la lista availableColors. Si es cierto, significa que hay un color disponible en esa posición.
-    //     availableColors[index]: Si el índice es válido, esta parte devuelve el color correspondiente de la lista availableColors.
-    //     null: Si el índice no es válido (es decir, es menor que 0 o mayor o igual al tamaño de la lista), la función devuelve null para indicar que no hay color disponible en esa posición.
+    //Se le asigna un indice a cada color
     return index >= 0 && index < availableColors.length
         ? availableColors[index]
         : null; // Devuelve null si no hay colores
@@ -188,7 +176,7 @@ class NoteScreenState extends State<NoteScreen> {
 //muestra un cuadro de diálogo en la interfaz de usuario para permitir al usuario agregar una nueva categoría
   void _showAddCategoryDialog() {
     TextEditingController _categoryController =
-        TextEditingController(); //Se crea un controlador de texto _categoryController para capturar la entrada de texto del usuario para el nombre de la nueva categoría.
+    TextEditingController(); //Se crea un controlador de texto _categoryController para capturar la entrada de texto del usuario para el nombre de la nueva categoría.
     String newCategory =
         ''; //Se declara una cadena vacía para almacenar el nombre de la categoria
     Color? newCategoryColor = getColorByIndex(_categories
@@ -200,7 +188,7 @@ class NoteScreenState extends State<NoteScreen> {
       showDialog(
         //mensaje de dialogo para el usuario
         context:
-            context, //se utiliza para obtener el contexto de la aplicación actual
+        context, //se utiliza para obtener el contexto de la aplicación actual
         builder: (context) {
           //es un constructor de funciones anónimas que toma el contexto como argumento y define el contenido del cuadro de diálogo
           //Dentro de la función anónima, se devuelve un widget
@@ -226,7 +214,7 @@ class NoteScreenState extends State<NoteScreen> {
       //si no es nulo, se muestra el cuadro de dialogo para ingresar las categorias
       showDialog(
         context:
-            context, //se utiliza para obtener el contexto de la aplicación actual
+        context, //se utiliza para obtener el contexto de la aplicación actual
         //constructor de funciones anónimas que toma el contexto como argumento y define el contenido del cuadro de diálogo.
         builder: (context) {
           //Dentro de la función anónima, se devuelve un widget
@@ -244,10 +232,10 @@ class NoteScreenState extends State<NoteScreen> {
                 //campo de entrada de texto
                 TextField(
                   controller:
-                      _categoryController, //se especifica el controlador de texto _categoryController para el campo de entrada de texto
+                  _categoryController, //se especifica el controlador de texto _categoryController para el campo de entrada de texto
                   decoration: InputDecoration(
                       labelText:
-                          'Nombre de la categoría'), //decoración al campo de entrada de texto
+                      'Nombre de la categoría'), //decoración al campo de entrada de texto
                   //Esta es una devolución de llamada (callback) que se ejecutará cada vez que el contenido del campo de entrada de texto cambie
                   onChanged: (value) {
                     //Cuando el usuario escriba o modifique el texto en el campo, la función anónima asignará el valor del texto ingresado a la variable newCategory
@@ -309,11 +297,10 @@ class NoteScreenState extends State<NoteScreen> {
     final content = _contentController.text;
     int categoryId; // Define categoryId como una variable de la clase
 
-    if (title.isNotEmpty &&
-        content.isNotEmpty &&
-        _selectedCategory.isNotEmpty) {
+    if (title.isNotEmpty && content.isNotEmpty && _selectedCategory.isNotEmpty) {
       // Buscar el índice de la categoría seleccionada en la lista de categorías
       final categoryIndex = _categories.indexOf(_selectedCategory);
+
 
       if (categoryIndex != -1) {
         // Verificar que se encontró la categoría seleccionada en la lista
@@ -329,6 +316,7 @@ class NoteScreenState extends State<NoteScreen> {
         title: title,
         content: content,
         categoryId: categoryId,
+
       );
 
       try {
@@ -382,73 +370,6 @@ class NoteScreenState extends State<NoteScreen> {
       }
     }
   }
-  /*
-  void _addNotea() async {
-
-    final title = _titleController.text;
-    final content = _contentController.text;
-    int categoryId; // Define categoryId como una variable de la clase
-
-
-    if (title.isNotEmpty && content.isNotEmpty && _selectedCategory.isEmpty) {
-      final dbNota = DatabaseHelper.internal();
-      final categoryId = _categories.indexOf(_selectedCategory);
-      final newNotea = Notea(
-        title: title,
-        content: content,
-
-      );
-
-      try {
-        final noteId = await dbNota.insert(newNotea, categoryId);
-
-        if (noteId != null && noteId > 0) {
-          Fluttertoast.showToast(
-            msg: 'Nota guardada con éxito',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            backgroundColor: Colors.green,
-            textColor: Colors.white,
-          );
-          // Espera a que se inserte la nueva nota y luego carga las notas desde la base de datos
-          loadNotesFromDatabase();
-
-          setState(() {
-            // Aquí es donde se convierte el objeto Notea en Note
-            _notes.add(
-              Note(
-                title,
-                content,
-                _selectedColor,
-                _selectedCategory,
-              ),
-            );
-            _titleController.clear();
-            _contentController.clear();
-            _showAddButton = true;
-          });
-        } else {
-          Fluttertoast.showToast(
-            msg: 'Error al guardar la nota',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-          );
-        }
-      } catch (e) {
-        print('Error al insertar nota en la base de datos: $e');
-        Fluttertoast.showToast(
-          msg: 'Error al guardar la nota',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-        );
-      }
-    }
-  }
-   */
 
   void _loadNotesFromDatabase() async {
     final allNotes = await DatabaseHelper.internal().getAllNotes();
@@ -458,12 +379,9 @@ class NoteScreenState extends State<NoteScreen> {
 
     // Recorrer las notas y asignar el color de la categoría
     for (final note in notes) {
-      print(
-          'ID: ${note.id}, Título: ${note.title}, Contenido: ${note.content}, Category: ${note.categoryId}');
-      final categoryIndex =
-          note.categoryId; // Obtener el índice de la categoría
-      final categoryColor =
-          _categoryColors[categoryIndex]; // Obtener el color de la categoría
+      print('ID: ${note.id}, Título: ${note.title}, Contenido: ${note.content}, Category: ${note.categoryId}');
+      final categoryIndex = note.categoryId; // Obtener el índice de la categoría
+      final categoryColor = _categoryColors[categoryIndex]; // Obtener el color de la categoría
       final noteToAdd = Note(
         note.title,
         note.content,
@@ -473,29 +391,17 @@ class NoteScreenState extends State<NoteScreen> {
       _notes.add(noteToAdd); // Agregar la nota a la lista _notes
     }
   }
-
-  //Se creo una funcion para poder ver las notas en la consola,
-  // aparecen al dar clic en el boton crear nota
-  /*void loadNotesFromDatabase() async {
-    final allNotes = await DatabaseHelper.internal().getAllNotes();
-    setState(() {
-      notes = allNotes!;
-    });
-
-    // Imprimir las notas en la consola
-    for (final note in notes) {
-      print('ID: ${note.id}, Título: ${note.title}, Contenido: ${note.content}');
-    }
-  }*/
-
   @override
   // método build de un widget, que se encarga de construir la interfaz de usuario del widget.
   Widget build(BuildContext context) {
+    Color backgroudcolor = Theme.of(context).brightness == Brightness.light ? Color(0xFFF1F4F8) : Color(0xFF1D2428);
+
     return Scaffold(
+      backgroundColor: backgroudcolor,
       //Este método construye un widget Scaffold, que es un esqueleto de la pantalla de la aplicación
       appBar: AppBar(
+        backgroundColor: backgroudcolor,
         //Se configura la barra de navegación superior (AppBar) en el Scaffold
-        backgroundColor: Colors.white, //se le coloca un color blanco
         //Esta propiedad se utiliza para colocar un widget en la parte izquierda de la AppBar. En este caso, se coloca un botón en la parte izquierda.
         leading: IconButton(
           //es un widget que representa un botón de icono.
@@ -558,7 +464,7 @@ class NoteScreenState extends State<NoteScreen> {
                       ),
                       SizedBox(
                           width:
-                              8.0), //se le agrega un espacio vacio con un ancho
+                          8.0), //se le agrega un espacio vacio con un ancho
                       Text(
                           _selectedCategory), //Esta variable puede cambiar dinámicamente a medida que el usuario selecciona diferentes categorías.
                     ],
@@ -566,111 +472,88 @@ class NoteScreenState extends State<NoteScreen> {
                   SizedBox(
                       width: 8.0), //se le agrega un espacio vacio con un ancho
                   _showAddButton
-                      //Este es el widget del botón desplegable. Cuando se toca, muestra una lista de elementos que el usuario puede seleccionar.
+                  //Este es el widget del botón desplegable. Cuando se toca, muestra una lista de elementos que el usuario puede seleccionar.
                       ? PopupMenuButton<Map<String, dynamic>>(
-                          //se crea un icono
-                          icon: Icon(
-                            Icons.add_circle,
-                            color: Colors.blue, //se le asigna el color
-                            size: 40.0, //tamaño del icono
+                    //se crea un icono
+                    icon: Icon(
+                      Icons.add_circle,
+                      color: Colors.blue, //se le asigna el color
+                      size: 40.0, //tamaño del icono
+                    ),
+                    //cuando el usuario seleccion un elemento del boton despegable, se activa la funcion onSelected
+                    //onSelected recibe un argumento selection, que es un mapa (Map<String, dynamic>) que contiene información sobre la selección del usuario.
+                    // En este mapa, "category" es la clave que contiene el nombre de la categoría seleccionada, y "color" es la clave que contiene el color asociado a la categoría (puede ser nulo si es una nueva categoría).
+                    onSelected: (Map<String, dynamic> selection) {
+                      //Si "category" es igual a "Add", se llama a _showAddCategoryDialog()
+                      if (selection['category'] == 'Add') {
+                        _showAddCategoryDialog();
+                      } else {
+                        //Si "category" no es igual a "Add", significa que el usuario seleccionó una categoría existente. En este caso, se actualizan las variables _selectedColor y _selectedCategory con los valores del mapa selection
+                        setState(() {
+                          _selectedColor = selection['color'];
+                          _selectedCategory = selection['category'];
+                          _showAddButton =
+                          false; //oculta el botón desplegable después de la selección.
+                        });
+                      }
+                    },
+                    //es una función que se llama cuando se construye el menú desplegable.
+                    itemBuilder: (BuildContext context) {
+                      //Se crea una lista items que contendrá los elementos del menú desplegable. Esta lista se inicializa como una lista vacía.
+                      List<PopupMenuEntry<Map<String, dynamic>>> items =
+                      _categories.map((category) {
+                        //para iterar a través de la lista de categorías _categories
+                        int index = _categories.indexOf(
+                            category); //busca el índice de la categoría actual (category) dentro de la lista _categories
+                        Color? color = getColorByIndex(
+                            index); //Una vez que se obtiene el índice de la categoría actual, se llama a la función _getColorByIndex(index) para obtener el color asociado a esa categoría.
+                        //Esta línea crea un elemento de menú emergente
+                        return PopupMenuItem<Map<String, dynamic>>(
+                          //Se utiliza un mapa con dos claves: 'color' y 'category', y se les asigna los valores color (el color asociado a la categoría) y category (el nombre de la categoría)
+                          value: {
+                            'color': color,
+                            'category': category,
+                          },
+                          child: CategoryMenuItem(
+                            //mostrará la categoría con su color específico
+                            color: color, //
+                            category: category,
                           ),
-                          //cuando el usuario seleccion un elemento del boton despegable, se activa la funcion onSelected
-                          //onSelected recibe un argumento selection, que es un mapa (Map<String, dynamic>) que contiene información sobre la selección del usuario.
-                          // En este mapa, "category" es la clave que contiene el nombre de la categoría seleccionada, y "color" es la clave que contiene el color asociado a la categoría (puede ser nulo si es una nueva categoría).
-                          onSelected: (Map<String, dynamic> selection) {
-                            //Si "category" es igual a "Add", se llama a _showAddCategoryDialog()
-                            if (selection['category'] == 'Add') {
-                              _showAddCategoryDialog();
-                            } else {
-                              //Si "category" no es igual a "Add", significa que el usuario seleccionó una categoría existente. En este caso, se actualizan las variables _selectedColor y _selectedCategory con los valores del mapa selection
-                              setState(() {
-                                _selectedColor = selection['color'];
-                                _selectedCategory = selection['category'];
-                                _showAddButton =
-                                    false; //oculta el botón desplegable después de la selección.
-                              });
-                            }
+                        );
+                      }).toList(); //se utiliza para convertir un iterable (como una lista o un generador)
+                      items.add(
+                        // operación que se utiliza para agregar un elemento a una lista
+                        PopupMenuItem<Map<String, dynamic>>(
+                          //se utiliza para crear un elemento de menú que contiene información sobre una categoría.
+                          value: {
+                            //define el valor asociado con este elemento de menú
+                            'color': getColorByIndex(_categories
+                                .length), //es el color obtenido por el método _getColorByIndex basado en la cantidad actual de categorías
+                            'category':
+                            'Add', //Sirve para identificar que se seleccionó la opción de agregar una nueva categoría en el menú.
                           },
-                          //es una función que se llama cuando se construye el menú desplegable.
-                          itemBuilder: (BuildContext context) {
-                            //Se crea una lista items que contendrá los elementos del menú desplegable. Esta lista se inicializa como una lista vacía.
-                            List<PopupMenuEntry<Map<String, dynamic>>> items =
-                                _categories.map((category) {
-                              //para iterar a través de la lista de categorías _categories
-                              int index = _categories.indexOf(
-                                  category); //busca el índice de la categoría actual (category) dentro de la lista _categories
-                              Color? color = getColorByIndex(
-                                  index); //Una vez que se obtiene el índice de la categoría actual, se llama a la función _getColorByIndex(index) para obtener el color asociado a esa categoría.
-                              //Esta línea crea un elemento de menú emergente
-                              return PopupMenuItem<Map<String, dynamic>>(
-                                //Se utiliza un mapa con dos claves: 'color' y 'category', y se les asigna los valores color (el color asociado a la categoría) y category (el nombre de la categoría)
-                                value: {
-                                  'color': color,
-                                  'category': category,
-                                },
-                                child: CategoryMenuItem(
-                                  //mostrará la categoría con su color específico
-                                  color: color, //
-                                  category: category,
-                                ),
-                              );
-                            }).toList(); //se utiliza para convertir un iterable (como una lista o un generador)
-                            items.add(
-                              // operación que se utiliza para agregar un elemento a una lista
-                              PopupMenuItem<Map<String, dynamic>>(
-                                //se utiliza para crear un elemento de menú que contiene información sobre una categoría.
-                                value: {
-                                  //define el valor asociado con este elemento de menú
-                                  'color': getColorByIndex(_categories
-                                      .length), //es el color obtenido por el método _getColorByIndex basado en la cantidad actual de categorías
-                                  'category':
-                                      'Add', //Sirve para identificar que se seleccionó la opción de agregar una nueva categoría en el menú.
-                                },
-                                child: Row(
-                                  //se crea una fila
-                                  children: [
-                                    Icon(
-                                      //se agrega un icono y se le asigna un color
-                                      Icons.add_circle,
-                                      color: Colors.grey[800],
-                                    ),
-                                    SizedBox(
-                                        width: 8.0), //crea un espacio horzontal
-                                    Text(
-                                        'Agregar nueva categoría'), //se establece el texto
-                                  ],
-                                ),
+                          child: Row(
+                            //se crea una fila
+                            children: [
+                              Icon(
+                                //se agrega un icono y se le asigna un color
+                                Icons.add_circle,
+                                color: Colors.grey[800],
                               ),
-                            );
-                            return items; // se utiliza para finalizar la construcción de los elementos de menú y devolver la lista completa de elementos de menú que se mostrarán en el menú emergente.
-                          },
-                        )
+                              SizedBox(
+                                  width: 8.0), //crea un espacio horzontal
+                              Text(
+                                  'Agregar nueva categoría'), //se establece el texto
+                            ],
+                          ),
+                        ),
+                      );
+                      return items; // se utiliza para finalizar la construcción de los elementos de menú y devolver la lista completa de elementos de menú que se mostrarán en el menú emergente.
+                    },
+                  )
                       : SizedBox(), //se agrega un espacion vacio sin contenido
                 ],
               ),
-/*
-              SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: () {
-                  _handleDeleteCategory('Bancos');
-                  _handleDeleteCategory('Tarjetas');
-                  _handleDeleteCategory('Entretenimiento');
-                  _handleDeleteCategory('Redes Sociales');
-                  _handleDeleteCategory('Dasa');
-                  _handleDeleteCategory('Peliculas');
-                  _handleDeleteCategory('Juegos');
-                  _handleDeleteCategory('Mexico');
-                  _handleDeleteCategory('Gmail');
-                  _handleDeleteCategory('adda');
-                  _handleDeleteCategory('Escuela');
-                  _handleDeleteCategory('Trabajo');
-                  _handleDeleteCategory('Musica');
-                  _handleDeleteCategory('Celular');
-                  _handleDeleteCategory('Correos');
-                },
-                child: Text('Eliminar Categoría'),
-              ),
-*/
               SizedBox(height: 16.0), //crea un espacio vertical
               TextField(
                 //se agrega un campo de texto, con un texto, con un estilo
@@ -681,8 +564,7 @@ class NoteScreenState extends State<NoteScreen> {
                     fontFamily: 'Headline Small',
                     fontWeight: FontWeight
                         .bold, // Cambia a fontWeight para hacerlo negrita
-                    fontSize:
-                        24.0, // Cambia a fontFamily en lugar de fontWeight
+                    fontSize: 24.0, // Cambia a fontFamily en lugar de fontWeight
                   ),
                 ),
               ),
@@ -695,8 +577,7 @@ class NoteScreenState extends State<NoteScreen> {
                   labelText: 'contenido..',
                   labelStyle: TextStyle(
                     fontFamily: 'Headline Small',
-                    fontSize:
-                        16.0, // Cambia a fontFamily en lugar de fontWeight
+                    fontSize: 16.0, // Cambia a fontFamily en lugar de fontWeight
                   ),
                 ),
               ),
@@ -706,7 +587,7 @@ class NoteScreenState extends State<NoteScreen> {
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius:
-                        BorderRadius.circular(12), // Radio de 12 en los bordes
+                    BorderRadius.circular(12), // Radio de 12 en los bordes
                   ),
                 ),
                 child: Container(
@@ -743,13 +624,13 @@ class NoteScreenState extends State<NoteScreen> {
 //esta clase se utiliza para mostrar un elemento de menú de categoría
 class CategoryMenuItem extends StatelessWidget {
   final Color?
-      color; //esta variable puede contener un valor de tipo Color o puede ser nulo (null)
+  color; //esta variable puede contener un valor de tipo Color o puede ser nulo (null)
   final String
-      category; // Este campo es de tipo String y es obligatorio (requerido)
+  category; // Este campo es de tipo String y es obligatorio (requerido)
 
   const CategoryMenuItem({
     Key?
-        key, // se utiliza para proporcionar una clave única a la instancia de CategoryMenuItem
+    key, // se utiliza para proporcionar una clave única a la instancia de CategoryMenuItem
     required this.color, //se utiliza para especificar el color que se asociará con el elemento de menú de categoría.
     required this.category, //se utiliza para especificar el nombre de la categoría que se mostrará en el elemento de menú
   }) : super(key: key);
