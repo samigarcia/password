@@ -32,7 +32,7 @@ class DatabaseHelper {
   Future<void> printTableNames() async {
     final db = await this.db;
     final result =
-        await db!.rawQuery("SELECT name FROM sqlite_master WHERE type='table'");
+    await db!.rawQuery("SELECT name FROM sqlite_master WHERE type='table'");
     final tableNames = result.map((row) => row['name'] as String).toList();
 
     for (final tableName in tableNames) {
@@ -81,7 +81,7 @@ class DatabaseHelper {
         title TEXT,
         content TEXT,
         category_id INTEGER,
-        iv TEXT,  // Campo para almacenar el IV
+        iv TEXT, 
         FOREIGN KEY (category_id) REFERENCES categories (id)
       )
     ''');
@@ -131,8 +131,9 @@ class DatabaseHelper {
     final notes = result.map((json) {
       final content = json['content'] as String?;
       final iv = json['iv'] as String?;
-      if (content != null && iv != null) {
-        final decryptedText = decryptText(content, iv);
+      //if (content != null && iv != null) {
+      if (content == iv) {
+        final decryptedText = decryptText(content!, iv!);
         json['content'] = decryptedText;
       }
       return Notea.fromMap(json);
@@ -171,7 +172,7 @@ class DatabaseHelper {
     // Verifica si la encriptación se realizó correctamente
     if (insertedId != null) {
       final noteFromDB =
-          await db?.query('notes', where: 'id = ?', whereArgs: [insertedId]);
+      await db?.query('notes', where: 'id = ?', whereArgs: [insertedId]);
       if (noteFromDB != null && noteFromDB.isNotEmpty) {
         final encryptedContent = noteFromDB.first['content'] as String?;
         final ivString = noteFromDB.first['iv'] as String?;
@@ -222,8 +223,8 @@ class Category {
   }
 
   factory Category.fromMap(Map<String, dynamic> json) => Category(
-        id: json['id'],
-        name: json['name'],
-        color: json['color'],
-      );
+    id: json['id'],
+    name: json['name'],
+    color: json['color'],
+  );
 }
