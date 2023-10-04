@@ -1,7 +1,7 @@
 import 'package:app_2/src/app.dart';
 //import 'package:app_2/src/inicio.dart';
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
+//import 'package:sqflite/sqflite.dart';
 
 void main() async {
   runApp(const MyApp());
