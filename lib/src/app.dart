@@ -285,6 +285,13 @@ class _MyAppFormState extends State<MyAppForm> {
                                       password: password.text,
                                       rpassword: password1.text,
                                       res: respuesta.text));
+                                } else if (_supportState ==
+                                    _SupportState.nosoportado) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const MyInicio()),
+                                  );
                                 }
                               },
                             ),
