@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:app_2/src/inicio.dart';
 import '../db/databaseCategory.dart';
-import '../db/databaseNota.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+
+import '../db/notesdb.dart';
 
 class Note {
   String title;
@@ -14,8 +15,6 @@ class Note {
 }
 
 class MyNote extends StatelessWidget {
-  const MyNote({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,10 +26,10 @@ class MyNote extends StatelessWidget {
 
 class NoteScreen extends StatefulWidget {
   @override
-  _NoteScreenState createState() => _NoteScreenState();
+  NoteScreenState createState() => NoteScreenState();
 }
 
-class _NoteScreenState extends State<NoteScreen> {
+class NoteScreenState extends State<NoteScreen> {
   TextEditingController _titleController = TextEditingController();
   TextEditingController _contentController = TextEditingController();
   List<Note> _notes = [];
@@ -38,7 +37,7 @@ class _NoteScreenState extends State<NoteScreen> {
       []; // Lista para almacenar las notas desde la base de datos
 
   String _selectedCategory = ''; // Sin opción "Seleccionar"
-  Color _selectedColor = Colors.white; // Color como nullable
+  Color? _selectedColor = Colors.white; // Color como nullable
   List<String> _categories = [];
   List<Color> _categoryColors = [];
   bool _showAddButton = true; // Mostrar el botón "+" al inicio
@@ -47,6 +46,8 @@ class _NoteScreenState extends State<NoteScreen> {
   void initState() {
     super.initState();
     _loadCategories();
+    final dbHelper = DatabaseHelper();
+    dbHelper.printTableNames();
   }
 
   bool _categoriesLoaded = false; //se declara una variable de tipo booleano
@@ -63,18 +64,20 @@ class _NoteScreenState extends State<NoteScreen> {
         //verifica si la lista de categories está vací
         //Crea una lista llamada defaultCategories que contiene tres categorías predeterminadas: 'Bancos', 'Correos' y 'Redes Sociales'
         final defaultCategories = ['Bancos', 'Correos', 'Redes Sociales'];
+        int idCounter = 0; // Inicializa el contador de ID en 1
         //itera a través de la lista defaultCategories, que contiene las categorías predeterminadas
         for (var category in defaultCategories) {
           // Asigna un color basado en el índice de categoría
           final colorIndex = defaultCategories.indexOf(
               category); //proporciona un número entero que representa la posición de la categoría actual en la lista
-          final newCategoryColor = _getColorByIndex(
+          final newCategoryColor = getColorByIndex(
               colorIndex); //devuelve un color de la lista de colores disponibles, basado en el índice proporcionad
           //Se crea un nuevo objeto Category con dos atributos
-          final newCategory =
-              Category(name: category, color: newCategoryColor!.value);
+          final newCategory = Category(
+              id: idCounter, name: category, color: newCategoryColor!.value);
           await dbHelper.insertCategory(
               newCategory); //insertar este nuevo objeto Category en la base de datos local.
+          idCounter++;
         }
 
         final updatedCategories = await dbHelper
@@ -162,17 +165,18 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 */
   //Se crea una lista llamada availableColors que contiene objetos de tipo color
-  List<Color> availableColors = [
-    Colors.red,
-    Colors.blue,
-    Colors.green,
-    Colors.orange,
-    Colors.brown,
-    Colors.yellow
-  ];
 
   //Esto define una función llamada _getColorByIndex que toma un parámetro index, que representa la posición en la lista de colores. El ? después de Color indica que el valor de retorno puede ser nulo (null)
-  Color? _getColorByIndex(int index) {
+  Color? getColorByIndex(int index) {
+    List<Color> availableColors = [
+      Colors.red,
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.brown,
+      Colors.yellow
+    ];
+
     //    index >= 0 && index < availableColors.length: Esto verifica si el índice proporcionado está dentro del rango válido de la lista availableColors. Si es cierto, significa que hay un color disponible en esa posición.
     //     availableColors[index]: Si el índice es válido, esta parte devuelve el color correspondiente de la lista availableColors.
     //     null: Si el índice no es válido (es decir, es menor que 0 o mayor o igual al tamaño de la lista), la función devuelve null para indicar que no hay color disponible en esa posición.
@@ -187,7 +191,7 @@ class _NoteScreenState extends State<NoteScreen> {
         TextEditingController(); //Se crea un controlador de texto _categoryController para capturar la entrada de texto del usuario para el nombre de la nueva categoría.
     String newCategory =
         ''; //Se declara una cadena vacía para almacenar el nombre de la categoria
-    Color? newCategoryColor = _getColorByIndex(_categories
+    Color? newCategoryColor = getColorByIndex(_categories
         .length); // Obtener un color basado en la cantidad actual de categorías almacenadas en la lista _categories
 
     //Se crea una estructura condicional
@@ -264,17 +268,34 @@ class _NoteScreenState extends State<NoteScreen> {
               ),
               //botón elevado con el texto "Agregar"
               ElevatedButton(
-                //se ejecuta cuando el usuario presiona el botón "Agregar".
                 onPressed: () {
-                  //Se verifica si la variable newCategory no está vacía
                   if (newCategory.isNotEmpty) {
-                    //Si el campo de entrada de texto no está vacío, se llama a la función _addCategory para agregar la nueva categoría
-                    _addCategory(newCategory,
-                        newCategoryColor); // Asegúrate de manejar el valor nullable aquí
-                    Navigator.pop(context); //se cierra el cuadro de diálogo
+                    // Verificar si la categoría ya existe
+                    if (_categories.contains(newCategory)) {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('Error'),
+                            content: Text('La categoría ya existe.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Text('Aceptar'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    } else {
+                      _addCategory(newCategory, newCategoryColor);
+                      Navigator.pop(context);
+                    }
                   }
                 },
-                child: Text('Agregar'), //Texto que se encuentra en el boton
+                child: Text('Agregar'),
               ),
             ],
           );
@@ -286,16 +307,100 @@ class _NoteScreenState extends State<NoteScreen> {
   void _addNotea() async {
     final title = _titleController.text;
     final content = _contentController.text;
+    int categoryId; // Define categoryId como una variable de la clase
 
-    if (title.isNotEmpty && content.isNotEmpty) {
-      final dbNota = DatabaseNota.instance;
+    if (title.isNotEmpty &&
+        content.isNotEmpty &&
+        _selectedCategory.isNotEmpty) {
+      // Buscar el índice de la categoría seleccionada en la lista de categorías
+      final categoryIndex = _categories.indexOf(_selectedCategory);
+
+      if (categoryIndex != -1) {
+        // Verificar que se encontró la categoría seleccionada en la lista
+        categoryId = categoryIndex; // Usar el índice como categoryId
+      } else {
+        // Manejar el caso en el que la categoría no se encuentra en la lista
+        print('Error: Categoría seleccionada no encontrada en la lista.');
+        return; // Salir de la función si no se encuentra la categoría
+      }
+
+      final dbNota = DatabaseHelper.internal();
       final newNotea = Notea(
         title: title,
         content: content,
+        categoryId: categoryId,
       );
 
       try {
-        final noteId = await dbNota.insert(newNotea);
+        final noteId = await dbNota.insert(newNotea, categoryId);
+
+        if (noteId != null && noteId > 0) {
+          Fluttertoast.showToast(
+            msg: 'Nota guardada con éxito',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+          );
+          // Espera a que se inserte la nueva nota y luego carga las notas desde la base de datos
+          _loadNotesFromDatabase();
+
+          setState(() {
+            // Aquí es donde se convierte el objeto Notea en Note
+            _notes.add(
+              Note(
+                title,
+                content,
+                _selectedColor!,
+                _selectedCategory,
+              ),
+            );
+            _titleController.clear();
+            _contentController.clear();
+            _selectedCategory = '';
+            _selectedColor = null;
+            _showAddButton = true;
+          });
+        } else {
+          Fluttertoast.showToast(
+            msg: 'Error al guardar la nota',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+          );
+        }
+      } catch (e) {
+        print('Error al insertar nota en la base de datos: $e');
+        Fluttertoast.showToast(
+          msg: 'Error al guardar la nota',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+      }
+    }
+  }
+  /*
+  void _addNotea() async {
+
+    final title = _titleController.text;
+    final content = _contentController.text;
+    int categoryId; // Define categoryId como una variable de la clase
+
+
+    if (title.isNotEmpty && content.isNotEmpty && _selectedCategory.isEmpty) {
+      final dbNota = DatabaseHelper.internal();
+      final categoryId = _categories.indexOf(_selectedCategory);
+      final newNotea = Notea(
+        title: title,
+        content: content,
+
+      );
+
+      try {
+        final noteId = await dbNota.insert(newNotea, categoryId);
 
         if (noteId != null && noteId > 0) {
           Fluttertoast.showToast(
@@ -343,21 +448,45 @@ class _NoteScreenState extends State<NoteScreen> {
       }
     }
   }
+   */
 
-  //Se creo una funcion para poder ver las notas en la consola,
-  // aparecen al dar clic en el boton crear nota
-  void loadNotesFromDatabase() async {
-    final allNotes = await DatabaseNota.instance.getAllNotes();
+  void _loadNotesFromDatabase() async {
+    final allNotes = await DatabaseHelper.internal().getAllNotes();
     setState(() {
       notes = allNotes;
     });
 
-    // Imprimir las notas en la consola
+    // Recorrer las notas y asignar el color de la categoría
     for (final note in notes) {
       print(
-          'ID: ${note.id}, Título: ${note.title}, Contenido: ${note.content}');
+          'ID: ${note.id}, Título: ${note.title}, Contenido: ${note.content}, Category: ${note.categoryId}');
+      final categoryIndex =
+          note.categoryId; // Obtener el índice de la categoría
+      final categoryColor =
+          _categoryColors[categoryIndex]; // Obtener el color de la categoría
+      final noteToAdd = Note(
+        note.title,
+        note.content,
+        categoryColor, // Asignar el color de la categoría a la nota
+        _categories[categoryIndex], // Obtener el nombre de la categoría
+      );
+      _notes.add(noteToAdd); // Agregar la nota a la lista _notes
     }
   }
+
+  //Se creo una funcion para poder ver las notas en la consola,
+  // aparecen al dar clic en el boton crear nota
+  /*void loadNotesFromDatabase() async {
+    final allNotes = await DatabaseHelper.internal().getAllNotes();
+    setState(() {
+      notes = allNotes!;
+    });
+
+    // Imprimir las notas en la consola
+    for (final note in notes) {
+      print('ID: ${note.id}, Título: ${note.title}, Contenido: ${note.content}');
+    }
+  }*/
 
   @override
   // método build de un widget, que se encarga de construir la interfaz de usuario del widget.
@@ -391,217 +520,220 @@ class _NoteScreenState extends State<NoteScreen> {
       //representa la estructura de la interfaz de usuario (UI) de una pantalla en la aplicación
       body: Padding(
         //El contenido principal de la pantalla se encuentra en el cuerpo (body) de la pantalla.
-        padding: const EdgeInsets.all(
+        padding: EdgeInsets.all(
             16.0), //se agrega un relleno de 16.0 píxeles en todos los lados del contenido.
-        child: Column(
-          // se utiliza Column para organizar el contenido verticalmente.
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(height: 16.0),
-            Row(
-              //Se utiliza para organizar elementos en una fila horizontal
-              children: [
-                Text(
-                  //muestra el contenido de la interfaz
-                  'Crea nueva nota', //texto que se muestra en pantalla
-                  style: TextStyle(
-                    //proporciona el estilo del texto
-                    fontSize: 24, //tamaño de la fuente
-                    fontFamily: 'Headline Medium',
-                  ),
-                ),
-                SizedBox(
-                    width: 8.0), //se le agrega un espacio vacio con un ancho
-                Row(
-                  //Se utiliza para organizar elementos en una fila horizontal
-                  children: [
-                    Container(
-                      //se utiliza para mostrar un círculo de color (_selectedColor) junto con el nombre de la categoría seleccionada (_selectedCategory)
-                      width: 24, //se le coloca un ancho al container
-                      height: 24, //se le coloca un alto al container
-                      decoration: BoxDecoration(
-                        //se le coloca un border redondeado
-                        shape: BoxShape
-                            .circle, //configura el container como un circulo
-                        color: _selectedColor, //contiene un valor de color
-                      ),
+        child: SingleChildScrollView(
+          child: Column(
+            // se utiliza Column para organizar el contenido verticalmente.
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: 16.0),
+              Row(
+                //Se utiliza para organizar elementos en una fila horizontal
+                children: [
+                  Text(
+                    //muestra el contenido de la interfaz
+                    'Crea nueva nota', //texto que se muestra en pantalla
+                    style: TextStyle(
+                      //proporciona el estilo del texto
+                      fontSize: 24, //tamaño de la fuente
+                      fontFamily: 'Headline Medium',
                     ),
-                    SizedBox(
-                        width:
-                            8.0), //se le agrega un espacio vacio con un ancho
-                    Text(
-                        _selectedCategory), //Esta variable puede cambiar dinámicamente a medida que el usuario selecciona diferentes categorías.
-                  ],
-                ),
-                SizedBox(
-                    width: 8.0), //se le agrega un espacio vacio con un ancho
-                _showAddButton
-                    //Este es el widget del botón desplegable. Cuando se toca, muestra una lista de elementos que el usuario puede seleccionar.
-                    ? PopupMenuButton<Map<String, dynamic>>(
-                        //se crea un icono
-                        icon: Icon(
-                          Icons.add_circle,
-                          color: Colors.blue, //se le asigna el color
-                          size: 40.0, //tamaño del icono
+                  ),
+                  SizedBox(
+                      width: 8.0), //se le agrega un espacio vacio con un ancho
+                  Row(
+                    //Se utiliza para organizar elementos en una fila horizontal
+                    children: [
+                      Container(
+                        //se utiliza para mostrar un círculo de color (_selectedColor) junto con el nombre de la categoría seleccionada (_selectedCategory)
+                        width: 24, //se le coloca un ancho al container
+                        height: 24, //se le coloca un alto al container
+                        decoration: BoxDecoration(
+                          //se le coloca un border redondeado
+                          shape: BoxShape
+                              .circle, //configura el container como un circulo
+                          color: _selectedColor, //contiene un valor de color
                         ),
-                        //cuando el usuario seleccion un elemento del boton despegable, se activa la funcion onSelected
-                        //onSelected recibe un argumento selection, que es un mapa (Map<String, dynamic>) que contiene información sobre la selección del usuario.
-                        // En este mapa, "category" es la clave que contiene el nombre de la categoría seleccionada, y "color" es la clave que contiene el color asociado a la categoría (puede ser nulo si es una nueva categoría).
-                        onSelected: (Map<String, dynamic> selection) {
-                          //Si "category" es igual a "Add", se llama a _showAddCategoryDialog()
-                          if (selection['category'] == 'Add') {
-                            _showAddCategoryDialog();
-                          } else {
-                            //Si "category" no es igual a "Add", significa que el usuario seleccionó una categoría existente. En este caso, se actualizan las variables _selectedColor y _selectedCategory con los valores del mapa selection
-                            setState(() {
-                              _selectedColor = selection['color'];
-                              _selectedCategory = selection['category'];
-                              _showAddButton =
-                                  false; //oculta el botón desplegable después de la selección.
-                            });
-                          }
-                        },
-                        //es una función que se llama cuando se construye el menú desplegable.
-                        itemBuilder: (BuildContext context) {
-                          //Se crea una lista items que contendrá los elementos del menú desplegable. Esta lista se inicializa como una lista vacía.
-                          List<PopupMenuEntry<Map<String, dynamic>>> items =
-                              _categories.map((category) {
-                            //para iterar a través de la lista de categorías _categories
-                            int index = _categories.indexOf(
-                                category); //busca el índice de la categoría actual (category) dentro de la lista _categories
-                            Color? color = _getColorByIndex(
-                                index); //Una vez que se obtiene el índice de la categoría actual, se llama a la función _getColorByIndex(index) para obtener el color asociado a esa categoría.
-                            //Esta línea crea un elemento de menú emergente
-                            return PopupMenuItem<Map<String, dynamic>>(
-                              //Se utiliza un mapa con dos claves: 'color' y 'category', y se les asigna los valores color (el color asociado a la categoría) y category (el nombre de la categoría)
-                              value: {
-                                'color': color,
-                                'category': category,
-                              },
-                              child: CategoryMenuItem(
-                                //mostrará la categoría con su color específico
-                                color: color, //
-                                category: category,
+                      ),
+                      SizedBox(
+                          width:
+                              8.0), //se le agrega un espacio vacio con un ancho
+                      Text(
+                          _selectedCategory), //Esta variable puede cambiar dinámicamente a medida que el usuario selecciona diferentes categorías.
+                    ],
+                  ),
+                  SizedBox(
+                      width: 8.0), //se le agrega un espacio vacio con un ancho
+                  _showAddButton
+                      //Este es el widget del botón desplegable. Cuando se toca, muestra una lista de elementos que el usuario puede seleccionar.
+                      ? PopupMenuButton<Map<String, dynamic>>(
+                          //se crea un icono
+                          icon: Icon(
+                            Icons.add_circle,
+                            color: Colors.blue, //se le asigna el color
+                            size: 40.0, //tamaño del icono
+                          ),
+                          //cuando el usuario seleccion un elemento del boton despegable, se activa la funcion onSelected
+                          //onSelected recibe un argumento selection, que es un mapa (Map<String, dynamic>) que contiene información sobre la selección del usuario.
+                          // En este mapa, "category" es la clave que contiene el nombre de la categoría seleccionada, y "color" es la clave que contiene el color asociado a la categoría (puede ser nulo si es una nueva categoría).
+                          onSelected: (Map<String, dynamic> selection) {
+                            //Si "category" es igual a "Add", se llama a _showAddCategoryDialog()
+                            if (selection['category'] == 'Add') {
+                              _showAddCategoryDialog();
+                            } else {
+                              //Si "category" no es igual a "Add", significa que el usuario seleccionó una categoría existente. En este caso, se actualizan las variables _selectedColor y _selectedCategory con los valores del mapa selection
+                              setState(() {
+                                _selectedColor = selection['color'];
+                                _selectedCategory = selection['category'];
+                                _showAddButton =
+                                    false; //oculta el botón desplegable después de la selección.
+                              });
+                            }
+                          },
+                          //es una función que se llama cuando se construye el menú desplegable.
+                          itemBuilder: (BuildContext context) {
+                            //Se crea una lista items que contendrá los elementos del menú desplegable. Esta lista se inicializa como una lista vacía.
+                            List<PopupMenuEntry<Map<String, dynamic>>> items =
+                                _categories.map((category) {
+                              //para iterar a través de la lista de categorías _categories
+                              int index = _categories.indexOf(
+                                  category); //busca el índice de la categoría actual (category) dentro de la lista _categories
+                              Color? color = getColorByIndex(
+                                  index); //Una vez que se obtiene el índice de la categoría actual, se llama a la función _getColorByIndex(index) para obtener el color asociado a esa categoría.
+                              //Esta línea crea un elemento de menú emergente
+                              return PopupMenuItem<Map<String, dynamic>>(
+                                //Se utiliza un mapa con dos claves: 'color' y 'category', y se les asigna los valores color (el color asociado a la categoría) y category (el nombre de la categoría)
+                                value: {
+                                  'color': color,
+                                  'category': category,
+                                },
+                                child: CategoryMenuItem(
+                                  //mostrará la categoría con su color específico
+                                  color: color, //
+                                  category: category,
+                                ),
+                              );
+                            }).toList(); //se utiliza para convertir un iterable (como una lista o un generador)
+                            items.add(
+                              // operación que se utiliza para agregar un elemento a una lista
+                              PopupMenuItem<Map<String, dynamic>>(
+                                //se utiliza para crear un elemento de menú que contiene información sobre una categoría.
+                                value: {
+                                  //define el valor asociado con este elemento de menú
+                                  'color': getColorByIndex(_categories
+                                      .length), //es el color obtenido por el método _getColorByIndex basado en la cantidad actual de categorías
+                                  'category':
+                                      'Add', //Sirve para identificar que se seleccionó la opción de agregar una nueva categoría en el menú.
+                                },
+                                child: Row(
+                                  //se crea una fila
+                                  children: [
+                                    Icon(
+                                      //se agrega un icono y se le asigna un color
+                                      Icons.add_circle,
+                                      color: Colors.grey[800],
+                                    ),
+                                    SizedBox(
+                                        width: 8.0), //crea un espacio horzontal
+                                    Text(
+                                        'Agregar nueva categoría'), //se establece el texto
+                                  ],
+                                ),
                               ),
                             );
-                          }).toList(); //se utiliza para convertir un iterable (como una lista o un generador)
-                          items.add(
-                            // operación que se utiliza para agregar un elemento a una lista
-                            PopupMenuItem<Map<String, dynamic>>(
-                              //se utiliza para crear un elemento de menú que contiene información sobre una categoría.
-                              value: {
-                                //define el valor asociado con este elemento de menú
-                                'color': _getColorByIndex(_categories
-                                    .length), //es el color obtenido por el método _getColorByIndex basado en la cantidad actual de categorías
-                                'category':
-                                    'Add', //Sirve para identificar que se seleccionó la opción de agregar una nueva categoría en el menú.
-                              },
-                              child: Row(
-                                //se crea una fila
-                                children: [
-                                  Icon(
-                                    //se agrega un icono y se le asigna un color
-                                    Icons.add_circle,
-                                    color: Colors.grey[800],
-                                  ),
-                                  SizedBox(
-                                      width: 8.0), //crea un espacio horzontal
-                                  Text(
-                                      'Agregar nueva categoría'), //se establece el texto
-                                ],
-                              ),
-                            ),
-                          );
-                          return items; // se utiliza para finalizar la construcción de los elementos de menú y devolver la lista completa de elementos de menú que se mostrarán en el menú emergente.
-                        },
-                      )
-                    : SizedBox(), //se agrega un espacion vacio sin contenido
-              ],
-            ),
+                            return items; // se utiliza para finalizar la construcción de los elementos de menú y devolver la lista completa de elementos de menú que se mostrarán en el menú emergente.
+                          },
+                        )
+                      : SizedBox(), //se agrega un espacion vacio sin contenido
+                ],
+              ),
 /*
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () {
-                _handleDeleteCategory('Bancos');
-                _handleDeleteCategory('Tarjetas');
-                _handleDeleteCategory('Entretenimiento');
-                _handleDeleteCategory('Redes Sociales');
-                _handleDeleteCategory('Dasa');
-                _handleDeleteCategory('Peliculas');
-                _handleDeleteCategory('Juegos');
-                _handleDeleteCategory('Mexico');
-                _handleDeleteCategory('Gmail');
-                _handleDeleteCategory('adda');
-                _handleDeleteCategory('Escuela');
-                _handleDeleteCategory('Trabajo');
-                _handleDeleteCategory('Musica');
-                _handleDeleteCategory('Celular');
-                _handleDeleteCategory('Correos');
-              },
-              child: Text('Eliminar Categoría'),
-            ),
+              SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: () {
+                  _handleDeleteCategory('Bancos');
+                  _handleDeleteCategory('Tarjetas');
+                  _handleDeleteCategory('Entretenimiento');
+                  _handleDeleteCategory('Redes Sociales');
+                  _handleDeleteCategory('Dasa');
+                  _handleDeleteCategory('Peliculas');
+                  _handleDeleteCategory('Juegos');
+                  _handleDeleteCategory('Mexico');
+                  _handleDeleteCategory('Gmail');
+                  _handleDeleteCategory('adda');
+                  _handleDeleteCategory('Escuela');
+                  _handleDeleteCategory('Trabajo');
+                  _handleDeleteCategory('Musica');
+                  _handleDeleteCategory('Celular');
+                  _handleDeleteCategory('Correos');
+                },
+                child: Text('Eliminar Categoría'),
+              ),
 */
-            SizedBox(height: 16.0), //crea un espacio vertical
-            TextField(
-              //se agrega un campo de texto, con un texto, con un estilo
-              controller: _titleController,
-              decoration: InputDecoration(
-                labelText: 'título', //titulo de la etiqueta
-                labelStyle: TextStyle(
-                  fontFamily: 'Headline Small',
-                  fontWeight: FontWeight
-                      .bold, // Cambia a fontWeight para hacerlo negrita
-                  fontSize: 24.0, // Cambia a fontFamily en lugar de fontWeight
+              SizedBox(height: 16.0), //crea un espacio vertical
+              TextField(
+                //se agrega un campo de texto, con un texto, con un estilo
+                controller: _titleController,
+                decoration: InputDecoration(
+                  labelText: 'título', //titulo de la etiqueta
+                  labelStyle: TextStyle(
+                    fontFamily: 'Headline Small',
+                    fontWeight: FontWeight
+                        .bold, // Cambia a fontWeight para hacerlo negrita
+                    fontSize:
+                        24.0, // Cambia a fontFamily en lugar de fontWeight
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 16.0),
-            TextField(
-              //se agrega un campo de texto, con un texto, con un estilo
-              controller: _contentController,
-              maxLines: 10,
-              decoration: InputDecoration(
-                labelText: 'contenido..',
-                labelStyle: TextStyle(
-                  fontFamily: 'Headline Small',
-                  fontSize: 16.0, // Cambia a fontFamily en lugar de fontWeight
+              SizedBox(height: 16.0),
+              TextField(
+                //se agrega un campo de texto, con un texto, con un estilo
+                controller: _contentController,
+                maxLines: 10,
+                decoration: InputDecoration(
+                  labelText: 'contenido..',
+                  labelStyle: TextStyle(
+                    fontFamily: 'Headline Small',
+                    fontSize:
+                        16.0, // Cambia a fontFamily en lugar de fontWeight
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _addNotea,
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(12), // Radio de 12 en los bordes
+              SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: _addNotea,
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(12), // Radio de 12 en los bordes
+                  ),
                 ),
-              ),
-              child: Container(
-                width: 150.0,
-                height: 54,
-                // Ancho personalizado
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons
-                          .receipt_long, // Agregar el icono "Receipt Long" aquí
-                      size: 32.0, // Tamaño del icono
-                    ),
-                    SizedBox(width: 8.0),
-                    Text(
-                      'crear nota',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.0,
+                child: Container(
+                  height: 54,
+                  // Ancho personalizado
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons
+                            .receipt_long, // Agregar el icono "Receipt Long" aquí
+                        size: 32.0, // Tamaño del icono
                       ),
-                    ),
-                  ],
+                      SizedBox(width: 8.0),
+                      Text(
+                        'crear nota',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
