@@ -274,11 +274,10 @@ class _MyAppFormState extends State<MyAppForm> {
                               child: const Text('Guardar'),
                               onPressed: () async {
                                 if (_supportState == _SupportState.soportado) {
-                                  debugPrint("es soportado");
-                                  //imprime la lista disponibles de autenticacion
                                   _listaAutenticacionesDisponibles();
                                   //funcion donde se pide la la huella o Face ID
                                   _authenticateWithBiometrics();
+                                  //funcion donde se guardan los datos en la DataBase
                                   DB.insert(Persona(
                                       id: 1,
                                       name: userin.text,
