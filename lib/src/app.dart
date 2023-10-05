@@ -177,6 +177,9 @@ class _MyAppFormState extends State<MyAppForm> {
     });
   }
 
+//variable para validar el formulario muy importante!
+  final _keyForm = GlobalKey<FormState>();
+
 //aqui empieza la creacion de los widgets
   @override
   Widget build(BuildContext context) {
@@ -273,24 +276,31 @@ class _MyAppFormState extends State<MyAppForm> {
                               ),
                               child: const Text('Guardar'),
                               onPressed: () async {
-                                if (_supportState == _SupportState.soportado) {
-                                  _listaAutenticacionesDisponibles();
-                                  //funcion donde se pide la la huella o Face ID
-                                  _authenticateWithBiometrics();
-                                  //funcion donde se guardan los datos en la DataBase
-                                  DB.insert(Persona(
-                                      id: 1,
-                                      name: userin.text,
-                                      password: password.text,
-                                      rpassword: password1.text,
-                                      res: respuesta.text));
-                                } else if (_supportState ==
-                                    _SupportState.nosoportado) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => const MyInicio()),
-                                  );
+                                if (_keyForm.currentState!.validate()) {
+                                  debugPrint('validacion');
+                                  if (_supportState ==
+                                      _SupportState.soportado) {
+                                    _listaAutenticacionesDisponibles();
+                                    //funcion donde se pide la la huella o Face ID
+                                    _authenticateWithBiometrics();
+                                    //funcion donde se guardan los datos en la DataBase
+                                    DB.insert(Persona(
+                                        id: 1,
+                                        name: userin.text,
+                                        password: password.text,
+                                        rpassword: password1.text,
+                                        res: respuesta.text));
+                                  } else if (_supportState ==
+                                      _SupportState.nosoportado) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const MyInicio()),
+                                    );
+                                  }
+                                } else {
+                                  debugPrint('invalidacion');
                                 }
                               },
                             ),
@@ -314,172 +324,193 @@ class _MyAppFormState extends State<MyAppForm> {
                 ),
               ),
               //se crea la caja de texto donde contendra el usuario
-              SizedBox(
-                height: 45,
-                child: TextField(
-                  controller: userin,
-                  enableInteractiveSelection: false,
-                  autofocus: true,
-                  //textCapitalization: TextCapitalization.characters,
-                  style: const TextStyle(
-                    color: Colors.black,
-                  ),
-                  decoration: const InputDecoration(
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: 'Ingrese su Usuario',
-                    hintStyle: TextStyle(
-                      color: Colors.black,
+              Form(
+                key: _keyForm,
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 45,
+                      child: TextFormField(
+                        validator: (valor) {
+                          if (valor!.isEmpty) {
+                            return "campo vacio!";
+                          }
+                          return null;
+                        },
+                        controller: userin,
+                        enableInteractiveSelection: false,
+                        autofocus: true,
+                        //textCapitalization: TextCapitalization.characters,
+                        style: const TextStyle(
+                          color: Colors.black,
+                        ),
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 10),
+                          border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: 'Ingrese su Usuario',
+                          hintStyle: TextStyle(
+                            color: Colors.black,
+                          ),
+                          suffixIcon: Icon(
+                            Icons.verified_user,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
                     ),
-                    suffixIcon: Icon(
-                      Icons.verified_user,
-                      color: Colors.black,
+                    //un divizor
+                    const Divider(
+                      height: 15.0,
                     ),
-                  ),
-                  onSubmitted: (valor) {
-                    debugPrint('el nombre es: $userin');
-                  },
-                ),
-              ),
-              //un divizor
-              const Divider(
-                height: 15.0,
-              ),
-              //se crea la etiqueta 'crear contraseña'
-              Container(
-                margin: const EdgeInsets.only(right: 180.0),
-                child: const Text(
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    color: Colors.black,
-                  ),
-                  'Crear contraseña',
-                ),
-              ),
-              //se crea la caja de texto donde contendra la contraseña
-              SizedBox(
-                height: 45,
-                child: TextField(
-                  controller: password,
-                  enableInteractiveSelection: false,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.white,
-                    suffixIcon: Icon(
-                      Icons.visibility_off_outlined,
-                      color: Colors.black,
+                    //se crea la etiqueta 'crear contraseña'
+                    Container(
+                      margin: const EdgeInsets.only(right: 180.0),
+                      child: const Text(
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          color: Colors.black,
+                        ),
+                        'Crear contraseña',
+                      ),
                     ),
-                    hintText: 'Password',
-                    hintStyle: TextStyle(color: Colors.black),
-                  ),
-                  onSubmitted: (valor) {
-                    debugPrint('la contraseña es: $password');
-                  },
-                ),
-              ),
-              //divizor
-              const Divider(
-                height: 15.0,
-              ),
-              //se crea la etiqueta 'Confirmar contraseña'
-              Container(
-                margin: const EdgeInsets.only(right: 150.0),
-                child: const Text(
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    color: Colors.black,
-                  ),
-                  'Confirmar contraseña',
-                ),
-              ),
-              //se crea la caja de texto donde se guarda la confirmacion de contraseña
-              SizedBox(
-                height: 45,
-                child: TextField(
-                  controller: password1,
-                  enableInteractiveSelection: false,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.white,
-                    suffixIcon: Icon(
-                      Icons.visibility_off_outlined,
-                      color: Colors.black,
+                    //se crea la caja de texto donde contendra la contraseña
+                    SizedBox(
+                      height: 45,
+                      child: TextFormField(
+                        validator: (valor) {
+                          if (valor!.isEmpty) {
+                            return "campo vacio!";
+                          }
+                          return null;
+                        },
+                        controller: password,
+                        enableInteractiveSelection: false,
+                        obscureText: true,
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 10),
+                          border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Colors.white,
+                          suffixIcon: Icon(
+                            Icons.visibility_off_outlined,
+                            color: Colors.black,
+                          ),
+                          hintText: 'Password',
+                          hintStyle: TextStyle(color: Colors.black),
+                        ),
+                      ),
                     ),
-                    hintText: 'Password',
-                    hintStyle: TextStyle(
-                      color: Colors.black,
+                    //divizor
+                    const Divider(
+                      height: 15.0,
                     ),
-                  ),
-                  onSubmitted: (valor1) {
-                    debugPrint('la confirmacion de contraseña es: $password1');
-                  },
-                ),
-              ),
-              //divisor
-              const Divider(
-                height: 10.0,
-              ),
-              // se crea el menu desplegable "dificil por cierto!"
-              DropdownMenu<String>(
-                width: 350,
-                label: const Text('Selecciona una prengunta'),
-                inputDecorationTheme: const InputDecorationTheme(
-                  border: OutlineInputBorder(),
-                  fillColor: Colors.black,
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                ),
-                textStyle: const TextStyle(
-                  fontFamily: 'Roboto',
-                  color: Colors.black,
-                  fontSize: 20,
-                ),
-                onSelected: (String? value) {
-                  // This is called when the user selects an item.
-                  setState(() {
-                    dropdownValue = value!;
-                  });
-                },
-                dropdownMenuEntries:
-                    list.map<DropdownMenuEntry<String>>((String value) {
-                  return DropdownMenuEntry<String>(value: value, label: value);
-                }).toList(),
-              ),
-              //divisor
-              const Divider(
-                height: 10.0,
-              ),
-              //se crea la caja de texto donde se guarda la respuesta del usuario
-              SizedBox(
-                height: 45,
-                width: double.infinity,
-                child: TextField(
-                  controller: respuesta,
-                  decoration: const InputDecoration(
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: 'Respuesta',
-                    hintStyle: TextStyle(
-                      color: Colors.black,
+                    //se crea la etiqueta 'Confirmar contraseña'
+                    Container(
+                      margin: const EdgeInsets.only(right: 150.0),
+                      child: const Text(
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          color: Colors.black,
+                        ),
+                        'Confirmar contraseña',
+                      ),
                     ),
-                  ),
-                  onSubmitted: (valor) {
-                    debugPrint('la respuesta es: $respuesta');
-                  },
+                    //se crea el formulario donde se guarda la confirmacion de contraseña
+                    SizedBox(
+                      height: 45,
+                      child: TextFormField(
+                        validator: (valor) {
+                          // ignore: unrelated_type_equality_checks
+                          if (valor!.isEmpty) {
+                            return "campo vacio!";
+                          }
+                          return null;
+                        },
+                        controller: password1,
+                        enableInteractiveSelection: false,
+                        obscureText: true,
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 10),
+                          border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Colors.white,
+                          suffixIcon: Icon(
+                            Icons.visibility_off_outlined,
+                            color: Colors.black,
+                          ),
+                          hintText: 'Password',
+                          hintStyle: TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                    //divisor
+                    const Divider(
+                      height: 10.0,
+                    ),
+                    // se crea el menu desplegable "dificil por cierto!"
+                    DropdownMenu<String>(
+                      width: 350,
+                      label: const Text('Selecciona una prengunta'),
+                      inputDecorationTheme: const InputDecorationTheme(
+                        border: OutlineInputBorder(),
+                        fillColor: Colors.black,
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                      ),
+                      textStyle: const TextStyle(
+                        fontFamily: 'Roboto',
+                        color: Colors.black,
+                        fontSize: 20,
+                      ),
+                      onSelected: (String? value) {
+                        // This is called when the user selects an item.
+                        setState(() {
+                          dropdownValue = value!;
+                        });
+                      },
+                      dropdownMenuEntries:
+                          list.map<DropdownMenuEntry<String>>((String value) {
+                        return DropdownMenuEntry<String>(
+                            value: value, label: value);
+                      }).toList(),
+                    ),
+                    //divisor
+                    const Divider(
+                      height: 10.0,
+                    ),
+                    //se crea la caja de texto donde se guarda la respuesta del usuario
+                    SizedBox(
+                      height: 45,
+                      width: double.infinity,
+                      child: TextFormField(
+                        validator: (valor) {
+                          if (valor!.isEmpty) {
+                            return "campo vacio!";
+                          }
+                          return null;
+                        },
+                        controller: respuesta,
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 10),
+                          border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: 'Respuesta',
+                          hintStyle: TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
