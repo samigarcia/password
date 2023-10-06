@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../db/databaseCategory.dart';
 import '../db/notesdb.dart';
 import 'note.dart';
+import '../db/db.dart';
 
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -288,11 +289,11 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
+                String? userPassword = await DB.getPasswordForUser(1);
                 final enteredPassword = _passwordController.text;
-                final correctPassword = "12345"; // Supongamos que la contraseña de la nota se almacena en la propiedad 'password' de la clase Notea
 
-                if (enteredPassword == correctPassword) {
+                if (userPassword != null && enteredPassword == userPassword) {
                   Navigator.of(context).pop();
                   _showNoteContentDialog(context, note); // Muestra el contenido de la nota
                 } else {

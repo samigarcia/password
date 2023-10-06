@@ -108,7 +108,7 @@ class _MyAppFormState extends State<MyAppForm> {
     setState(
         () => _authorized = authenticated ? 'Autorizado' : 'No Autorizado');
   }
-
+/*
   Future<void> _authenticateWithBiometrics() async {
     bool authenticated = false;
     try {
@@ -151,7 +151,7 @@ class _MyAppFormState extends State<MyAppForm> {
     setState(() {
       _authorized = mensaje;
     });
-  }
+  }*/
 
   Future<void> _cancelAuthentication() async {
     await auth.stopAuthentication();
@@ -176,6 +176,56 @@ class _MyAppFormState extends State<MyAppForm> {
       person = auxPersona;
     });
   }
+
+
+  /////pruebas ****************
+  Future<void> _authenticateWithBiometrics() async {
+    bool authenticated = false;
+    try {
+      setState(() {
+        _isAuthenticating = true;
+        _authorized = 'Authenticating';
+      });
+      authenticated = await auth.authenticate(
+        localizedReason:
+        'Scan your fingerprint (or face or whatever) to authenticate',
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true,
+        ),
+      );
+
+      if (authenticated == true) {
+        // Autenticación exitosa, ahora recuperemos y mostremos los usuarios desde la base de datos
+        List<Persona> usuarios = await DB.personas();
+        for (Persona usuario in usuarios) {
+          print('nombre: ${usuario.name}, contra: ${usuario.password}');
+        }
+      }
+
+      setState(() {
+        _isAuthenticating = false;
+        _authorized = 'Authenticating';
+      });
+    } on PlatformException catch (e) {
+      print(e);
+      setState(() {
+        _isAuthenticating = false;
+        _authorized = 'Error - ${e.message}';
+      });
+      return;
+    }
+    if (!mounted) {
+      return;
+    }
+
+    final String mensaje = authenticated ? 'AUTORIZADO' : 'NO AUTORIZADO';
+    setState(() {
+      _authorized = mensaje;
+    });
+  }
+
+
 
 //variable para validar el formulario muy importante!
   final _keyForm = GlobalKey<FormState>();
@@ -278,6 +328,53 @@ class _MyAppFormState extends State<MyAppForm> {
                               onPressed: () async {
                                 if (_keyForm.currentState!.validate()) {
                                   debugPrint('validacion');
+
+                                  // Crear un nuevo usuario con los datos ingresados
+                                  Persona nuevoUsuario = Persona(
+                                    id: 1, // Cambia el valor del ID según tus necesidades
+                                    name: userin.text,
+                                    password: password.text,
+                                    rpassword: password1.text,
+                                    res: respuesta.text,
+                                  );
+
+                                  // Llama a la función de inserción en la base de datos
+                                  int resultado = await DB.insert(nuevoUsuario);
+
+                                  if (resultado > 0) {
+                                    // Inserción exitosa, puedes mostrar un mensaje de éxito
+                                    print('Usuario insertado con éxito');
+
+                                    // Ahora, después de insertar, obtén y muestra todos los usuarios
+                                    List<Persona> usuarios = await DB.personas();
+                                    for (Persona usuario in usuarios) {
+                                      print('id: ${usuario.id},nombre: ${usuario.name}, contra: ${usuario.password}');
+                                    }
+                                  } else {
+                                    // Error en la inserción, muestra un mensaje de error
+                                    print('Error al insertar el usuario');
+                                  }
+
+                                  if (_supportState == _SupportState.soportado) {
+                                    _listaAutenticacionesDisponibles();
+                                    // Función donde se pide la huella o Face ID
+                                    _authenticateWithBiometrics();
+                                  } else if (_supportState == _SupportState.nosoportado) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const MyInicio()),
+                                    );
+                                  }
+                                } else {
+                                  debugPrint('invalidacion');
+                                }
+                              },
+
+
+                              /*onPressed: () async {
+                                if (_keyForm.currentState!.validate()) {
+                                  debugPrint('validacion');
+                                  await DB.obtenerYGuardarContrasena();
                                   if (_supportState ==
                                       _SupportState.soportado) {
                                     _listaAutenticacionesDisponibles();
@@ -285,7 +382,7 @@ class _MyAppFormState extends State<MyAppForm> {
                                     _authenticateWithBiometrics();
                                     //funcion donde se guardan los datos en la DataBase
                                     DB.insert(Persona(
-                                        id: 1,
+                                        id: 2,
                                         name: userin.text,
                                         password: password.text,
                                         rpassword: password1.text,
@@ -302,7 +399,8 @@ class _MyAppFormState extends State<MyAppForm> {
                                 } else {
                                   debugPrint('invalidacion');
                                 }
-                              },
+
+                              },*/
                             ),
                           ),
                         ],
