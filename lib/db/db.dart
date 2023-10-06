@@ -3,13 +3,12 @@ import 'package:path/path.dart';
 import 'package:app_2/db/persona.dart';
 
 class DB {
-// Este metodo sirve para crear y/o llamar la base de datos ya creada y crea una tabla
-//llamada usuario
+// Este metodo sirve para crear y/o llamar la base de datos ya creada y crea una tabla llamada usuario
   static Future<Database> _openDB() async {
-    return openDatabase(join(await getDatabasesPath(), 'persona.db'),
+    return openDatabase(join(await getDatabasesPath(), 'user.db'),
         onCreate: (db, version) {
       return db.execute(
-          "CREATE TABLE usuario (id INT, nombre TEXT, contra TEXT, rcontra TEXT,respuesta TEXT)");
+          "CREATE TABLE usuario (id INT, name TEXT, password TEXT, rpassword TEXT, res TEXT)");
     }, version: 1);
   }
 
@@ -19,7 +18,7 @@ class DB {
     return database.insert('usuario', persona.toMap());
   }
 
-// Un metodo que eliomina a una persona de la tabla usuario
+// Un metodo que elimina a una persona de la tabla usuario
   static Future<int> delete(Persona persona) async {
     Database database = await _openDB();
     return database.delete('usuario', where: "id = ?", whereArgs: [persona.id]);
@@ -32,21 +31,6 @@ class DB {
         where: "id = ?", whereArgs: [persona.id]);
   }
 
-// Un metodo que enlista todos los adatos de la tabla usuario
-  // static Future<List<Persona>> personas() async {
-  //   Database database = await _openDB();
-  //   final List<Map<String, dynamic>> personasMap =
-  //       await database.query('usuario');
-  //   return List.generate(
-  //       personasMap.length,
-  //       (i) => Persona(
-  //           id: personasMap[i]['id'],
-  //           name: personasMap[i]['nombre'],
-  //           password: personasMap[i]['contra'],
-  //           rpassword: personasMap[i]['rcontra'],
-  //           res: personasMap[i]['respuesta']));
-  // }
-
   // Un método que recupera e imprime todos los datos de la tabla
   static Future<List<Persona>> personas() async {
     final Database database = await _openDB();
@@ -56,10 +40,17 @@ class DB {
     return List.generate(maps.length, (i) {
       return Persona(
           id: maps[i]['id'],
-          name: maps[i]['nombre'],
-          password: maps[i]['contra'],
+          name: maps[i]['name'],
+          password: maps[i]['password'],
           rpassword: maps[i]['rpassword'],
-          res: maps[i]['respuesta']);
+          res: maps[i]['res']);
     });
+  }
+
+//Metodo que imprime todas las personas de la tabla 'usuario'
+  Future<List<Persona>> getPersonas() async {
+    final Database database = await _openDB();
+    final list = await database.query('usuario');
+    return list.map((json) => Persona.fromMap(json)).toList();
   }
 }

@@ -14,6 +14,34 @@ class MyAppForm extends StatefulWidget {
 }
 
 class _MyAppFormState extends State<MyAppForm> {
+  //metodo que se ejecuta al dar click en guardar
+  click() {
+    if (_keyForm.currentState!.validate()) {
+      debugPrint('validacion');
+      if (_supportState == _SupportState.soportado) {
+        getPersonas();
+        cargaPersonas();
+        _listaAutenticacionesDisponibles();
+        //funcion donde se pide la la huella o Face ID
+        _authenticateWithBiometrics();
+        //funcion donde se guardan los datos en la DataBase
+        DB.insert(Persona(
+            id: 1,
+            name: userin.text,
+            password: password.text,
+            rpassword: password1.text,
+            res: respuesta.text));
+      } else if (_supportState == _SupportState.nosoportado) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MyInicio()),
+        );
+      }
+    } else {
+      debugPrint('invalidacion');
+    }
+  }
+
   //varaibles para la autenticacion--------------------------------
   final LocalAuthentication auth = LocalAuthentication();
   _SupportState _supportState = _SupportState.desconocido;
@@ -40,14 +68,14 @@ class _MyAppFormState extends State<MyAppForm> {
   final password = TextEditingController();
   final password1 = TextEditingController();
   final respuesta = TextEditingController();
-  List<Persona> person = [];
 
 //metodos para la autenticacion #############################################
   Future<void> _listaAutenticacionesDisponibles() async {
     late List<BiometricType> listaAutenticacion;
     try {
       listaAutenticacion = await _autenticacion.getAvailableBiometrics();
-      print("Podemos usar: ${listaAutenticacion.toString()}");
+      debugPrint("Podemos usar: ${listaAutenticacion.toString()}");
+      cargaPersonas();
     } on PlatformException catch (e) {
       print(e);
     }
@@ -170,10 +198,22 @@ class _MyAppFormState extends State<MyAppForm> {
 // ############################################################################
 
 //metood para ver datos en la base de datos no usado!
+  List<Persona> person = [];
+  List<Persona> pers = [];
   cargaPersonas() async {
     List<Persona> auxPersona = await DB.personas();
     setState(() {
       person = auxPersona;
+      debugPrint('todas las personas: $person');
+    });
+  }
+
+  void getPersonas() async {
+    final dbHelper = DB();
+    final persona = await dbHelper.getPersonas();
+    setState(() {
+      pers = persona;
+      debugPrint('otras personas: $pers');
     });
   }
 
@@ -276,32 +316,7 @@ class _MyAppFormState extends State<MyAppForm> {
                               ),
                               child: const Text('Guardar'),
                               onPressed: () async {
-                                if (_keyForm.currentState!.validate()) {
-                                  debugPrint('validacion');
-                                  if (_supportState ==
-                                      _SupportState.soportado) {
-                                    _listaAutenticacionesDisponibles();
-                                    //funcion donde se pide la la huella o Face ID
-                                    _authenticateWithBiometrics();
-                                    //funcion donde se guardan los datos en la DataBase
-                                    DB.insert(Persona(
-                                        id: 1,
-                                        name: userin.text,
-                                        password: password.text,
-                                        rpassword: password1.text,
-                                        res: respuesta.text));
-                                  } else if (_supportState ==
-                                      _SupportState.nosoportado) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const MyInicio()),
-                                    );
-                                  }
-                                } else {
-                                  debugPrint('invalidacion');
-                                }
+                                click();
                               },
                             ),
                           ),
@@ -424,7 +439,6 @@ class _MyAppFormState extends State<MyAppForm> {
                       height: 45,
                       child: TextFormField(
                         validator: (valor) {
-                          // ignore: unrelated_type_equality_checks
                           if (valor!.isEmpty) {
                             return "campo vacio!";
                           }
@@ -536,4 +550,8 @@ enum _SupportState {
   soportado,
   nosoportado,
 }
+
+
+
+
 //------------------------------------------------

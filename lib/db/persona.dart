@@ -16,10 +16,17 @@ class Persona {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'nombre': name,
-      'contra': password,
-      'rcontra': rpassword,
-      'respuesta': res
+      'name': name,
+      'password': password,
+      'rpassword': rpassword,
+      'res': res
     };
   }
+
+  factory Persona.fromMap(Map<String, dynamic> json) => Persona(
+      id: 1,
+      name: 'name',
+      password: 'password',
+      rpassword: 'rpassword',
+      res: 'res');
 }
