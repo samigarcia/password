@@ -1,11 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../db/databaseCategory.dart';
 import '../db/notesdb.dart';
 import 'note.dart';
+import '../db/db.dart';
+
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 // Definición de la clase MyInicio, que es un StatelessWidget
 class MyInicio extends StatelessWidget {
@@ -15,7 +21,8 @@ class MyInicio extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final brightness = MediaQuery.of(context).platformBrightness;
-    final initialMode = brightness == Brightness.dark ? AdaptiveThemeMode.dark : AdaptiveThemeMode.light;
+    final initialMode = brightness == Brightness.dark ? AdaptiveThemeMode.dark
+        : AdaptiveThemeMode.light;
     // Devuelve un AdaptiveTheme, que permite cambiar entre temas oscuros y claros
     return AdaptiveTheme(
       // Tema oscuro
@@ -53,14 +60,21 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _imageLoaded = false;
 
   String? _imagePathFromDatabase; // Variable de tipo String para almacenar una ruta de imagen (puede ser nula)
+  bool _imageSaved = false;
+  bool _imageAlreadySaved = false; // Variable para controlar si la imagen ya ha sido guardada
 
   // Método que se llama al inicializar el estado
   @override
   void initState() {
     super.initState(); // Llama al método initState de la clase base
     //retrieveAndPrintImage(); // Llama al método retrieveAndPrintImage
-    if(!_imageLoaded){
-      retrieveAndPrintImage();
+    if (!_imageSaved) {
+      saveImageFromAssetToDatabase().then((_) {
+        retrieveAndPrintImage();
+        setState(() {
+          _imageSaved = true; // Marca la imagen como guardada después de ejecutar una vez
+        });
+      });
     }
     _loadCategories(); // Llama al método _loadCategories al iniciar la pantalla
     _loadNotes();
@@ -86,13 +100,13 @@ class _MyHomePageState extends State<MyHomePage> {
       print('Error al cargar notas: $e');
     }
   }
-  // Recupera y muestra una imagen desde la base de datos
+
   Future<void> retrieveAndPrintImage() async {
-    final db = await DatabaseHelper().db;// Obtiene una instancia de la base de datos
-    final List<Map<String, dynamic>> imageList = await db!.query('images');// Consulta la tabla 'images' en la base de datos
+    final db = await DatabaseHelper().db;
+    final List<Map<String, dynamic>> imageList = await db!.query('images');
 
     if (imageList.isNotEmpty) {
-      final imagePath = imageList.first['image_path'] as String;// Obtiene la ruta de la imagen desde la lista
+      final imagePath = imageList.first['image_path'] as String;
 
       // Cargar la imagen desde la ruta de la base de datos
       final imageFile = File(imagePath);
@@ -117,6 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
       print('No se encontraron imágenes en la base de datos.');
     }
   }
+
   // Captura una imagen desde la cámara y la guarda en la base de datos
   Future<void> _getImageFromCamera() async {
     final picker = ImagePicker();// Instancia de ImagePicker para capturar imágenes
@@ -164,6 +179,33 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Future<void> saveImageFromAssetToDatabase() async {
+    if (_imageAlreadySaved) {
+      print('La imagen ya se ha guardado anteriormente, no se agregará de nuevo.');
+      return;
+    }else{
+      try {
+        final ByteData assetData = await rootBundle.load('assets/imagen.jpg');
+        final List<int> bytes = assetData.buffer.asUint8List();
+
+        final documentsDirectory = await getApplicationDocumentsDirectory();
+        final imagePath = path.join(documentsDirectory.path, 'imagen.jpg');
+
+        await File(imagePath).writeAsBytes(bytes);
+
+        final databaseHelper = DatabaseHelper();
+        await databaseHelper.insertImageAssets(imagePath);
+
+        // Marca la imagen como guardada
+        _imageAlreadySaved = true;
+
+      } catch (e) {
+        print('Error al guardar la imagen en la base de datos: $e');
+      }
+    }
+  }
+
+
   // Muestra un diálogo para seleccionar entre tomar una foto o seleccionar desde la galería
   Future<void> _showImagePickerDialog() async {
     showDialog(
@@ -189,6 +231,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     _getImageFromGallery(); // Llama al método para seleccionar desde la galería
                   },
                 ),
+                SizedBox(height: 20), // Espacio en blanco
               ],
             ),
           ),
@@ -210,6 +253,102 @@ class _MyHomePageState extends State<MyHomePage> {
   //funcion para que el contenido se muestre en asteriscos
   String hideText(String text){
     return '*' * text.length;
+  }
+
+  void _showPasswordDialog(BuildContext context, Notea note) {
+    final TextEditingController _passwordController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Ingrese la contraseña"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: "Contraseña",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                "Cancelar",
+                style: TextStyle(
+                  color: Colors.red, // Personaliza el color del botón
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                String? userPassword = await DB.getPasswordForUser(1);
+                final enteredPassword = _passwordController.text;
+
+                if (userPassword != null && enteredPassword == userPassword) {
+                  Navigator.of(context).pop();
+                  _showNoteContentDialog(context, note); // Muestra el contenido de la nota
+                } else {
+                  // Mostrar un mensaje de contraseña incorrecta
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Contraseña incorrecta"),
+                    ),
+                  );
+                }
+              },
+              child: Text(
+                "Aceptar",
+                style: TextStyle(
+                  color: Colors.white, // Personaliza el color del botón
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showNoteContentDialog(BuildContext context, Notea note) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: catColor.getColorByIndex(note.categoryId),
+          title: Text(note.title,
+            style: TextStyle(
+              color: Colors.white70,
+            ),
+          ),
+          content: Text(note.content,
+            style: TextStyle(
+              color: Colors.white70,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Cerrar",
+                style: TextStyle(
+                  color: Colors.white70,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   NoteScreenState catColor = NoteScreenState();
@@ -243,12 +382,13 @@ class _MyHomePageState extends State<MyHomePage> {
                             padding: EdgeInsets.only(left: 2, right: 2, top: 2),
                             child: Card(
                               elevation: 0,
-                              color: Color(0xFFFFFF),
+                              color: Colors.transparent,
                               child: CircleAvatar(
+                                backgroundColor: Colors.transparent,
                                 radius: 30,
                                 backgroundImage: _imagePathFromDatabase != null
                                     ? FileImage(File(_imagePathFromDatabase!))
-                                    : AssetImage('assets/imagen.jpg') as ImageProvider<Object>?,
+                                    : null,
                               ),
                             ),
                           ),
@@ -385,6 +525,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           SizedBox(height: 24),
                           GestureDetector(
                             onTap: (){
+                              _showPasswordDialog(context, note);
                               print('Aqui debe abrir el archivo');
                             },
                             child: Padding(

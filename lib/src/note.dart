@@ -76,16 +76,15 @@ class NoteScreenState extends State<NoteScreen> {
 
       if (categories.isEmpty) {
         //verifica si la lista de categories está vací
-        //Crea una lista llamada defaultCategories que contiene tres categorías predeterminadas: 'Bancos', 'Correos' y 'Redes Sociales'
         final defaultCategories = ['Bancos', 'Correos', 'Redes Sociales'];
         int idCounter = 0; // Inicializa el contador de ID en 1
-        //itera a través de la lista defaultCategories, que contiene las categorías predeterminadas
+        //itera a través de la lista
         for (var category in defaultCategories) {
           // Asigna un color basado en el índice de categoría
           final colorIndex = defaultCategories.indexOf(
-              category); //proporciona un número entero que representa la posición de la categoría actual en la lista
+              category);
           final newCategoryColor = getColorByIndex(
-              colorIndex); //devuelve un color de la lista de colores disponibles, basado en el índice proporcionad
+              colorIndex); 
           //Se crea un nuevo objeto Category con dos atributos
           final newCategory =
           Category(id: idCounter, name: category, color: newCategoryColor!.value);
@@ -119,10 +118,8 @@ class NoteScreenState extends State<NoteScreen> {
 //funcion para agregar nueva categoria
   void _addCategory(String category, Color color) async {
     final dbHelper = DatabaseHelper(); //Se crea una instancia de la clase
-
     final existingCategories = await dbHelper
-        .getCategories(); //Se llama al método getCategories del dbHelper para obtener la lista de categorías existentes desde la base de datos. Se espera que este método devuelva una lista de categorías ya existentes.
-//Se inicia una estructura condicional para verificar si ya existe una categoría con el mismo nombre en la base de datos.
+        .getCategories();
     if (existingCategories
         .any((existingCategory) => existingCategory.name == category)) {
       print('Ya existe una categoría con el mismo nombre.');
@@ -130,26 +127,21 @@ class NoteScreenState extends State<NoteScreen> {
       final newCategory = Category(
           name: category,
           color: color
-              .value); //Se crea una nueva instancia de la clase Category con el nombre de categoría (category) y el valor del color (color.value).
+              .value);
       final result = await dbHelper.insertCategory(
-          newCategory); //Se llama al método insertCategory del dbHelper para insertar la nueva categoría en la base de datos. El resultado de esta operación se almacena en la variable result.
-
+          newCategory);
       if (result == -1) {
-        //Si result es igual a -1, esto significa que la inserción no pudo realizarse correctamente debido a un color duplicado.
         print('Color duplicado. No se pudo insertar la categoría.');
       } else {
-        //se muestra un mensaje en la consola indicando que la categoría se ha insertado con éxito
-        print('Categoría insertada con éxito.');
-        //se utiliza para notificar al sistema de que el estado de un widget ha cambiado y que debe volver a dibujar el widget en función del nuevo estado.
         setState(() {
           _categories.add(
-              category); //Agrega el nombre de la nueva categoría (category) a la lista _categories. Esto asegura que la lista de categorías refleje la adición de la nueva categoría.
+              category); //Agrega el nombre de la nueva categoría (category) a la lista _categories.
           _categoryColors.add(
-              color); //Agrega el color de la nueva categoría (color) a la lista _categoryColors. Esto asegura que la lista de colores de categoría refleje el color asociado a la nueva categoría.
+              color); //Agrega el color de la nueva categoría (color) a la lista _categoryColors.
           _selectedColor =
-              color; //Actualiza la variable _selectedColor con el color de la nueva categoría. Esto significa que después de agregar una categoría, _selectedColor contendrá el color de la categoría recién agregada.
+              color; //Actualiza la variable _selectedColor con el color de la nueva categoría.
           _selectedCategory =
-              category; //Actualiza la variable _selectedCategory con el nombre de la nueva categoría. Esto significa que después de agregar una categoría, _selectedCategory contendrá el nombre de la categoría recién agregada.
+              category; //Actualiza la variable _selectedCategory con el nombre de la nueva categoría.
           _showAddButton =
           false; // para ocultar el botón de agregar al agregar una categoría.
         });
@@ -176,11 +168,11 @@ class NoteScreenState extends State<NoteScreen> {
 //muestra un cuadro de diálogo en la interfaz de usuario para permitir al usuario agregar una nueva categoría
   void _showAddCategoryDialog() {
     TextEditingController _categoryController =
-    TextEditingController(); //Se crea un controlador de texto _categoryController para capturar la entrada de texto del usuario para el nombre de la nueva categoría.
+    TextEditingController(); //Se crea un controlador de texto
     String newCategory =
         ''; //Se declara una cadena vacía para almacenar el nombre de la categoria
     Color? newCategoryColor = getColorByIndex(_categories
-        .length); // Obtener un color basado en la cantidad actual de categorías almacenadas en la lista _categories
+        .length);
 
     //Se crea una estructura condicional
     if (newCategoryColor == null) {
@@ -190,18 +182,16 @@ class NoteScreenState extends State<NoteScreen> {
         context:
         context, //se utiliza para obtener el contexto de la aplicación actual
         builder: (context) {
-          //es un constructor de funciones anónimas que toma el contexto como argumento y define el contenido del cuadro de diálogo
-          //Dentro de la función anónima, se devuelve un widget
+          //es un constructor de funciones anónimas
           return AlertDialog(
             title: Text(
-                'No se pueden agregar más categorías'), //se crea un titulo del cuadro de diálogo como un widget
+                'No se pueden agregar más categorías'),
             content: Text(
-                'No hay colores disponibles para nuevas categorías.'), // Esto establece el contenido principal del cuadro de diálogo como un widget
+                'No hay colores disponibles para nuevas categorías.'),
             //es una lista de acciones que se pueden realizar en el cuadro de diálogo.
             actions: [
               TextButton(
                 onPressed: () {
-                  // Cuando se presiona el botón, se llama a Navigator.pop(context) para cerrar el cuadro de diálogo y regresar a la pantalla anterior.
                   Navigator.pop(context);
                 },
                 child: Text('Aceptar'), //Texto que se encuentra en el boton
@@ -215,7 +205,7 @@ class NoteScreenState extends State<NoteScreen> {
       showDialog(
         context:
         context, //se utiliza para obtener el contexto de la aplicación actual
-        //constructor de funciones anónimas que toma el contexto como argumento y define el contenido del cuadro de diálogo.
+        //constructor de funciones anónimas
         builder: (context) {
           //Dentro de la función anónima, se devuelve un widget
           return AlertDialog(
@@ -226,19 +216,17 @@ class NoteScreenState extends State<NoteScreen> {
             content: Column(
               //crea un widget Column
               mainAxisSize: MainAxisSize
-                  .min, //la columna ocupará el espacio mínimo vertical necesario para acomodar sus hijos, lo que hace que la columna se ajuste al tamaño de su contenido.
-              // lista de widgets hijos que se colocarán en la columna verticalmente. En este caso, la lista contiene un único elemento, que es un campo de entrada de texto.
+                  .min,
+              // lista de widgets hijos
               children: [
                 //campo de entrada de texto
                 TextField(
                   controller:
-                  _categoryController, //se especifica el controlador de texto _categoryController para el campo de entrada de texto
+                  _categoryController, //se especifica el controlador de texto
                   decoration: InputDecoration(
                       labelText:
                       'Nombre de la categoría'), //decoración al campo de entrada de texto
-                  //Esta es una devolución de llamada (callback) que se ejecutará cada vez que el contenido del campo de entrada de texto cambie
                   onChanged: (value) {
-                    //Cuando el usuario escriba o modifique el texto en el campo, la función anónima asignará el valor del texto ingresado a la variable newCategory
                     newCategory = value;
                   },
                 ),
@@ -247,9 +235,7 @@ class NoteScreenState extends State<NoteScreen> {
             actions: [
               //botón de texto con el texto "Cancelar"
               TextButton(
-                //se ejecuta la accion onPressed, que cierra el cuadro de diálogo utilizando Navigator.pop(context);
                 onPressed: () {
-                  //l cuadro de diálogo se cierra y se vuelve a la pantalla anterior
                   Navigator.pop(context);
                 },
                 child: Text('Cancelar'), //Texto que se encuentra en el boton

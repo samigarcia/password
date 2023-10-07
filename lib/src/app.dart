@@ -19,8 +19,9 @@ class _MyAppFormState extends State<MyAppForm> {
     if (_keyForm.currentState!.validate()) {
       debugPrint('validacion');
       if (_supportState == _SupportState.soportado) {
-        getPersonas();
+        //funcion donde carga todas las personas
         cargaPersonas();
+        //funcion donde lista las autenticaciones disponibles
         _listaAutenticacionesDisponibles();
         //funcion donde se pide la la huella o Face ID
         _authenticateWithBiometrics();
@@ -153,6 +154,10 @@ class _MyAppFormState extends State<MyAppForm> {
         ),
       );
       if (authenticated == true) {
+        List<Persona> usuarios = await DB.personas();
+        for (Persona usuario in usuarios) {
+          debugPrint('nombre: ${usuario.name}, contra: ${usuario.password}');
+        }
         // ignore: use_build_context_synchronously
         Navigator.push(
           context,
@@ -197,25 +202,63 @@ class _MyAppFormState extends State<MyAppForm> {
   }
 // ############################################################################
 
-//metood para ver datos en la base de datos no usado!
   List<Persona> person = [];
   List<Persona> pers = [];
+//metood para ver el numero total de usuarios en la base de datos
   cargaPersonas() async {
     List<Persona> auxPersona = await DB.personas();
     setState(() {
       person = auxPersona;
-      debugPrint('todas las personas: $person');
+      debugPrint('todas las personas: ${person.toString()}');
     });
   }
 
-  void getPersonas() async {
-    final dbHelper = DB();
-    final persona = await dbHelper.getPersonas();
+  /*
+  Future<void> _authenticateWithBiometrics() async {
+    bool authenticated = false;
+    try {
+      setState(() {
+        _isAuthenticating = true;
+        _authorized = 'Authenticating';
+      });
+      authenticated = await auth.authenticate(
+        localizedReason:
+            'Scan your fingerprint (or face or whatever) to authenticate',
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true,
+        ),
+      );
+
+      if (authenticated == true) {
+        // Autenticación exitosa, ahora recuperemos y mostremos los usuarios desde la base de datos
+        List<Persona> usuarios = await DB.personas();
+        for (Persona usuario in usuarios) {
+          print('nombre: ${usuario.name}, contra: ${usuario.password}');
+        }
+      }
+
+      setState(() {
+        _isAuthenticating = false;
+        _authorized = 'Authenticating';
+      });
+    } on PlatformException catch (e) {
+      print(e);
+      setState(() {
+        _isAuthenticating = false;
+        _authorized = 'Error - ${e.message}';
+      });
+      return;
+    }
+    if (!mounted) {
+      return;
+    }
+
+    final String mensaje = authenticated ? 'AUTORIZADO' : 'NO AUTORIZADO';
     setState(() {
-      pers = persona;
-      debugPrint('otras personas: $pers');
+      _authorized = mensaje;
     });
-  }
+  }*/
 
 //variable para validar el formulario muy importante!
   final _keyForm = GlobalKey<FormState>();
@@ -550,8 +593,3 @@ enum _SupportState {
   soportado,
   nosoportado,
 }
-
-
-
-
-//------------------------------------------------

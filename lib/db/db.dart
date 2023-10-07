@@ -12,8 +12,20 @@ class DB {
     }, version: 1);
   }
 
-// Un metodo que inserta datos a la tabla usuario
   static Future<int> insert(Persona persona) async {
+    try {
+      Database database = await _openDB();
+      int result = await database.insert('usuario', persona.toMap());
+      print('Usuario insertado con éxito: $result');
+      return result;
+    } catch (e) {
+      print('Error al insertar el usuario: $e');
+      return -1; // Retorna un valor negativo en caso de error
+    }
+  }
+
+// Un metodo que inserta datos a la tabla usuario
+  static Future<int> inserto(Persona persona) async {
     Database database = await _openDB();
     return database.insert('usuario', persona.toMap());
   }
@@ -39,18 +51,28 @@ class DB {
 
     return List.generate(maps.length, (i) {
       return Persona(
-          id: maps[i]['id'],
-          name: maps[i]['name'],
-          password: maps[i]['password'],
-          rpassword: maps[i]['rpassword'],
-          res: maps[i]['res']);
+        id: maps[i]['id'],
+        name: maps[i]['nombre'] ?? '', // Maneja valores nulos aquí
+        password: maps[i]['contra'] ?? '', // Maneja valores nulos aquí
+        rpassword: maps[i]['rcontra'] ?? '', // Maneja valores nulos aquí
+        res: maps[i]['respuesta'] ?? '', // Maneja valores nulos aquí
+      );
     });
   }
 
-//Metodo que imprime todas las personas de la tabla 'usuario'
-  Future<List<Persona>> getPersonas() async {
+  static Future<String?> getPasswordForUser(int userId) async {
     final Database database = await _openDB();
-    final list = await database.query('usuario');
-    return list.map((json) => Persona.fromMap(json)).toList();
+
+    final List<Map<String, dynamic>> maps = await database.query(
+      'usuario',
+      where: 'id = ?',
+      whereArgs: [1],
+    );
+
+    if (maps.isNotEmpty) {
+      return maps.first['contra'] ?? '';
+    }
+
+    return null; // Retorna null si el usuario no se encuentra en la base de datos
   }
 }

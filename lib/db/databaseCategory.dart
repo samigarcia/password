@@ -1,4 +1,5 @@
 import 'package:app_2/db/notesdb.dart';
+import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
@@ -94,12 +95,37 @@ class DatabaseHelper {
     ''');
   }
 
+/*  // Función para cargar una imagen desde activos y guardarla en la base de datos
+  Future<void> insertImageFromAssets(Uint8List uint8list) async {
+    try {
+      // Lee la imagen desde el archivo de activos
+      final ByteData assetByteData = await rootBundle.load('assets/imagen.jpg');
+      final List<int> imageBytes = assetByteData.buffer.asUint8List();
+
+      // Convierte los bytes de la imagen en un objeto Uint8List
+      final Uint8List uint8list = Uint8List.fromList(imageBytes);
+
+      // Inserta la imagen en la base de datos
+      final db = await this.db;
+      await db!.insert('images', {'image_data': uint8list});
+      print('Imagen insertada en la base de datos');
+    } catch (e) {
+      print('Error al cargar la imagen desde activos: $e');
+    }
+  }*/
+  // Función para insertar una ruta de imagen en la base de datos.
+  Future<void> insertImageAssets(String imagePath) async {
+    final db = await this.db;
+    await db?.insert('images', {'image_path': imagePath});
+  }
+
   // Función para insertar una ruta de imagen en la base de datos.
   Future<void> insertImage(String imagePath) async {
     final db = await this.db;
     await db!.delete('images');
     await db.insert('images', {'image_path': imagePath});
   }
+
 
   // Función para insertar una categoría en la base de datos.
   Future<int> insertCategory(Category category) async {
@@ -109,11 +135,9 @@ class DatabaseHelper {
       where: 'color = ?',
       whereArgs: [category.color],
     );
-
     if (existingCategories.isNotEmpty) {
       return -1;
     }
-
     return await dbClient.insert('categories', category.toMap());
   }
 
