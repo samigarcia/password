@@ -212,7 +212,7 @@ class _MyAppFormState extends State<MyAppForm> {
     });
 
     final conteo = DB.contar();
-    debugPrint('cantidad de personas en la bd: $conteo');
+    debugPrint(await 'cantidad de personas en la bd: $conteo');
   }
 
   /*

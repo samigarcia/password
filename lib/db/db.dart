@@ -49,6 +49,8 @@ class DB {
 
     final List<Map<String, dynamic>> maps = await database.query('usuario');
 
+    print('personas total: ${maps.toString()}');
+
     return List.generate(maps.length, (i) {
       return Persona(
         id: maps[i]['id'],
