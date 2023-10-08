@@ -76,7 +76,6 @@ class _MyAppFormState extends State<MyAppForm> {
     try {
       listaAutenticacion = await _autenticacion.getAvailableBiometrics();
       debugPrint("Podemos usar: ${listaAutenticacion.toString()}");
-      cargaPersonas();
     } on PlatformException catch (e) {
       print(e);
     }
@@ -204,13 +203,16 @@ class _MyAppFormState extends State<MyAppForm> {
 
   List<Persona> person = [];
   List<Persona> pers = [];
-//metood para ver el numero total de usuarios en la base de datos
+//metood para ver todos los usuarios en la base de datos
   cargaPersonas() async {
     List<Persona> auxPersona = await DB.personas();
     setState(() {
       person = auxPersona;
       debugPrint('todas las personas: ${person.toString()}');
     });
+
+    final conteo = DB.contar();
+    debugPrint('cantidad de personas en la bd: $conteo');
   }
 
   /*

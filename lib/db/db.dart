@@ -75,4 +75,15 @@ class DB {
 
     return null; // Retorna null si el usuario no se encuentra en la base de datos
   }
+
+  static contar() async {
+    final Database database = await _openDB();
+
+    final cont;
+    //cont = (await database.rawQuery('select count(*) from usuario;')) as String;
+    cont = Sqflite.firstIntValue(
+        await database.rawQuery('SELECT COUNT(*) FROM usuario;'));
+    print('cantidad de personas: $cont');
+    return cont;
+  }
 }
