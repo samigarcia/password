@@ -1,6 +1,10 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:app_2/db/persona.dart';
+
+import '../src/inicio.dart';
 
 class DB {
 // Este metodo sirve para crear y/o llamar la base de datos ya creada y crea una tabla llamada usuario
@@ -80,12 +84,20 @@ class DB {
 
   static contar() async {
     final Database database = await _openDB();
-
-    final cont;
+    final int? cont;
+    bool accion = false;
     //cont = (await database.rawQuery('select count(*) from usuario;')) as String;
     cont = Sqflite.firstIntValue(
         await database.rawQuery('SELECT COUNT(*) FROM usuario;'));
     print('cantidad de personas: $cont');
-    return cont;
+    if (cont! > 1) {
+      accion = true;
+      print(accion);
+      // Navigator.push(
+      //   context as BuildContext,
+      //   MaterialPageRoute(builder: (context) => const MyInicio()),
+      // );
+    }
+    return accion;
   }
 }

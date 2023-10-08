@@ -211,7 +211,7 @@ class _MyAppFormState extends State<MyAppForm> {
       debugPrint('todas las personas: ${person.toString()}');
     });
 
-    final conteo = DB.contar();
+    bool conteo = DB.contar();
     debugPrint(await 'cantidad de personas en la bd: $conteo');
   }
 
