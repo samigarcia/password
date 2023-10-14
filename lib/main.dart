@@ -31,13 +31,13 @@ class MyApp extends StatelessWidget {
   }
 }
 
+//clase principal que se ejecuta al abrir la aplicacion
 // ignore: must_be_immutable
 class First extends StatelessWidget {
   //variables para la funcion de huella
   final LocalAuthentication _autenticacion = LocalAuthentication();
   bool authenticated = false;
   bool isAuthorized = false;
-  String _autorizado = "No autorizado";
   //-----------------------------------
 
   First({super.key});
@@ -52,7 +52,7 @@ class First extends StatelessWidget {
   }
 //-----------------------------------------------------------------------------------------------
 
-//metodo para autenticarse con Huella o FaceID---------------------------------------------------
+//metodo para autenticarse con Huella o FaceID-----------------------------
   // ignore: unused_element
   Future<void> _autorizar(BuildContext context) async {
     try {
@@ -72,19 +72,19 @@ class First extends StatelessWidget {
       print(e);
     }
   }
-//-----------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('espera'),
+        title: const Text('INICIO'),
       ),
       body: Column(
         children: [
           Center(
             child: ElevatedButton(
-                child: const Text('Sing In o Sign Up'),
+                child: const Text('Inicia Sesion'),
                 onPressed: () async {
                   final Database database = await _openDB();
                   final int? cont;
@@ -92,7 +92,7 @@ class First extends StatelessWidget {
                   cont = Sqflite.firstIntValue(
                       await database.rawQuery('SELECT COUNT(*) FROM usuario;'));
                   debugPrint('cantidad de personas: $cont');
-                  //si hay datos quiere decir que ya se registro la persona
+                  //si hay datos quiere decir que ya se registro un usuario
                   if (cont! > 1) {
                     // ignore: use_build_context_synchronously
                     _autorizar(context);
