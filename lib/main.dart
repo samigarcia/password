@@ -93,12 +93,12 @@ class First extends StatelessWidget {
                       await database.rawQuery('SELECT COUNT(*) FROM usuario;'));
                   debugPrint('cantidad de personas: $cont');
                   //si hay datos quiere decir que ya se registro un usuario
-                  if (cont! > 1) {
+                  if (cont! > 0) {
                     // ignore: use_build_context_synchronously
                     _autorizar(context);
                     if (isAuthorized == true) {
                       // ignore: use_build_context_synchronously
-                      Navigator.pushNamed(context, '/tercero');
+                      //Navigator.pushNamed(context, '/tercero');
                     }
                   } else if (cont < 1) {
                     //si No hay datos, se manda a la pagina de registro

@@ -214,9 +214,6 @@ class _MyAppFormState extends State<MyAppForm> {
       person = auxPersona;
       debugPrint('todas las personas: ${person.toString()}');
     });
-
-    bool conteo = DB.contar();
-    debugPrint('cantidad de personas en la bd: $conteo');
   }
 
 //variable para validar el formulario muy importante!
