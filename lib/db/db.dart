@@ -54,10 +54,10 @@ class DB {
     return List.generate(maps.length, (i) {
       return Persona(
         id: maps[i]['id'],
-        name: maps[i]['nombre'] ?? '', // Maneja valores nulos aquí
-        password: maps[i]['contra'] ?? '', // Maneja valores nulos aquí
-        rpassword: maps[i]['rcontra'] ?? '', // Maneja valores nulos aquí
-        res: maps[i]['respuesta'] ?? '', // Maneja valores nulos aquí
+        name: maps[i]['name'] ?? '', // Maneja valores nulos aquí
+        password: maps[i]['password'] ?? '', // Maneja valores nulos aquí
+        rpassword: maps[i]['rpassword'] ?? '', // Maneja valores nulos aquí
+        res: maps[i]['res'] ?? '', // Maneja valores nulos aquí
       );
     });
   }
@@ -72,7 +72,7 @@ class DB {
     );
 
     if (maps.isNotEmpty) {
-      return maps.first['contra'] ?? '';
+      return maps.first['password'] ?? '';
     }
 
     return null; // Retorna null si el usuario no se encuentra en la base de datos

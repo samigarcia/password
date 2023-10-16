@@ -57,7 +57,7 @@ class First extends StatelessWidget {
   Future<void> _autorizar(BuildContext context) async {
     try {
       isAuthorized = await _autenticacion.authenticate(
-        localizedReason: "Autentíquese para completar su transacción",
+        localizedReason: "Autentíquese para saber su Identidad",
         options: const AuthenticationOptions(
           stickyAuth: true,
           biometricOnly: true,
@@ -96,10 +96,6 @@ class First extends StatelessWidget {
                   if (cont! > 0) {
                     // ignore: use_build_context_synchronously
                     _autorizar(context);
-                    if (isAuthorized == true) {
-                      // ignore: use_build_context_synchronously
-                      //Navigator.pushNamed(context, '/tercero');
-                    }
                   } else if (cont < 1) {
                     //si No hay datos, se manda a la pagina de registro
                     // ignore: use_build_context_synchronously
