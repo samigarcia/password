@@ -37,7 +37,8 @@ class _MyAppFormState extends State<MyAppForm> {
         );
       } else if (_supportState == _SupportState.nosoportado) {
         //metodo para ir a otra pagina
-        debugPrint('dispositivo no soportado, no se inserto nada!');
+        debugPrint(
+            'el dispositivo no soporta datos biometricos, no se inserto nada!');
         debugPrint('redirigiendose al Modulo de Inicio');
         Navigator.push(
           context,
