@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../db/databaseCategory.dart';
-import '../db/notesdb.dart';
+import '../Entity/notas.dart';
+import '../Entity/categorias.dart';
 import 'note.dart';
 import '../db/db.dart';
-
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
@@ -56,44 +56,54 @@ class _MyHomePageState extends State<MyHomePage> {
   File? _image; // Variable para almacenar una imagen (puede ser nula)
   int _selectedChipIndex = -1; // Índice de la categoría seleccionada (inicializado en -1)
   List<Category> _categories = []; // Lista para almacenar categorías
-  List<Notea> _notes = [];
-  bool _imageLoaded = false;
+  List<Notea> _notes = []; //Lista para almacenar notas
 
-  String? _imagePathFromDatabase; // Variable de tipo String para almacenar una ruta de imagen (puede ser nula)
+  // Variable de tipo String para almacenar una ruta de imagen (puede ser nula)
+  String? _imagePathFromDatabase;
+  //se utiliza como bandera para verificar si la imagen fue guardada
   bool _imageSaved = false;
-  bool _imageAlreadySaved = false; // Variable para controlar si la imagen ya ha sido guardada
+  // Variable para controlar si la imagen ya ha sido guardada
+  bool _imageAlreadySaved = false;
 
   // Método que se llama al inicializar el estado
   @override
   void initState() {
-    super.initState(); // Llama al método initState de la clase base
-    //retrieveAndPrintImage(); // Llama al método retrieveAndPrintImage
+    // Llama al método initState de la clase base
+    super.initState();
+    // Llama al método retrieveAndPrintImage
     if (!_imageSaved) {
       saveImageFromAssetToDatabase().then((_) {
         retrieveAndPrintImage();
         setState(() {
-          _imageSaved = true; // Marca la imagen como guardada después de ejecutar una vez
+          // Marca la imagen como guardada después de ejecutar una vez
+          _imageSaved = true;
         });
       });
     }
-    _loadCategories(); // Llama al método _loadCategories al iniciar la pantalla
+    // Llama al método _loadCategories al iniciar la pantalla
+    _loadCategories();
     _loadNotes();
   }
-  //carga las categorias de la base de datos
+  //carga las categorias de la bd
   void _loadCategories() async {
-    final dbHelper = DatabaseHelper(); // Instancia de DatabaseHelper para interactuar con la base de datos
-    final categories = await dbHelper.getCategories(); //evuelve una lista de categorías
+    // Instancia de DatabaseHelper para interactuar con la base de datos
+    final dbHelper = DatabaseHelper();
+    //evuelve una lista de categorías
+    final categories = await dbHelper.getCategories();
 
     setState(() {
-      _categories = categories;// Actualiza la lista de categorías en el estado con las categorías cargadas desde la base de datos
+      // Actualiza la lista de categorías con las categorías cargadas desde la bd
+      _categories = categories;
     });
   }
-
+  //carga las notas de la bd
   void _loadNotes() async {
     try {
       final dbHelper = DatabaseHelper();
+      // Obtiene todas las notas desde la base de datos.
       final notes = await dbHelper.getAllNotes();
       setState(() {
+        // Actualiza la lista de notas en el estado del widget.
         _notes = notes;
       });
     } catch (e) {
@@ -103,9 +113,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> retrieveAndPrintImage() async {
     final db = await DatabaseHelper().db;
+    // Consulta la base de datos para obtener la lista de imágenes.
     final List<Map<String, dynamic>> imageList = await db!.query('images');
 
     if (imageList.isNotEmpty) {
+      // Obtiene la ruta de la primera imagen de la lista.
       final imagePath = imageList.first['image_path'] as String;
 
       // Cargar la imagen desde la ruta de la base de datos
@@ -118,11 +130,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
         print('Imagen guardada en la base de datos a Base64: $imageBase64');
 
-        // Asigna la ruta de la imagen directamente a _imagePathFromDatabase
-        // Activa un cambio en la interfaz de usuario para reflejar la nueva imagen
+        //Asigna la ruta de la imagen directamente a _imagePathFromDatabase
+        //Activa un cambio en la interfaz de usuario para reflejar la nueva imagen
         setState(() {
           _imagePathFromDatabase = imagePath;
-          _imageLoaded = true;
         });
       } else {
         print('La imagen no existe en la ruta de la base de datos: $imagePath');
@@ -134,22 +145,27 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Captura una imagen desde la cámara y la guarda en la base de datos
   Future<void> _getImageFromCamera() async {
-    final picker = ImagePicker();// Instancia de ImagePicker para capturar imágenes
-    final pickedFile = await picker.pickImage(source: ImageSource.camera);// Captura una imagen desde la cámara
+    // Instancia de ImagePicker para capturar imágenes
+    final picker = ImagePicker();
+    // Captura una imagen desde la cámara
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       // Si se capturó una imagen con éxito
       setState(() {
-        _image = File(pickedFile.path); // Asigna la imagen capturada a la variable _image
+        // Asigna la imagen capturada a la variable _image
+        _image = File(pickedFile.path);
         _imagePathFromDatabase = _image?.path;
       });
 
       // Obtén la instancia de DatabaseHelper y luego inserta la imagen
       final databaseHelper = DatabaseHelper();
-      final imagePath = _image?.path; // Instancia de DatabaseHelper para interactuar con la base de datos
+      // Instancia de DatabaseHelper para interactuar con la base de datos
+      final imagePath = _image?.path;
       //await databaseHelper.printImagesInDatabase();
 
       try {
-        await databaseHelper.insertImage(imagePath!); // Inserta la ruta de la imagen en la base de datos
+        // Inserta la ruta de la imagen en la base de datos
+        await databaseHelper.insertImage(imagePath!);
         print("Imagen guardada con exito");
       } catch (e) {
         print('Error al insertar la imagen en la base de datos: $e');
@@ -158,42 +174,53 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   // Selecciona una imagen desde la galería y la guarda en la base de datos
   Future<void> _getImageFromGallery() async {
-    final picker = ImagePicker(); // Instancia de ImagePicker para seleccionar imágenes de la galería
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);// Selecciona una imagen desde la galería
+    // Instancia de ImagePicker para seleccionar imágenes de la galería
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    // Selecciona una imagen desde la galería
     if (pickedFile != null) {
-      // Si se seleccionó una imagen con éxito
+      //Si se seleccionó una imagen con éxito
       setState(() {
-        _image = File(pickedFile.path); // Asigna la imagen seleccionada a la variable _image
+        // Asigna la imagen seleccionada a la variable _image
+        _image = File(pickedFile.path);
         _imagePathFromDatabase = _image?.path;
       });
 
       // Obtén la instancia de DatabaseHelper y luego inserta la imagen
-      final databaseHelper = DatabaseHelper(); // Instancia de DatabaseHelper para interactuar con la base de datos
-      final imagePath = _image?.path; // Obtiene la ruta de la imagen seleccionada
+      // Instancia de DatabaseHelper para interactuar con la base de datos
+      final databaseHelper = DatabaseHelper();
+      // Obtiene la ruta de la imagen seleccionada
+      final imagePath = _image?.path;
 
       try {
-        await databaseHelper.insertImage(imagePath!); // Inserta la ruta de la imagen en la base de datos
+        // Inserta la ruta de la imagen en la base de datos
+        await databaseHelper.insertImage(imagePath!);
       } catch (e) {
         print('Error al insertar la imagen en la base de datos: $e');
       }
     }
   }
-
+  //funcion para guardar la imagen en la bd
   Future<void> saveImageFromAssetToDatabase() async {
     if (_imageAlreadySaved) {
-      print('La imagen ya se ha guardado anteriormente, no se agregará de nuevo.');
-      return;
+      print('La imagen ya se ha guardado anteriormente, no se agregará.');
+      return;// Sale del método si la imagen ya ha sido guardada previamente.
     }else{
       try {
+        // Carga los datos de la imagen desde los activos.
         final ByteData assetData = await rootBundle.load('assets/imagen.jpg');
+        // Convierte los datos de la imagen en una lista de bytes.
         final List<int> bytes = assetData.buffer.asUint8List();
 
         final documentsDirectory = await getApplicationDocumentsDirectory();
+        // Establece la ubicación de almacenamiento de la imagen en la carpeta
+        // de documentos de la aplicación.
         final imagePath = path.join(documentsDirectory.path, 'imagen.jpg');
-
+        // Guarda la imagen en la ubicación especificada.
         await File(imagePath).writeAsBytes(bytes);
 
         final databaseHelper = DatabaseHelper();
+        // Inserta la ruta de la imagen en la base de datos.
         await databaseHelper.insertImageAssets(imagePath);
 
         // Marca la imagen como guardada
@@ -206,7 +233,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 
-  // Muestra un diálogo para seleccionar entre tomar una foto o seleccionar desde la galería
+  // Muestra un diálogo para seleccionar entre tomar una foto o
+  // seleccionar desde la galería
   Future<void> _showImagePickerDialog() async {
     showDialog(
       context: context,
@@ -217,18 +245,22 @@ class _MyHomePageState extends State<MyHomePage> {
             child: ListBody(
               children: <Widget>[
                 GestureDetector(
-                  child: Text('Tomar foto'), // Opción para tomar una foto
+                  // Opción para tomar una foto desde la camara
+                  child: Text('Tomar foto'),
                   onTap: () {
                     Navigator.of(context).pop(); // Cierra el diálogo
-                    _getImageFromCamera(); // Llama al método para tomar una foto
+                    // Llama al método para tomar una foto
+                    _getImageFromCamera();
                   },
                 ),
                 SizedBox(height: 20), // Espacio en blanco
                 GestureDetector(
-                  child: Text('Seleccionar desde galería'), // Opción para seleccionar desde la galería
+                  // Opción para seleccionar desde la galería
+                  child: Text('Seleccionar desde galería'),
                   onTap: () {
-                    Navigator.of(context).pop(); // Cierra el diálogo
-                    _getImageFromGallery(); // Llama al método para seleccionar desde la galería
+                    Navigator.of(context).pop();
+                    // Llama al método para seleccionar desde la galería
+                    _getImageFromGallery();
                   },
                 ),
                 SizedBox(height: 20), // Espacio en blanco
@@ -239,6 +271,7 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
   }
+  //Funcion para listar las notas por categoria
   List<Notea> getNotesForSelectedCategory() {
     if (_selectedChipIndex == -1) {
       // Si no se ha seleccionado ninguna categoría, devuelve todas las notas
@@ -251,23 +284,25 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   //funcion para que el contenido se muestre en asteriscos
-  String hideText(String text){
-    return '*' * text.length;
+  String hideText(String text, {int defaultLength = 12}) {
+    return '* ' * (defaultLength);
   }
 
+  // En el método _showPasswordDialog, cuando la contraseña es incorrecta, muestra un diálogo en lugar de un SnackBar.
   void _showPasswordDialog(BuildContext context, Notea note) {
-    final TextEditingController _passwordController = TextEditingController();
+    final TextEditingController passwordController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Ingrese la contraseña"),
+        return SingleChildScrollView(
+          child: AlertDialog(
+          title: Text("Ingrese la contraseña con la que se registró"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextField(
-                controller: _passwordController,
+                controller: passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: "Contraseña",
@@ -284,64 +319,89 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Text(
                 "Cancelar",
                 style: TextStyle(
-                  color: Colors.red, // Personaliza el color del botón
+                  color: Colors.red,
                 ),
               ),
             ),
             ElevatedButton(
               onPressed: () async {
-                String? userPassword = await DB.getPasswordForUser(1);
-                final enteredPassword = _passwordController.text;
+                String? userPassword = await DB.getPasswordForUser(_selectedChipIndex);
+                final enteredPassword = passwordController.text;
 
                 if (userPassword != null && enteredPassword == userPassword) {
                   Navigator.of(context).pop();
-                  _showNoteContentDialog(context, note); // Muestra el contenido de la nota
+                  _showNoteContentDialog(context, note);
                 } else {
-                  // Mostrar un mensaje de contraseña incorrecta
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Contraseña incorrecta"),
-                    ),
+                  // Contraseña incorrecta: muestra un diálogo de error.
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text("Contraseña incorrecta"),
+                        content: Text("La contraseña ingresada es incorrecta. Inténtalo de nuevo."),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text("Cerrar"),
+                          ),
+                        ],
+                      );
+                    },
                   );
                 }
               },
               child: Text(
                 "Aceptar",
                 style: TextStyle(
-                  color: Colors.white, // Personaliza el color del botón
+                  color: Colors.white,
                 ),
               ),
             ),
           ],
+        ),
         );
       },
     );
   }
 
+
+  //funcion para mostrar un cuadro de dialogo con el contenido de la nota
   void _showNoteContentDialog(BuildContext context, Notea note) {
     showDialog(
+      // Muestra el diálogo en el contexto actual de la aplicación.
       context: context,
+      // Define el constructor del cuadro de diálogo.
       builder: (BuildContext context) {
-        return AlertDialog(
+        return AlertDialog( // Crea un cuadro de diálogo.
+          // Fondo del diálogo basado en la categoría de la nota
           backgroundColor: catColor.getColorByIndex(note.categoryId),
           title: Text(note.title,
             style: TextStyle(
-              color: Colors.white70,
+              // Estilo del texto del título
+              color: Colors.black54,
+              fontSize: 19,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          content: Text(note.content,
+          content: Text(note.content,// Contenido de la nota
             style: TextStyle(
-              color: Colors.white70,
+              color: Colors.black54,// Estilo del texto del contenido
+              fontSize: 14,
+              fontWeight: FontWeight.normal,
             ),
+
           ),
           actions: [
             TextButton(
               onPressed: () {
+                // Cierra el diálogo cuando se presiona "Cerrar"
                 Navigator.of(context).pop();
               },
-              child: Text("Cerrar",
+              child: Text("Cerrar",// Texto del botón "Cerrar"
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: Colors.white70,// Estilo del texto del botón
                 ),
               ),
             ),
@@ -350,165 +410,181 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
   }
-
+  // Crear una instancia de NoteScreenState para acceder a métodos y propiedades
   NoteScreenState catColor = NoteScreenState();
   @override
   Widget build(BuildContext context) {
+    // Determina colores según el tema (claro u oscuro)
     Color botonColor = Theme.of(context).brightness == Brightness.light ? Color(0xFFFFFFFF) : Color(0xFF14181B);
     Color textColor = Theme.of(context).brightness == Brightness.light ? Color(0xFF57636C) : Color(0xFF95A1AC);
     Color chiocColor = Theme.of(context).brightness == Brightness.light ? Color(0xFFE0E3E7) : Color(0xFF262D34);
     Color bordeColor = Theme.of(context).brightness == Brightness.light ? Color(0xFFF1F4F8) : Color(0xFF1D2428);
     Color backgroudcolor = Theme.of(context).brightness == Brightness.light ? Color(0xFFF1F4F8) : Color(0xFF1D2428);
 
-
     return Scaffold(
-      backgroundColor: backgroudcolor,
-      body: Stack(
+      backgroundColor: backgroudcolor, // Establece el color de fondo de la pantalla.
+      body: Stack( // Un Stack permite superponer widgets en capas.
         children: [
           Column(
             children: [
-              Column(
-                children: [
-                  //Container(
-                  //margin: EdgeInsets.only(left: 20,top: 40, right: 20),
-                  //child:
-                  Padding(
-                    padding: EdgeInsets.only(left: 20,top: 40, right: 20),
-                    child: Row(
-                      children: [
-                        GestureDetector(
-                          onTap: _showImagePickerDialog,
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 2, right: 2, top: 2),
-                            child: Card(
-                              elevation: 0,
-                              color: Colors.transparent,
-                              child: CircleAvatar(
-                                backgroundColor: Colors.transparent,
-                                radius: 30,
-                                backgroundImage: _imagePathFromDatabase != null
-                                    ? FileImage(File(_imagePathFromDatabase!))
-                                    : null,
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20), // Margen de 20 en izquierda y derecha
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(top: 35),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: _showImagePickerDialog,
+                            //child: Padding(
+                              //padding: EdgeInsets.only(left: 20),
+                              child: Card(
+                                elevation: 0,
+                                color: Colors.transparent,
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.transparent,
+                                  radius: 30,
+                                  backgroundImage: _imagePathFromDatabase != null
+                                      ? FileImage(File(_imagePathFromDatabase!))
+                                      : null,
+                                ),
                               ),
-                            ),
+                            //),
                           ),
-                        ),
-                        Spacer(),
-                        Stack(
-                          children: [
-                            Text(
-                              'Gestory Password',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontFamily:
-                                'Title Large',
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Spacer(),//SizedBox(width: double.maxFinite),
-                        Container(
-                          height: 40,
-                          width: 80,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Color(0xFFE0E3E7), // Color del borde
-                              width: 1.0, // Ancho del borde
-                            ),
-                            borderRadius: BorderRadius.circular(25.0),
-                          ),
-                          padding: EdgeInsets.only(right: 12),
-                          child: Stack(
+                          Spacer(),
+                          Stack(
                             children: [
-                              const Positioned(
-                                left: 6, // Alinea el icono de modo claro a la izquierda
-                                top: 8,
-                                child: Icon(
-                                  Icons.wb_sunny_rounded,
-                                  color: Color(0xFF57636C), // Cambia el color según el modo
-                                  size: 24.0,
+                              MediaQuery.of(context).size.width < 320.05
+                                  ? Text(
+                                'Gestory\nPassword', // Texto dividido en dos líneas para pantallas pequeñas
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontFamily: 'Title Large',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              )
+                                  : Container(
+                                alignment: Alignment.center,
+                                    child: Text(
+                                'Gestory Password', // Texto en una sola línea para pantallas más grandes
+                                style: TextStyle(
+                                    fontSize: 22,
+                                    fontFamily: 'Title Large',
+                                    fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              const Positioned(
-                                right: 0, // Alinea el icono de modo oscuro a la derecha
-                                top: 8,
-                                child: Icon(
-                                  Icons.mode_night_rounded,
-                                  color: Colors.white, // Cambia el color según el modo
-                                  size: 24.0,
-                                ),
-                              ),
-                              Transform.scale(
-                                scale: 2.0,
-                                child: Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: Switch(
-                                    value: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.light,
-                                    onChanged: (bool value) {
-                                      if (value) {
-                                        AdaptiveTheme.of(context).setLight();
-                                      } else {
-                                        AdaptiveTheme.of(context).setDark();
-                                      }
-                                    },
-                                    activeColor: Colors.transparent, // Pulgar transparente en modo oscuro y claro
-                                    activeTrackColor: Colors.transparent, // Riel transparente en modo oscuro y claro
-                                    inactiveThumbColor: Colors.transparent, // Color del pulgar del interruptor cuando está desactivado
-                                    inactiveTrackColor: Colors.transparent, // Color del riel cuando el interruptor está desactivado
                                   ),
-                                ),
-                              ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  //),
-
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        SizedBox(width: 20),
-
-                        for (int index = 0; index < _categories.length; index++)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: ChoiceChip(
-                              label: Text(_categories[index].name,
-                                style: TextStyle(
-                                  fontSize: 18, // Tamaño de fuente personalizado
+                          Spacer(),
+                          Container(
+                            //margin: EdgeInsets.only(right: 22),
+                            height: 42,
+                            width: 80,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Color(0xFFE0E3E7), // Color del borde
+                                width: 1.0, // Ancho del borde
+                              ),
+                              borderRadius: BorderRadius.circular(25.0),
+                            ),
+                            padding: EdgeInsets.only(left: 15,right: 15),
+                            child: Stack(
+                              children: [
+                                // Dos íconos de modo (claro y oscuro) con un interruptor para cambiar el tema.
+                                Positioned(
+                                  left: 0,
+                                  top: 8,
+                                  child: Icon(
+                                    Icons.wb_sunny_rounded,
+                                    color: Color(0xFF57636C),
+                                    size: 24.0,
+                                  ),
                                 ),
-                              ),
-                              selected: _selectedChipIndex == index, // Verifica si este ChoiceChip está seleccionado
-                              backgroundColor: chiocColor,
-                              labelStyle: TextStyle(
-                                color: textColor,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                  color: bordeColor, // Color del borde
-                                  width: 1.0, // Ancho del borde
+                                Positioned(
+                                  right: 0, // Alinea el icono de modo oscuro a la derecha
+                                  top: 8,
+                                  child: Icon(
+                                    Icons.mode_night_rounded,
+                                    color: Colors.white, // Cambia el color según el modo
+                                    size: 24.0,
+                                  ),
                                 ),
-                                borderRadius: BorderRadius.circular(16.0), // Radio del borde
-                              ),
-                              onSelected: (isSelected) {
-                                setState(() {
-                                  _selectedChipIndex = isSelected ? index : -1;// Selecciona o deselecciona este ChoiceChip
-                                  print('Categoria Seleccionada: ${_categories[index].name}');
-                                  print('_selectedChipIndex: $_selectedChipIndex');
-                                });
-                              },
+                                // se utiliza Transform.scale para escalar el interruptor.
+                                Transform.scale(
+                                  scale: 2.0,
+                                  child: Align(
+                                    alignment: Alignment.bottomRight,
+                                    // El color de los elementos cambia según el modo.
+                                    child: Switch(
+                                      value: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.light,
+                                      onChanged: (bool value) {
+                                        if (value) {// si es verdadero se matiene el modo claro
+                                          AdaptiveTheme.of(context).setLight();
+                                        } else {// si es false se pone el modo nocturno
+                                          AdaptiveTheme.of(context).setDark();
+                                        }
+                                      },
+                                      activeColor: Colors.transparent, // Pulgar transparente en modo oscuro y claro
+                                      activeTrackColor: Colors.transparent, // Riel transparente en modo oscuro y claro
+                                      inactiveThumbColor: Colors.transparent, // Color del pulgar del interruptor cuando está desactivado
+                                      inactiveTrackColor: Colors.transparent, // Color del riel cuando el interruptor está desactivado
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        SizedBox(width: 12),
-                      ],
+                        ],
+                      ),
                     ),
-                  )
-                ],
+                    // Una fila de ChoiceChips para seleccionar una categoría.
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          //SizedBox(width: 20),
+                          for (int index = 0; index < _categories.length; index++)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: ChoiceChip(
+                                label: Text(_categories[index].name,
+                                  style: TextStyle(
+                                    fontSize: 18, // Tamaño de fuente personalizado
+                                  ),
+                                ),
+                                // Verifica si este ChoiceChip está seleccionado
+                                selected: _selectedChipIndex == index,
+                                backgroundColor: chiocColor,
+                                labelStyle: TextStyle(
+                                  color: textColor,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                    color: bordeColor, // Color del borde
+                                    width: 1.0, // Ancho del borde
+                                  ),
+                                  borderRadius: BorderRadius.circular(16.0), // Radio del borde
+                                ),
+                                onSelected: (isSelected) {
+                                  setState(() {
+                                    // Selecciona o deselecciona este ChoiceChip
+                                    _selectedChipIndex = isSelected ? index : -1;
+                                    print('Categoria Seleccionada: ${_categories[index].name}');
+                                    print('_selectedChipIndex: $_selectedChipIndex');
+                                  });
+                                },
+                              ),
+                            ),
+                          //SizedBox(width: 12),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
               ),
+              // Una división visual entre la selección de categoría y las notas.
               Divider(
                 color: Color(0xFF2874cf).withOpacity(0.2), // se le asigno un color
                 thickness: 2,
@@ -519,12 +595,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Column(
                     children:
                     getNotesForSelectedCategory().map((note) {
-                      final isLastNote = note == getNotesForSelectedCategory().last; // Verifica si esta es la última nota
+                      // Verifica si esta es la última nota
+                      final isLastNote = note ==
+                          getNotesForSelectedCategory().last;
                       return  Column(
                         children: [
                           SizedBox(height: 24),
                           GestureDetector(
                             onTap: (){
+                              // Abre un diálogo con detalles de la contraseña
+                              // cuando se toca una nota
                               _showPasswordDialog(context, note);
                               print('Aqui debe abrir el archivo');
                             },
@@ -542,7 +622,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                     children: [
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start, // Alinea el texto a la izquierda
+                                          // Alinea el texto a la izquierda
+                                          crossAxisAlignment: CrossAxisAlignment
+                                              .start,
                                           children: [
                                             Text(
                                               note.title,
@@ -550,18 +632,17 @@ class _MyHomePageState extends State<MyHomePage> {
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
                                                 fontSize: 19,
-                                                fontFamily: 'Headline Small',
                                                 fontWeight: FontWeight.w500,
                                               ),
                                             ),
                                             Text(
+                                           // Texto de la nota, con parte oculta
                                               hideText(note.content),
                                               maxLines: 4,
                                               overflow: TextOverflow.ellipsis,
                                               textAlign: TextAlign.justify,
                                               style: TextStyle(
                                                 fontSize: 14,
-                                                fontFamily: 'Body Small',
                                                 fontWeight: FontWeight.normal,
                                               ),
                                             ),
@@ -574,7 +655,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),
                             ),
                           ),
-                          if (isLastNote) SizedBox(height: 24), // Agrega el espacio después de la última nota
+                          // Agrega el espacio después de la última nota
+                          if (isLastNote) SizedBox(height: 24),
                         ],
                       );
                     }).toList(),
@@ -584,15 +666,19 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
           Align(
+            // Alinea el widget en la esquina inferior derecha
             alignment: Alignment.bottomRight,
             child: Container(
               height: 80,
               width: 100,
               decoration: BoxDecoration(
+                // Forma circular del contenedor
                 shape: BoxShape.circle,
+                // Color de fondo del botón
                 color: botonColor,
                 border: Border.all(
-                  color: chiocColor, // Color del borde
+                  // Color del borde del botón
+                  color: chiocColor,
                   width: 4.0, // Ancho del borde
                 ),
               ),
@@ -600,14 +686,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 onTap: () {
                   print('Icono presionado');
                   Navigator.push(
+                    // Navega a una nueva pantalla cuando se presiona el botón
                     context,
                     MaterialPageRoute(builder: (context) => MyNote()),
                   );
                 },
                 child: const Icon(
+                  // Ícono de "Agregar" representado por un signo más
                   Icons.add,
-                  size: 48,
-                  color: Color(0xFF2874cF),
+                  size: 48,// Tamaño del ícono
+                  color: Color(0xFF2874cF),// Color del ícono
                 ),
               ),
             ),
