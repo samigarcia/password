@@ -2,14 +2,18 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:app_2/db/persona.dart';
 
-class DB {
+class Data {
 // Este metodo sirve para crear y/o llamar la base de datos ya creada y crea una tabla llamada usuario
   static Future<Database> _openDB() async {
-    return openDatabase(join(await getDatabasesPath(), 'user.db'),
-        onCreate: (db, version) {
-      return db.execute(
-          "CREATE TABLE usuario (id INT, name TEXT, password TEXT, rpassword TEXT, res TEXT)");
-    }, version: 1);
+    final databasePath = await getDatabasesPath();
+    final path = join(databasePath, 'gestorypassword.db');
+    return await openDatabase(path, version: 4, onCreate: _onCreate);
+  }
+
+  static void _onCreate(Database db, int newVersion) async {
+    String sql =
+        "CREATE TABLE usuario (id INT, name TEXT, password TEXT, rpassword TEXT, res TEXT)";
+    await db.execute(sql);
   }
 
   static Future<int> insert(Persona persona) async {
@@ -49,7 +53,7 @@ class DB {
 
     final List<Map<String, dynamic>> maps = await database.query('usuario');
 
-    print('personas total: ${maps.toString()}');
+    print('todas las personas: ${maps.toString()}');
 
     return List.generate(maps.length, (i) {
       return Persona(
@@ -62,6 +66,7 @@ class DB {
     });
   }
 
+//este metodo busca en la base de datos el id que le demos.
   static Future<String?> getPasswordForUser(int userId) async {
     final Database database = await _openDB();
 

@@ -8,7 +8,6 @@ import 'package:path/path.dart';
 import 'dart:math';
 import 'dart:typed_data';
 
-
 class DataEncryptor {
   // Clave de 32 caracteres para cifrado AES
   static final key = Key.fromUtf8('my32lengthsupersecretnooneknows1');
@@ -26,6 +25,7 @@ class DataEncryptor {
     // Devuelve el texto encriptado como una cadena en formato Base64
     return encryptedText.base64;
   }
+
   // Método para agregar relleno al texto antes de cifrarlo
   String padTextForEncryption(String text, int blockSize) {
     // Calcula la longitud del relleno necesario para que el texto sea un
@@ -57,9 +57,7 @@ class DataEncryptor {
     // Elimina el relleno y devuelve el texto original
     return text.substring(0, text.length - paddingLength);
   }
-
 }
-
 
 class DatabaseHelper {
   // Instancia única de la clase para el patrón Singleton.
@@ -72,11 +70,11 @@ class DatabaseHelper {
   static Database? _db;
 
   // Función para obtener la ruta de la base de datos.
-  Future<String> getDatabaseName() async {
-    final databasesPath = await getDatabasesPath();
-    final path = join(databasesPath, 'gestorypassword.db');
-    return path;
-  }
+  // Future<String> getDatabaseName() async {
+  //   final databasesPath = await getDatabasesPath();
+  //   final path = join(databasesPath, '');
+  //   return path;
+  // }
 
   // Getter para obtener la base de datos.
   Future<Database?> get db async {
@@ -92,7 +90,7 @@ class DatabaseHelper {
   // Método para inicializar la base de datos
   Future<Database> initDb() async {
     final databasesPath = await getDatabasesPath();
-    final path = join(databasesPath, 'categories.db');
+    final path = join(databasesPath, 'gestorypassword.db');
     // Abre la base de datos o crea una nueva si no existe
     //return await openDatabase(path, version: 1, onCreate: _onCreate);
     return await openDatabase(path, version: 4, onCreate: _onCreate);
@@ -140,7 +138,6 @@ class DatabaseHelper {
     await db.insert('images', {'image_path': imagePath});
   }
 
-
   // Función para insertar una categoría en la base de datos.
   Future<int> insertCategory(Category category) async {
     // Obtiene la instancia de la base de datos.
@@ -175,15 +172,17 @@ class DatabaseHelper {
   Future<int?> updateDecryptedNote(Notea note, String decryptedText) async {
     final db = await _instance.db; // Obtiene la instancia de la base de datos.
     final noteMap = note.toMap(); // Convierte la nota en un mapa
-    noteMap['content'] = decryptedText; // Actualiza el contenido con el texto desencriptado.
+    noteMap['content'] =
+        decryptedText; // Actualiza el contenido con el texto desencriptado.
     // Realiza una actualización en la tabla 'notes' utilizando
     // el mapa de la nota y el ID de la nota específica.
-    return await db?.update(
-        'notes', noteMap, where: 'id = ?', whereArgs: [note.id]);
+    return await db
+        ?.update('notes', noteMap, where: 'id = ?', whereArgs: [note.id]);
   }
+
   // Función para obtener todas las notas desencriptadas de la base de datos
   Future<List<Notea>> getAllNotes() async {
-    final db = await _instance.db;// Obtiene la instancia de la base de datos.
+    final db = await _instance.db; // Obtiene la instancia de la base de datos.
     // Realiza una consulta para obtener las notas cifradas.
     final result = await db!.query('notes');
     // Instancia un DataEncryptor para descifrar las notas.
@@ -240,11 +239,12 @@ class DatabaseHelper {
     // Verifica si la encriptación se realizó correctamente
     if (insertedId != null) {
       final noteFromDB =
-      await db?.query('notes', where: 'id = ?', whereArgs: [insertedId]);
+          await db?.query('notes', where: 'id = ?', whereArgs: [insertedId]);
       if (noteFromDB != null && noteFromDB.isNotEmpty) {
         final encryptedContent = noteFromDB.first['content'] as String?;
         final ivString = noteFromDB.first['iv'] as String?;
-        final decryptedText = dataEncryptor.decryptText(encryptedContent!, ivString!);
+        final decryptedText =
+            dataEncryptor.decryptText(encryptedContent!, ivString!);
         if (decryptedText == textToEncrypt) {
           print('Encriptación exitosa: $textToEncrypt');
         } else {

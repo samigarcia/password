@@ -14,44 +14,42 @@ class MyAppForm extends StatefulWidget {
 }
 
 class _MyAppFormState extends State<MyAppForm> {
+  //inserccion hacia la labla persona
+  insercion() async {
+    Data.insert(Persona(
+        id: 1,
+        name: userin.text,
+        password: password.text,
+        rpassword: password1.text,
+        res: respuesta.text));
+  }
+
   //metodo que se ejecuta al dar click en guardar
   click() {
+    //funcion donde carga todas las personas
+    cargaPersonas();
+    //validamos si el formulario tiene los datos completos
     if (_keyForm.currentState!.validate()) {
-      debugPrint('validacion');
-      if (_supportState == _SupportState.soportado) {
-        //funcion donde carga todas las personas
-        cargaPersonas();
+      debugPrint('validacion del formulario');
+      //funcion donde cheka si el dispositivo es compatible con datos biometricos
+      _checkBiometrics();
+      if (_canCheckBiometrics == true) {
         //funcion donde lista las autenticaciones disponibles
         _listaAutenticacionesDisponibles();
-        //funcion donde se guardan los datos en la DataBase
-        DB.insert(Persona(
-            id: 1,
-            name: userin.text,
-            password: password.text,
-            rpassword: password1.text,
-            res: respuesta.text));
-        //metodo para ir a otra pagina
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const MyInicio()),
-        );
-      } else if (_supportState == _SupportState.nosoportado) {
-        //metodo para ir a otra pagina
-        debugPrint(
-            'el dispositivo no soporta datos biometricos, no se inserto nada!');
-        debugPrint('redirigiendose al Modulo de Inicio');
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const MyInicio()),
-        );
+        //autenticacion solo con biometricos
+        _autenticacionConBiometricos();
+      } else {
+        //funcion donde el S.O. determina el método de autenticación
+        _authenticate();
       }
     } else {
-      debugPrint('invalidacion');
+      debugPrint('faltan datos del formulario');
     }
   }
 
-  //varaibles para la autenticacion--------------------------------
+  //varaibles para la autenticacion------------------------------------
   final LocalAuthentication auth = LocalAuthentication();
+  // ignore: unused_field
   _SupportState _supportState = _SupportState.desconocido;
   // ignore: unused_field
   bool? _canCheckBiometrics;
@@ -69,38 +67,26 @@ class _MyAppFormState extends State<MyAppForm> {
   final String _autorizado = "No autorizado";
   // ignore: unused_field
   List<BiometricType>? _autorizacionesDisponibles;
-  //----------------------------------------------------------------
+  //--------------------------------------------------------------------
 
   //variables para capturar los datos ingresados del usuario
   final userin = TextEditingController();
   final password = TextEditingController();
   final password1 = TextEditingController();
   final respuesta = TextEditingController();
+  //--------------------------------------------------------
 
-//metodos para la autenticacion #############################################
-  Future<void> _listaAutenticacionesDisponibles() async {
-    late List<BiometricType> listaAutenticacion;
-    try {
-      listaAutenticacion = await _autenticacion.getAvailableBiometrics();
-      debugPrint("Podemos usar: ${listaAutenticacion.toString()}");
-    } on PlatformException catch (e) {
-      print(e);
-    }
+//funciones para la autenticacion #############################################
 
-    if (!mounted) return;
-
-    setState(() {
-      _autorizacionesDisponibles = listaAutenticacion = [];
-    });
-  }
-
+//esta funcion da a conocer los tipos datos biemetricos
   Future<void> _checkBiometrics() async {
     late bool canCheckBiometrics;
     try {
       canCheckBiometrics = await auth.canCheckBiometrics;
-      debugPrint("las opciones son: ${canCheckBiometrics.toString()}");
+      debugPrint("dispositivo compatible: ${canCheckBiometrics.toString()}");
     } on PlatformException catch (e) {
       canCheckBiometrics = false;
+      // ignore: avoid_print
       print(e);
     }
     if (!mounted) {
@@ -112,23 +98,56 @@ class _MyAppFormState extends State<MyAppForm> {
     });
   }
 
+//este metodo enlista los tipos de metodos biometricos que tiene el dispositivo
+  Future<void> _listaAutenticacionesDisponibles() async {
+    late List<BiometricType> listaAutenticacion;
+    try {
+      listaAutenticacion = await _autenticacion.getAvailableBiometrics();
+      debugPrint("Podemos usar: ${listaAutenticacion.toString()}");
+    } on PlatformException catch (e) {
+      // ignore: avoid_print
+      print(e);
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _autorizacionesDisponibles = listaAutenticacion = [];
+    });
+  }
+
+//esta funcion accede al dato biometrico que contenga informacion del usuario
   Future<void> _authenticate() async {
     bool authenticated = false;
     try {
       setState(() {
         _isAuthenticating = true;
-        _authorized = 'Authenticating';
+        _authorized = 'Autenticacion';
       });
       authenticated = await auth.authenticate(
-        localizedReason: 'Let OS determine authentication method',
+        localizedReason:
+            'Deje que el sistema operativo determine el método de autenticación',
         options: const AuthenticationOptions(
           stickyAuth: true,
         ),
       );
+      if (authenticated == true) {
+        //funcion donde se guardan los datos en la DataBase
+        insercion();
+        //comentarios
+        debugPrint('redirigiendose al Modulo de Inicio');
+        //metodo para ir a otra pagina
+        // ignore: use_build_context_synchronously
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MyInicio()),
+        );
+      }
       setState(() {
         _isAuthenticating = false;
       });
     } on PlatformException catch (e) {
+      // ignore: avoid_print
       print(e);
       setState(() {
         _isAuthenticating = false;
@@ -144,7 +163,8 @@ class _MyAppFormState extends State<MyAppForm> {
         () => _authorized = authenticated ? 'Autorizado' : 'No Autorizado');
   }
 
-  Future<void> _authenticateWithBiometrics() async {
+//esta funcion accede al dato biometrico Huella/FaceID para su autenticacion
+  Future<void> _autenticacionConBiometricos() async {
     bool authenticated = false;
     try {
       setState(() {
@@ -153,17 +173,18 @@ class _MyAppFormState extends State<MyAppForm> {
       });
       authenticated = await auth.authenticate(
         localizedReason:
-            'Scan your fingerprint (or face or whatever) to authenticate',
+            'Escanee su huella digital (o su rostro) para autenticarse',
         options: const AuthenticationOptions(
           stickyAuth: true,
           biometricOnly: true,
         ),
       );
       if (authenticated == true) {
-        List<Persona> usuarios = await DB.personas();
-        for (Persona usuario in usuarios) {
-          debugPrint('nombre: ${usuario.name}, contra: ${usuario.password}');
-        }
+        //funcion donde se guardan los datos en la DataBase
+        insercion();
+        //comentarios
+        debugPrint('redirigiendose al Modulo de Inicio');
+        //metodo para ir a otra pagina
         // ignore: use_build_context_synchronously
         Navigator.push(
           context,
@@ -175,6 +196,7 @@ class _MyAppFormState extends State<MyAppForm> {
         _authorized = 'Authenticating';
       });
     } on PlatformException catch (e) {
+      // ignore: avoid_print
       print(e);
       setState(() {
         _isAuthenticating = false;
@@ -192,7 +214,8 @@ class _MyAppFormState extends State<MyAppForm> {
     });
   }
 
-  Future<void> _cancelAuthentication() async {
+//funcion que finaliza la autenticacion encaso de que el usuario se salga de la app
+  Future<void> _cancelarAutenticacion() async {
     await auth.stopAuthentication();
     setState(() => _isAuthenticating = false);
   }
@@ -208,14 +231,11 @@ class _MyAppFormState extends State<MyAppForm> {
   }
 // ############################################################################
 
-  List<Persona> person = [];
-  List<Persona> pers = [];
 //metood para ver todos los usuarios en la base de datos
   cargaPersonas() async {
-    List<Persona> auxPersona = await DB.personas();
+    List<Persona> auxPersona = await Data.personas();
     setState(() {
-      person = auxPersona;
-      debugPrint('todas las personas: ${person.toString()}');
+      auxPersona;
     });
   }
 
@@ -268,6 +288,7 @@ class _MyAppFormState extends State<MyAppForm> {
                             child: Container(
                                 width: 110,
                                 height: 100,
+                                //son la decoracion del logo de registro
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF485876),
                                   borderRadius: const BorderRadius.only(
@@ -306,7 +327,7 @@ class _MyAppFormState extends State<MyAppForm> {
                               ),
                             ),
                           ),
-                          //se crea el boton guardar
+                          //se crea un box para el boton guardar
                           Align(
                             alignment: const AlignmentDirectional(-1.00, 0.80),
                             //Creacion del Boton de Guardar
@@ -318,6 +339,7 @@ class _MyAppFormState extends State<MyAppForm> {
                               ),
                               child: const Text('Guardar'),
                               onPressed: () async {
+                                //funcion que se alctiva al dar click
                                 click();
                               },
                             ),

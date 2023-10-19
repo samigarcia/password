@@ -21,12 +21,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'GESTOR DE PASSWORD',
+      //creamos un router para movernos entre pages--
       initialRoute: '/',
       routes: {
         '/': (context) => First(),
         '/segundo': (context) => const MyAppForm(),
         '/tercero': (context) => const MyInicio(),
       },
+      //----------------------------------------------
     );
   }
 }
@@ -34,33 +36,35 @@ class MyApp extends StatelessWidget {
 //clase principal que se ejecuta al abrir la aplicacion
 // ignore: must_be_immutable
 class First extends StatelessWidget {
-  //variables para la funcion de huella
+  //variables para la funcion de huella----------------------------
   final LocalAuthentication _autenticacion = LocalAuthentication();
   bool authenticated = false;
   bool isAuthorized = false;
-  //-----------------------------------
+  //---------------------------------------------------------------
 
   First({super.key});
 
 //configuracion de la base de datos--------------------------------------------------------------
   static Future<Database> _openDB() async {
-    return openDatabase(join(await getDatabasesPath(), 'user.db'),
-        onCreate: (db, version) {
-      return db.execute(
-          "CREATE TABLE usuario (id INT, name TEXT, password TEXT, rpassword TEXT, res TEXT)");
-    }, version: 1);
+    final databasePath = await getDatabasesPath();
+    final path = join(databasePath, 'gestorypassword.db');
+    return await openDatabase(path, version: 4, onCreate: _onCreate);
+  }
+
+  static void _onCreate(Database db, int newVersion) async {
+    String sql =
+        "CREATE TABLE usuario (id INT, name TEXT, password TEXT, rpassword TEXT, res TEXT)";
+    await db.execute(sql);
   }
 //-----------------------------------------------------------------------------------------------
 
-//metodo para autenticarse con Huella o FaceID-----------------------------
-  // ignore: unused_element
+//metodo para autenticarse con Huella o FaceID----------------------
   Future<void> _autorizar(BuildContext context) async {
     try {
       isAuthorized = await _autenticacion.authenticate(
         localizedReason: "Autentíquese para saber su Identidad",
         options: const AuthenticationOptions(
           stickyAuth: true,
-          biometricOnly: true,
         ),
       );
       if (isAuthorized == true) {
@@ -72,13 +76,33 @@ class First extends StatelessWidget {
       print(e);
     }
   }
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------
+
+//metodo que indica si hay usuarios registrados el la base de datos
+  onClick(BuildContext context) async {
+    final Database database = await _openDB();
+    final int? cont;
+    String sql = "SELECT COUNT(*) FROM usuario;";
+    //revisa si en la tabla 'usuario' haigan datos
+    cont = Sqflite.firstIntValue(await database.rawQuery(sql));
+    debugPrint('cantidad de personas: $cont');
+    //si hay datos quiere decir que ya se registro un usuario
+    if (cont! > 0) {
+      // ignore: use_build_context_synchronously
+      _autorizar(context);
+    } else if (cont < 1) {
+      //si No hay datos, se manda a la pagina de registro
+      // ignore: use_build_context_synchronously
+      Navigator.pushNamed(context, '/segundo');
+    }
+  }
+//------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('INICIO'),
+        title: const Text('INICIO DE SESION'),
       ),
       body: Column(
         children: [
@@ -86,21 +110,7 @@ class First extends StatelessWidget {
             child: ElevatedButton(
                 child: const Text('Inicia Sesion'),
                 onPressed: () async {
-                  final Database database = await _openDB();
-                  final int? cont;
-                  //revisa si en la tabla 'usuario' haigan datos
-                  cont = Sqflite.firstIntValue(
-                      await database.rawQuery('SELECT COUNT(*) FROM usuario;'));
-                  debugPrint('cantidad de personas: $cont');
-                  //si hay datos quiere decir que ya se registro un usuario
-                  if (cont! > 0) {
-                    // ignore: use_build_context_synchronously
-                    _autorizar(context);
-                  } else if (cont < 1) {
-                    //si No hay datos, se manda a la pagina de registro
-                    // ignore: use_build_context_synchronously
-                    Navigator.pushNamed(context, '/segundo');
-                  }
+                  onClick(context);
                 }),
           ),
         ],

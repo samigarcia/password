@@ -21,29 +21,30 @@ class MyInicio extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final brightness = MediaQuery.of(context).platformBrightness;
-    final initialMode = brightness == Brightness.dark ? AdaptiveThemeMode.dark
+    final initialMode = brightness == Brightness.dark
+        ? AdaptiveThemeMode.dark
         : AdaptiveThemeMode.light;
     // Devuelve un AdaptiveTheme, que permite cambiar entre temas oscuros y claros
     return AdaptiveTheme(
-      // Tema oscuro
+        // Tema oscuro
         dark: ThemeData.dark(),
         // Tema claro
         light: ThemeData.light(),
         // Modo de tema inicial
         initial: initialMode,
         // Builder que configura el tema en función del AdaptiveTheme
-        builder: (theme, darkTheme){
+        builder: (theme, darkTheme) {
           // Devuelve un MaterialApp que utiliza el tema proporcionado
           return MaterialApp(
             title: 'Gestory Password',
             theme: theme,
             darkTheme: darkTheme,
-            home: MyHomePage(),// Define la página de inicio como MyHomePage
+            home: MyHomePage(), // Define la página de inicio como MyHomePage
           );
-        }
-    );
+        });
   }
 }
+
 //widget que puede cambiar de estado a lo largo del tiempo
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -52,9 +53,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   File? _image; // Variable para almacenar una imagen (puede ser nula)
-  int _selectedChipIndex = -1; // Índice de la categoría seleccionada (inicializado en -1)
+  int _selectedChipIndex =
+      -1; // Índice de la categoría seleccionada (inicializado en -1)
   List<Category> _categories = []; // Lista para almacenar categorías
   List<Notea> _notes = []; //Lista para almacenar notas
 
@@ -84,6 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _loadCategories();
     _loadNotes();
   }
+
   //carga las categorias de la bd
   void _loadCategories() async {
     // Instancia de DatabaseHelper para interactuar con la base de datos
@@ -96,6 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _categories = categories;
     });
   }
+
   //carga las notas de la bd
   void _loadNotes() async {
     try {
@@ -172,6 +175,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
   }
+
   // Selecciona una imagen desde la galería y la guarda en la base de datos
   Future<void> _getImageFromGallery() async {
     // Instancia de ImagePicker para seleccionar imágenes de la galería
@@ -200,12 +204,13 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
   }
+
   //funcion para guardar la imagen en la bd
   Future<void> saveImageFromAssetToDatabase() async {
     if (_imageAlreadySaved) {
       print('La imagen ya se ha guardado anteriormente, no se agregará.');
-      return;// Sale del método si la imagen ya ha sido guardada previamente.
-    }else{
+      return; // Sale del método si la imagen ya ha sido guardada previamente.
+    } else {
       try {
         // Carga los datos de la imagen desde los activos.
         final ByteData assetData = await rootBundle.load('assets/imagen.jpg');
@@ -225,13 +230,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
         // Marca la imagen como guardada
         _imageAlreadySaved = true;
-
       } catch (e) {
         print('Error al guardar la imagen en la base de datos: $e');
       }
     }
   }
-
 
   // Muestra un diálogo para seleccionar entre tomar una foto o
   // seleccionar desde la galería
@@ -271,6 +274,7 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
   }
+
   //Funcion para listar las notas por categoria
   List<Notea> getNotesForSelectedCategory() {
     if (_selectedChipIndex == -1) {
@@ -279,7 +283,9 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       // Filtra las notas por la categoría seleccionada
       final selectedCategory = _categories[_selectedChipIndex];
-      return _notes.where((note) => note.categoryId == selectedCategory.id).toList();
+      return _notes
+          .where((note) => note.categoryId == selectedCategory.id)
+          .toList();
     }
   }
 
@@ -297,75 +303,76 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (BuildContext context) {
         return SingleChildScrollView(
           child: AlertDialog(
-          title: Text("Ingrese la contraseña con la que se registró"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "Contraseña",
-                  border: OutlineInputBorder(),
+            title: Text("Ingrese la contraseña con la que se registró"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: "Contraseña",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  "Cancelar",
+                  style: TextStyle(
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  String? userPassword =
+                      await Data.getPasswordForUser(_selectedChipIndex);
+                  final enteredPassword = passwordController.text;
+
+                  if (userPassword != null && enteredPassword == userPassword) {
+                    Navigator.of(context).pop();
+                    _showNoteContentDialog(context, note);
+                  } else {
+                    // Contraseña incorrecta: muestra un diálogo de error.
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text("Contraseña incorrecta"),
+                          content: Text(
+                              "La contraseña ingresada es incorrecta. Inténtalo de nuevo."),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text("Cerrar"),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+                child: Text(
+                  "Aceptar",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                "Cancelar",
-                style: TextStyle(
-                  color: Colors.red,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                String? userPassword = await DB.getPasswordForUser(_selectedChipIndex);
-                final enteredPassword = passwordController.text;
-
-                if (userPassword != null && enteredPassword == userPassword) {
-                  Navigator.of(context).pop();
-                  _showNoteContentDialog(context, note);
-                } else {
-                  // Contraseña incorrecta: muestra un diálogo de error.
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text("Contraseña incorrecta"),
-                        content: Text("La contraseña ingresada es incorrecta. Inténtalo de nuevo."),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text("Cerrar"),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }
-              },
-              child: Text(
-                "Aceptar",
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
-        ),
         );
       },
     );
   }
-
 
   //funcion para mostrar un cuadro de dialogo con el contenido de la nota
   void _showNoteContentDialog(BuildContext context, Notea note) {
@@ -374,10 +381,12 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       // Define el constructor del cuadro de diálogo.
       builder: (BuildContext context) {
-        return AlertDialog( // Crea un cuadro de diálogo.
+        return AlertDialog(
+          // Crea un cuadro de diálogo.
           // Fondo del diálogo basado en la categoría de la nota
           backgroundColor: catColor.getColorByIndex(note.categoryId),
-          title: Text(note.title,
+          title: Text(
+            note.title,
             style: TextStyle(
               // Estilo del texto del título
               color: Colors.black54,
@@ -385,13 +394,13 @@ class _MyHomePageState extends State<MyHomePage> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          content: Text(note.content,// Contenido de la nota
+          content: Text(
+            note.content, // Contenido de la nota
             style: TextStyle(
-              color: Colors.black54,// Estilo del texto del contenido
+              color: Colors.black54, // Estilo del texto del contenido
               fontSize: 14,
               fontWeight: FontWeight.normal,
             ),
-
           ),
           actions: [
             TextButton(
@@ -399,9 +408,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 // Cierra el diálogo cuando se presiona "Cerrar"
                 Navigator.of(context).pop();
               },
-              child: Text("Cerrar",// Texto del botón "Cerrar"
+              child: Text(
+                "Cerrar", // Texto del botón "Cerrar"
                 style: TextStyle(
-                  color: Colors.white70,// Estilo del texto del botón
+                  color: Colors.white70, // Estilo del texto del botón
                 ),
               ),
             ),
@@ -410,25 +420,39 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
   }
+
   // Crear una instancia de NoteScreenState para acceder a métodos y propiedades
   NoteScreenState catColor = NoteScreenState();
   @override
   Widget build(BuildContext context) {
     // Determina colores según el tema (claro u oscuro)
-    Color botonColor = Theme.of(context).brightness == Brightness.light ? Color(0xFFFFFFFF) : Color(0xFF14181B);
-    Color textColor = Theme.of(context).brightness == Brightness.light ? Color(0xFF57636C) : Color(0xFF95A1AC);
-    Color chiocColor = Theme.of(context).brightness == Brightness.light ? Color(0xFFE0E3E7) : Color(0xFF262D34);
-    Color bordeColor = Theme.of(context).brightness == Brightness.light ? Color(0xFFF1F4F8) : Color(0xFF1D2428);
-    Color backgroudcolor = Theme.of(context).brightness == Brightness.light ? Color(0xFFF1F4F8) : Color(0xFF1D2428);
+    Color botonColor = Theme.of(context).brightness == Brightness.light
+        ? Color(0xFFFFFFFF)
+        : Color(0xFF14181B);
+    Color textColor = Theme.of(context).brightness == Brightness.light
+        ? Color(0xFF57636C)
+        : Color(0xFF95A1AC);
+    Color chiocColor = Theme.of(context).brightness == Brightness.light
+        ? Color(0xFFE0E3E7)
+        : Color(0xFF262D34);
+    Color bordeColor = Theme.of(context).brightness == Brightness.light
+        ? Color(0xFFF1F4F8)
+        : Color(0xFF1D2428);
+    Color backgroudcolor = Theme.of(context).brightness == Brightness.light
+        ? Color(0xFFF1F4F8)
+        : Color(0xFF1D2428);
 
     return Scaffold(
-      backgroundColor: backgroudcolor, // Establece el color de fondo de la pantalla.
-      body: Stack( // Un Stack permite superponer widgets en capas.
+      backgroundColor:
+          backgroudcolor, // Establece el color de fondo de la pantalla.
+      body: Stack(
+        // Un Stack permite superponer widgets en capas.
         children: [
           Column(
             children: [
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20), // Margen de 20 en izquierda y derecha
+                padding: EdgeInsets.symmetric(
+                    horizontal: 20), // Margen de 20 en izquierda y derecha
                 child: Column(
                   children: [
                     Padding(
@@ -438,18 +462,18 @@ class _MyHomePageState extends State<MyHomePage> {
                           GestureDetector(
                             onTap: _showImagePickerDialog,
                             //child: Padding(
-                              //padding: EdgeInsets.only(left: 20),
-                              child: Card(
-                                elevation: 0,
-                                color: Colors.transparent,
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.transparent,
-                                  radius: 30,
-                                  backgroundImage: _imagePathFromDatabase != null
-                                      ? FileImage(File(_imagePathFromDatabase!))
-                                      : null,
-                                ),
+                            //padding: EdgeInsets.only(left: 20),
+                            child: Card(
+                              elevation: 0,
+                              color: Colors.transparent,
+                              child: CircleAvatar(
+                                backgroundColor: Colors.transparent,
+                                radius: 30,
+                                backgroundImage: _imagePathFromDatabase != null
+                                    ? FileImage(File(_imagePathFromDatabase!))
+                                    : null,
                               ),
+                            ),
                             //),
                           ),
                           Spacer(),
@@ -457,24 +481,24 @@ class _MyHomePageState extends State<MyHomePage> {
                             children: [
                               MediaQuery.of(context).size.width < 320.05
                                   ? Text(
-                                'Gestory\nPassword', // Texto dividido en dos líneas para pantallas pequeñas
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontFamily: 'Title Large',
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              )
+                                      'Gestory\nPassword', // Texto dividido en dos líneas para pantallas pequeñas
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                        fontFamily: 'Title Large',
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    )
                                   : Container(
-                                alignment: Alignment.center,
-                                    child: Text(
-                                'Gestory Password', // Texto en una sola línea para pantallas más grandes
-                                style: TextStyle(
-                                    fontSize: 22,
-                                    fontFamily: 'Title Large',
-                                    fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                                  ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        'Gestory Password', // Texto en una sola línea para pantallas más grandes
+                                        style: TextStyle(
+                                          fontSize: 22,
+                                          fontFamily: 'Title Large',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
                             ],
                           ),
                           Spacer(),
@@ -489,7 +513,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),
                               borderRadius: BorderRadius.circular(25.0),
                             ),
-                            padding: EdgeInsets.only(left: 15,right: 15),
+                            padding: EdgeInsets.only(left: 15, right: 15),
                             child: Stack(
                               children: [
                                 // Dos íconos de modo (claro y oscuro) con un interruptor para cambiar el tema.
@@ -503,11 +527,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ),
                                 ),
                                 Positioned(
-                                  right: 0, // Alinea el icono de modo oscuro a la derecha
+                                  right:
+                                      0, // Alinea el icono de modo oscuro a la derecha
                                   top: 8,
                                   child: Icon(
                                     Icons.mode_night_rounded,
-                                    color: Colors.white, // Cambia el color según el modo
+                                    color: Colors
+                                        .white, // Cambia el color según el modo
                                     size: 24.0,
                                   ),
                                 ),
@@ -518,18 +544,25 @@ class _MyHomePageState extends State<MyHomePage> {
                                     alignment: Alignment.bottomRight,
                                     // El color de los elementos cambia según el modo.
                                     child: Switch(
-                                      value: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.light,
+                                      value: AdaptiveTheme.of(context).mode ==
+                                          AdaptiveThemeMode.light,
                                       onChanged: (bool value) {
-                                        if (value) {// si es verdadero se matiene el modo claro
+                                        if (value) {
+                                          // si es verdadero se matiene el modo claro
                                           AdaptiveTheme.of(context).setLight();
-                                        } else {// si es false se pone el modo nocturno
+                                        } else {
+                                          // si es false se pone el modo nocturno
                                           AdaptiveTheme.of(context).setDark();
                                         }
                                       },
-                                      activeColor: Colors.transparent, // Pulgar transparente en modo oscuro y claro
-                                      activeTrackColor: Colors.transparent, // Riel transparente en modo oscuro y claro
-                                      inactiveThumbColor: Colors.transparent, // Color del pulgar del interruptor cuando está desactivado
-                                      inactiveTrackColor: Colors.transparent, // Color del riel cuando el interruptor está desactivado
+                                      activeColor: Colors
+                                          .transparent, // Pulgar transparente en modo oscuro y claro
+                                      activeTrackColor: Colors
+                                          .transparent, // Riel transparente en modo oscuro y claro
+                                      inactiveThumbColor: Colors
+                                          .transparent, // Color del pulgar del interruptor cuando está desactivado
+                                      inactiveTrackColor: Colors
+                                          .transparent, // Color del riel cuando el interruptor está desactivado
                                     ),
                                   ),
                                 ),
@@ -545,13 +578,17 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Row(
                         children: [
                           //SizedBox(width: 20),
-                          for (int index = 0; index < _categories.length; index++)
+                          for (int index = 0;
+                              index < _categories.length;
+                              index++)
                             Padding(
                               padding: const EdgeInsets.only(right: 8.0),
                               child: ChoiceChip(
-                                label: Text(_categories[index].name,
+                                label: Text(
+                                  _categories[index].name,
                                   style: TextStyle(
-                                    fontSize: 18, // Tamaño de fuente personalizado
+                                    fontSize:
+                                        18, // Tamaño de fuente personalizado
                                   ),
                                 ),
                                 // Verifica si este ChoiceChip está seleccionado
@@ -565,14 +602,18 @@ class _MyHomePageState extends State<MyHomePage> {
                                     color: bordeColor, // Color del borde
                                     width: 1.0, // Ancho del borde
                                   ),
-                                  borderRadius: BorderRadius.circular(16.0), // Radio del borde
+                                  borderRadius: BorderRadius.circular(
+                                      16.0), // Radio del borde
                                 ),
                                 onSelected: (isSelected) {
                                   setState(() {
                                     // Selecciona o deselecciona este ChoiceChip
-                                    _selectedChipIndex = isSelected ? index : -1;
-                                    print('Categoria Seleccionada: ${_categories[index].name}');
-                                    print('_selectedChipIndex: $_selectedChipIndex');
+                                    _selectedChipIndex =
+                                        isSelected ? index : -1;
+                                    print(
+                                        'Categoria Seleccionada: ${_categories[index].name}');
+                                    print(
+                                        '_selectedChipIndex: $_selectedChipIndex');
                                   });
                                 },
                               ),
@@ -586,34 +627,36 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               // Una división visual entre la selección de categoría y las notas.
               Divider(
-                color: Color(0xFF2874cf).withOpacity(0.2), // se le asigno un color
+                color:
+                    Color(0xFF2874cf).withOpacity(0.2), // se le asigno un color
                 thickness: 2,
               ),
 
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
-                    children:
-                    getNotesForSelectedCategory().map((note) {
+                    children: getNotesForSelectedCategory().map((note) {
                       // Verifica si esta es la última nota
-                      final isLastNote = note ==
-                          getNotesForSelectedCategory().last;
-                      return  Column(
+                      final isLastNote =
+                          note == getNotesForSelectedCategory().last;
+                      return Column(
                         children: [
                           SizedBox(height: 24),
                           GestureDetector(
-                            onTap: (){
+                            onTap: () {
                               // Abre un diálogo con detalles de la contraseña
                               // cuando se toca una nota
                               _showPasswordDialog(context, note);
                               print('Aqui debe abrir el archivo');
                             },
                             child: Padding(
-                              padding: EdgeInsets.only(left: 20, top: 10, right: 20),
+                              padding:
+                                  EdgeInsets.only(left: 20, top: 10, right: 20),
                               child: Container(
                                 height: 100,
                                 decoration: BoxDecoration(
-                                  color: catColor.getColorByIndex(note.categoryId),
+                                  color:
+                                      catColor.getColorByIndex(note.categoryId),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Padding(
@@ -623,8 +666,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                       Expanded(
                                         child: Column(
                                           // Alinea el texto a la izquierda
-                                          crossAxisAlignment: CrossAxisAlignment
-                                              .start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               note.title,
@@ -636,7 +679,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                               ),
                                             ),
                                             Text(
-                                           // Texto de la nota, con parte oculta
+                                              // Texto de la nota, con parte oculta
                                               hideText(note.content),
                                               maxLines: 4,
                                               overflow: TextOverflow.ellipsis,
@@ -694,8 +737,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: const Icon(
                   // Ícono de "Agregar" representado por un signo más
                   Icons.add,
-                  size: 48,// Tamaño del ícono
-                  color: Color(0xFF2874cF),// Color del ícono
+                  size: 48, // Tamaño del ícono
+                  color: Color(0xFF2874cF), // Color del ícono
                 ),
               ),
             ),
