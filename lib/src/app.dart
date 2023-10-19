@@ -26,7 +26,7 @@ class _MyAppFormState extends State<MyAppForm> {
 
   //metodo que se ejecuta al dar click en guardar
   click() {
-    //funcion donde carga todas las personas
+    //funcion donde se imprimen todas las personas
     cargaPersonas();
     //validamos si el formulario tiene los datos completos
     if (_keyForm.currentState!.validate()) {

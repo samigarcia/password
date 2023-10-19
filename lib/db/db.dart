@@ -6,7 +6,7 @@ class Data {
 // Este metodo sirve para crear y/o llamar la base de datos ya creada y crea una tabla llamada usuario
   static Future<Database> _openDB() async {
     final databasePath = await getDatabasesPath();
-    final path = join(databasePath, 'gestorypassword.db');
+    final path = join(databasePath, 'user.db');
     return await openDatabase(path, version: 4, onCreate: _onCreate);
   }
 
