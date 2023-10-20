@@ -53,6 +53,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
   File? _image; // Variable para almacenar una imagen (puede ser nula)
   int _selectedChipIndex =
       -1; // Índice de la categoría seleccionada (inicializado en -1)
@@ -230,11 +231,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
         // Marca la imagen como guardada
         _imageAlreadySaved = true;
+
       } catch (e) {
         print('Error al guardar la imagen en la base de datos: $e');
       }
     }
   }
+
 
   // Muestra un diálogo para seleccionar entre tomar una foto o
   // seleccionar desde la galería
@@ -374,6 +377,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+
   //funcion para mostrar un cuadro de dialogo con el contenido de la nota
   void _showNoteContentDialog(BuildContext context, Notea note) {
     showDialog(
@@ -381,12 +385,10 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       // Define el constructor del cuadro de diálogo.
       builder: (BuildContext context) {
-        return AlertDialog(
-          // Crea un cuadro de diálogo.
+        return AlertDialog( // Crea un cuadro de diálogo.
           // Fondo del diálogo basado en la categoría de la nota
           backgroundColor: catColor.getColorByIndex(note.categoryId),
-          title: Text(
-            note.title,
+          title: Text(note.title,
             style: TextStyle(
               // Estilo del texto del título
               color: Colors.black54,
@@ -401,6 +403,7 @@ class _MyHomePageState extends State<MyHomePage> {
               fontSize: 14,
               fontWeight: FontWeight.normal,
             ),
+
           ),
           actions: [
             TextButton(
@@ -481,24 +484,24 @@ class _MyHomePageState extends State<MyHomePage> {
                             children: [
                               MediaQuery.of(context).size.width < 320.05
                                   ? Text(
-                                      'Gestory\nPassword', // Texto dividido en dos líneas para pantallas pequeñas
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                        fontFamily: 'Title Large',
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    )
+                                'Gestory\nPassword', // Texto dividido en dos líneas para pantallas pequeñas
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontFamily: 'Title Large',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              )
                                   : Container(
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        'Gestory Password', // Texto en una sola línea para pantallas más grandes
-                                        style: TextStyle(
-                                          fontSize: 22,
-                                          fontFamily: 'Title Large',
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
+                                alignment: Alignment.center,
+                                    child: Text(
+                                'Gestory Password', // Texto en una sola línea para pantallas más grandes
+                                style: TextStyle(
+                                    fontSize: 22,
+                                    fontFamily: 'Title Large',
+                                    fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                                  ),
                             ],
                           ),
                           Spacer(),
@@ -527,13 +530,11 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ),
                                 ),
                                 Positioned(
-                                  right:
-                                      0, // Alinea el icono de modo oscuro a la derecha
+                                  right: 0, // Alinea el icono de modo oscuro a la derecha
                                   top: 8,
                                   child: Icon(
                                     Icons.mode_night_rounded,
-                                    color: Colors
-                                        .white, // Cambia el color según el modo
+                                    color: Colors.white, // Cambia el color según el modo
                                     size: 24.0,
                                   ),
                                 ),
@@ -547,11 +548,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                       value: AdaptiveTheme.of(context).mode ==
                                           AdaptiveThemeMode.light,
                                       onChanged: (bool value) {
-                                        if (value) {
-                                          // si es verdadero se matiene el modo claro
+                                        if (value) {// si es verdadero se matiene el modo claro
                                           AdaptiveTheme.of(context).setLight();
-                                        } else {
-                                          // si es false se pone el modo nocturno
+                                        } else {// si es false se pone el modo nocturno
                                           AdaptiveTheme.of(context).setDark();
                                         }
                                       },
@@ -584,11 +583,9 @@ class _MyHomePageState extends State<MyHomePage> {
                             Padding(
                               padding: const EdgeInsets.only(right: 8.0),
                               child: ChoiceChip(
-                                label: Text(
-                                  _categories[index].name,
+                                label: Text(_categories[index].name,
                                   style: TextStyle(
-                                    fontSize:
-                                        18, // Tamaño de fuente personalizado
+                                    fontSize: 18, // Tamaño de fuente personalizado
                                   ),
                                 ),
                                 // Verifica si este ChoiceChip está seleccionado
@@ -602,8 +599,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     color: bordeColor, // Color del borde
                                     width: 1.0, // Ancho del borde
                                   ),
-                                  borderRadius: BorderRadius.circular(
-                                      16.0), // Radio del borde
+                                  borderRadius: BorderRadius.circular(16.0), // Radio del borde
                                 ),
                                 onSelected: (isSelected) {
                                   setState(() {
@@ -627,8 +623,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               // Una división visual entre la selección de categoría y las notas.
               Divider(
-                color:
-                    Color(0xFF2874cf).withOpacity(0.2), // se le asigno un color
+                color: Color(0xFF2874cf).withOpacity(0.2), // se le asigno un color
                 thickness: 2,
               ),
 

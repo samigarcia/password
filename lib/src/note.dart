@@ -18,7 +18,8 @@ class MyNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final brightness = MediaQuery.of(context).platformBrightness;
-    final initialMode = brightness == Brightness.dark ? AdaptiveThemeMode.dark : AdaptiveThemeMode.light;
+    final initialMode = brightness ==
+        Brightness.dark ? AdaptiveThemeMode.dark : AdaptiveThemeMode.light;
     //cambia entre temas oscuros y claros
     return AdaptiveTheme(
       // Tema oscuro

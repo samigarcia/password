@@ -1,10 +1,11 @@
 //importaciones de paquetes de dart
 import 'package:app_2/db/db.dart';
-import 'package:app_2/db/persona.dart';
 import 'package:flutter/material.dart';
 import 'package:app_2/src/inicio.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
+
+import '../entity/persona.dart';
 
 //clase principal, la cual se manda a llamar desde el main
 class MyAppForm extends StatefulWidget {

@@ -3,7 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:app_2/db/persona.dart';
+
+import '../entity/persona.dart';
 
 //variables para la funcion de huella----------------------------
 final LocalAuthentication _autenticacion = LocalAuthentication();
