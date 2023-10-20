@@ -1,6 +1,14 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:app_2/db/persona.dart';
+
+//variables para la funcion de huella----------------------------
+final LocalAuthentication _autenticacion = LocalAuthentication();
+bool isAuthorized = false;
+//---------------------------------------------------------------
 
 class Data {
 // Este metodo sirve para crear y/o llamar la base de datos ya creada y crea una tabla llamada usuario
@@ -10,6 +18,7 @@ class Data {
     return await openDatabase(path, version: 4, onCreate: _onCreate);
   }
 
+//metodo donde se crea la tabla con execute y se lo enviamos a _openDB()
   static void _onCreate(Database db, int newVersion) async {
     String sql =
         "CREATE TABLE usuario (id INT, name TEXT, password TEXT, rpassword TEXT, res TEXT)";
@@ -82,4 +91,42 @@ class Data {
 
     return null; // Retorna null si el usuario no se encuentra en la base de datos
   }
+
+//este metodo cheka en la base de datos si hay registro de usuario
+  static buscar(BuildContext context) async {
+    final Database database = await _openDB();
+    final int? cont;
+    String sql = "SELECT COUNT(*) FROM usuario;";
+    //revisa que en la tabla 'usuario' haigan datos
+    cont = Sqflite.firstIntValue(await database.rawQuery(sql));
+    print('cantidad de personas: $cont');
+    //si hay datos quiere decir que ya se registro un usuario
+    if (cont! > 0) {
+      // ignore: use_build_context_synchronously
+      _autorizar(context);
+    } else if (cont < 1) {
+      //si No hay datos, se manda a la pagina de registro
+      // ignore: use_build_context_synchronously
+      Navigator.pushNamed(context, '/segundo');
+    }
+  }
+
+  //metodo para autenticarse con Huella o FaceID----------------------
+  static Future<void> _autorizar(BuildContext context) async {
+    try {
+      isAuthorized = await _autenticacion.authenticate(
+        localizedReason: "Autentíquese para saber su Identidad",
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+        ),
+      );
+      if (isAuthorized == true) {
+        // ignore: use_build_context_synchronously
+        Navigator.pushNamed(context, '/tercero');
+      }
+    } on PlatformException catch (e) {
+      print(e);
+    }
+  }
+//------------------------------------------------------------------
 }

@@ -214,7 +214,7 @@ class _MyAppFormState extends State<MyAppForm> {
     });
   }
 
-//funcion que finaliza la autenticacion encaso de que el usuario se salga de la app
+//funcion que finaliza la autenticacion encaso de que el usuario se salga de la app, no la use
   Future<void> _cancelarAutenticacion() async {
     await auth.stopAuthentication();
     setState(() => _isAuthenticating = false);
@@ -339,7 +339,7 @@ class _MyAppFormState extends State<MyAppForm> {
                               ),
                               child: const Text('Guardar'),
                               onPressed: () async {
-                                //funcion que se alctiva al dar click
+                                //funcion que se activa al dar click
                                 click();
                               },
                             ),
@@ -565,7 +565,7 @@ const List<String> list = [
   "comida favorita",
   "color favorito"
 ];
-//variable que se encarga de poner la primera pregunta de la lista "no lo usé"
+//variable que se encarga de poner la primera pregunta de la lista
 String dropdownValue = list.first;
 
 //Metodo para la Autenticacion por Huella Dactilar
