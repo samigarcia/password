@@ -1,9 +1,9 @@
-//-------------importaciones de base de datos--------------------
+//-----------------importaciones----------------------------
 import 'package:app_2/src/app.dart';
 import 'package:app_2/src/inicio.dart';
 import 'package:flutter/material.dart';
 import 'package:app_2/db/db.dart';
-//---------------------------------------------------------------
+//----------------------------------------------------------
 
 void main() async {
   runApp(const MyApp());
