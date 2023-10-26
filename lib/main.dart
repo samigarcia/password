@@ -24,7 +24,6 @@ class MyApp extends StatelessWidget {
         '/segundo': (context) => const MyAppForm(),
         '/tercero': (context) => const MyInicio(),
       },
-      //-----------------------------------------------
     );
   }
 }

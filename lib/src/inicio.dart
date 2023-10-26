@@ -21,6 +21,7 @@ class MyInicio extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final brightness = MediaQuery.of(context).platformBrightness;
+    //inicializa el tema que este activado
     final initialMode = brightness == Brightness.dark
         ? AdaptiveThemeMode.dark
         : AdaptiveThemeMode.light;
@@ -300,77 +301,78 @@ class _MyHomePageState extends State<MyHomePage> {
   // En el método _showPasswordDialog, cuando la contraseña es incorrecta, muestra un diálogo en lugar de un SnackBar.
   void _showPasswordDialog(BuildContext context, Notea note) {
     final TextEditingController passwordController = TextEditingController();
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return SingleChildScrollView(
-          child: AlertDialog(
-            title: Text("Ingrese la contraseña con la que se registró"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                TextField(
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: "Contraseña",
-                    border: OutlineInputBorder(),
+        return Center(
+          child: SingleChildScrollView(
+            child: AlertDialog(
+              title: Text("Ingrese la contraseña con la que se registró"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: "Contraseña",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    "Cancelar",
+                    style: TextStyle(
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    String? userPassword =
+                        await Data.getPasswordForUser(_selectedChipIndex);
+                    final enteredPassword = passwordController.text;
+
+                    if (userPassword != null && enteredPassword == userPassword) {
+                      Navigator.of(context).pop();
+                      _showNoteContentDialog(context, note);
+                    } else {
+                      // Contraseña incorrecta: muestra un diálogo de error.
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text("Contraseña incorrecta"),
+                            content: Text(
+                                "La contraseña ingresada es incorrecta. Inténtalo de nuevo."),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text("Cerrar"),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+                  },
+                  child: Text(
+                    "Aceptar",
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  "Cancelar",
-                  style: TextStyle(
-                    color: Colors.red,
-                  ),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  String? userPassword =
-                      await Data.getPasswordForUser(_selectedChipIndex);
-                  final enteredPassword = passwordController.text;
-
-                  if (userPassword != null && enteredPassword == userPassword) {
-                    Navigator.of(context).pop();
-                    _showNoteContentDialog(context, note);
-                  } else {
-                    // Contraseña incorrecta: muestra un diálogo de error.
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text("Contraseña incorrecta"),
-                          content: Text(
-                              "La contraseña ingresada es incorrecta. Inténtalo de nuevo."),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Text("Cerrar"),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  }
-                },
-                child: Text(
-                  "Aceptar",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
           ),
         );
       },
@@ -388,20 +390,21 @@ class _MyHomePageState extends State<MyHomePage> {
         return AlertDialog( // Crea un cuadro de diálogo.
           // Fondo del diálogo basado en la categoría de la nota
           backgroundColor: catColor.getColorByIndex(note.categoryId),
+          //Titulo de la nota
           title: Text(note.title,
             style: TextStyle(
               // Estilo del texto del título
-              color: Colors.black54,
-              fontSize: 19,
-              fontWeight: FontWeight.w500,
+              color: Colors.black54, //color
+              fontSize: 19, //Tamaño
+              fontWeight: FontWeight.w500, //tipo de testo
             ),
           ),
           content: Text(
             note.content, // Contenido de la nota
             style: TextStyle(
               color: Colors.black54, // Estilo del texto del contenido
-              fontSize: 14,
-              fontWeight: FontWeight.normal,
+              fontSize: 14, //tamaño del texto
+              fontWeight: FontWeight.normal, //tipo de letra
             ),
 
           ),
@@ -411,10 +414,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 // Cierra el diálogo cuando se presiona "Cerrar"
                 Navigator.of(context).pop();
               },
+              //texto cerrar
               child: Text(
                 "Cerrar", // Texto del botón "Cerrar"
                 style: TextStyle(
-                  color: Colors.white70, // Estilo del texto del botón
+                  color: Colors.black54,
                 ),
               ),
             ),
@@ -458,6 +462,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     horizontal: 20), // Margen de 20 en izquierda y derecha
                 child: Column(
                   children: [
+                    //padding para el espacio
                     Padding(
                       padding: EdgeInsets.only(top: 35),
                       child: Row(
@@ -482,6 +487,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           Spacer(),
                           Stack(
                             children: [
+                              //se valida si el texto ocupa mas espacio se coloca
+                              //en dos lineas
                               MediaQuery.of(context).size.width < 320.05
                                   ? Text(
                                 'Gestory\nPassword', // Texto dividido en dos líneas para pantallas pequeñas
@@ -599,8 +606,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                     color: bordeColor, // Color del borde
                                     width: 1.0, // Ancho del borde
                                   ),
-                                  borderRadius: BorderRadius.circular(16.0), // Radio del borde
+                                  // Radio del borde
+                                  borderRadius: BorderRadius.circular(16.0),
                                 ),
+                                //maneja la eleccion de categorias
                                 onSelected: (isSelected) {
                                   setState(() {
                                     // Selecciona o deselecciona este ChoiceChip
