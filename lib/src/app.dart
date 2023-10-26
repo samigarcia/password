@@ -2,9 +2,6 @@
 import 'package:app_2/db/db.dart';
 import 'package:app_2/entity/persona.dart';
 import 'package:flutter/material.dart';
-import 'package:app_2/src/inicio.dart';
-import 'package:flutter/services.dart';
-import 'package:local_auth/local_auth.dart';
 //------------------------------------------------
 
 //clase principal, la cual se manda a llamar desde el main
@@ -15,230 +12,12 @@ class MyAppForm extends StatefulWidget {
 }
 
 class _MyAppFormState extends State<MyAppForm> {
-  //inserccion hacia la labla persona
-  insercion() async {
-    Data.insert(Persona(
-        id: 1,
-        name: userin.text,
-        password: password.text,
-        rpassword: password1.text,
-        res: respuesta.text));
-  }
-
-  //metodo que se ejecuta al dar click en guardar
-  click() {
-    //funcion donde se imprimen todas las personas
-    cargaPersonas();
-    //validamos si el formulario tiene los datos completos
-    if (_keyForm.currentState!.validate()) {
-      debugPrint('validacion del formulario');
-      //funcion donde cheka si el dispositivo es compatible con datos biometricos
-      _checkBiometrics();
-      if (_canCheckBiometrics == true) {
-        //funcion donde lista las autenticaciones disponibles
-        _listaAutenticacionesDisponibles();
-        //autenticacion solo con biometricos
-        _autenticacionConBiometricos();
-      } else {
-        //funcion donde el S.O. determina el método de autenticación
-        _authenticate();
-      }
-    } else {
-      debugPrint('faltan datos del formulario');
-    }
-  }
-
-  //varaibles para la autenticacion------------------------------------
-  final LocalAuthentication auth = LocalAuthentication();
-  // ignore: unused_field
-  _SupportState _supportState = _SupportState.desconocido;
-  // ignore: unused_field
-  bool? _canCheckBiometrics;
-  // ignore: unused_field
-  List<BiometricType>? _availableBiometrics;
-  // ignore: unused_field
-  String _authorized = 'Not Authorized';
-  // ignore: unused_field
-  bool _isAuthenticating = false;
-
-  final LocalAuthentication _autenticacion = LocalAuthentication();
-  // ignore: unused_field
-  final bool _podemosUsarAutorizacion = false;
-  // ignore: unused_field
-  final String _autorizado = "No autorizado";
-  // ignore: unused_field
-  List<BiometricType>? _autorizacionesDisponibles;
-  //--------------------------------------------------------------------
-
-  //variables para capturar los datos ingresados del usuario
+//variables para capturar los datos ingresados del usuario
   final userin = TextEditingController();
   final password = TextEditingController();
   final password1 = TextEditingController();
   final respuesta = TextEditingController();
-  //--------------------------------------------------------
-
-//funciones para la autenticacion #############################################
-
-//esta funcion da a conocer los tipos datos biemetricos
-  Future<void> _checkBiometrics() async {
-    late bool canCheckBiometrics;
-    try {
-      canCheckBiometrics = await auth.canCheckBiometrics;
-      debugPrint("dispositivo compatible: ${canCheckBiometrics.toString()}");
-    } on PlatformException catch (e) {
-      canCheckBiometrics = false;
-      // ignore: avoid_print
-      print(e);
-    }
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _canCheckBiometrics = canCheckBiometrics;
-    });
-  }
-
-//este metodo enlista los tipos de metodos biometricos que tiene el dispositivo
-  Future<void> _listaAutenticacionesDisponibles() async {
-    late List<BiometricType> listaAutenticacion;
-    try {
-      listaAutenticacion = await _autenticacion.getAvailableBiometrics();
-      debugPrint("Podemos usar: ${listaAutenticacion.toString()}");
-    } on PlatformException catch (e) {
-      // ignore: avoid_print
-      print(e);
-    }
-
-    if (!mounted) return;
-
-    setState(() {
-      _autorizacionesDisponibles = listaAutenticacion = [];
-    });
-  }
-
-//esta funcion accede al dato biometrico que contenga informacion del usuario
-  Future<void> _authenticate() async {
-    bool authenticated = false;
-    try {
-      setState(() {
-        _isAuthenticating = true;
-        _authorized = 'Autenticacion';
-      });
-      authenticated = await auth.authenticate(
-        localizedReason:
-            'Deje que el sistema operativo determine el método de autenticación',
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-        ),
-      );
-      if (authenticated == true) {
-        //funcion donde se guardan los datos en la DataBase
-        insercion();
-        //comentarios
-        debugPrint('redirigiendose al Modulo de Inicio');
-        //metodo para ir a otra pagina
-        // ignore: use_build_context_synchronously
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const MyInicio()),
-        );
-      }
-      setState(() {
-        _isAuthenticating = false;
-      });
-    } on PlatformException catch (e) {
-      // ignore: avoid_print
-      print(e);
-      setState(() {
-        _isAuthenticating = false;
-        _authorized = 'Error - ${e.message}';
-      });
-      return;
-    }
-    if (!mounted) {
-      return;
-    }
-
-    setState(
-        () => _authorized = authenticated ? 'Autorizado' : 'No Autorizado');
-  }
-
-//esta funcion accede al dato biometrico Huella/FaceID para su autenticacion
-  Future<void> _autenticacionConBiometricos() async {
-    bool authenticated = false;
-    try {
-      setState(() {
-        _isAuthenticating = true;
-        _authorized = 'Authenticating';
-      });
-      authenticated = await auth.authenticate(
-        localizedReason:
-            'Escanee su huella digital (o su rostro) para autenticarse',
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-        ),
-      );
-      if (authenticated == true) {
-        //funcion donde se guardan los datos en la DataBase
-        insercion();
-        //comentarios
-        debugPrint('redirigiendose al Modulo de Inicio');
-        //metodo para ir a otra pagina
-        // ignore: use_build_context_synchronously
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const MyInicio()),
-        );
-      }
-      setState(() {
-        _isAuthenticating = false;
-        _authorized = 'Authenticating';
-      });
-    } on PlatformException catch (e) {
-      // ignore: avoid_print
-      print(e);
-      setState(() {
-        _isAuthenticating = false;
-        _authorized = 'Error - ${e.message}';
-      });
-      return;
-    }
-    if (!mounted) {
-      return;
-    }
-
-    final String mensaje = authenticated ? 'AUTORIZADO' : 'NO AUTORIZADO';
-    setState(() {
-      _authorized = mensaje;
-    });
-  }
-
-//funcion que finaliza la autenticacion encaso de que el usuario se salga de la app, no la use
-  Future<void> _cancelarAutenticacion() async {
-    await auth.stopAuthentication();
-    setState(() => _isAuthenticating = false);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    auth.isDeviceSupported().then(
-          (bool isSupported) => setState(() => _supportState = isSupported
-              ? _SupportState.soportado
-              : _SupportState.nosoportado),
-        );
-  }
-// ############################################################################
-
-//metood para ver todos los usuarios en la base de datos
-  cargaPersonas() async {
-    List<Persona> auxPersona = await Data.personas();
-    setState(() {
-      auxPersona;
-    });
-  }
+//--------------------------------------------------------
 
 //variable para validar el formulario muy importante!
   final _keyForm = GlobalKey<FormState>();
@@ -558,6 +337,31 @@ class _MyAppFormState extends State<MyAppForm> {
       ),
     );
   }
+
+  //inserccion hacia la labla persona-----------------
+  insercion() async {
+    Data.insert(Persona(
+        id: 1,
+        name: userin.text,
+        password: password.text,
+        rpassword: password1.text,
+        res: respuesta.text));
+    Navigator.pushNamed(context, '/tercero');
+  }
+//---------------------------------------------------
+
+//metodo que se ejecuta al dar click en guardar----------
+  click() {
+    //validamos si el formulario tiene los datos completos
+    if (_keyForm.currentState!.validate()) {
+      debugPrint('validacion del formulario');
+      //funcion de insertar datos a la BD
+      insercion();
+    } else {
+      debugPrint('faltan datos del formulario');
+    }
+  }
+//--------------------------------------------------------
 }
 
 //se crea las preguntas en forma de una lista
@@ -568,10 +372,3 @@ const List<String> list = [
 ];
 //variable que se encarga de poner la primera pregunta de la lista
 String dropdownValue = list.first;
-
-//Metodo para la Autenticacion por Huella Dactilar
-enum _SupportState {
-  desconocido,
-  soportado,
-  nosoportado,
-}

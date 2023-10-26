@@ -8,6 +8,8 @@ import 'package:app_2/entity/persona.dart';
 //variables para la funcion de huella----------------------------
 final LocalAuthentication _autenticacion = LocalAuthentication();
 bool isAuthorized = false;
+//varaibles para la autenticacion
+late bool canCheckBiometrics;
 //---------------------------------------------------------------
 
 class Data {
@@ -110,8 +112,9 @@ class Data {
       Navigator.pushNamed(context, '/segundo');
     }
   }
+//-----------------------------------------------------------------
 
-  //metodo para autenticarse con Huella o FaceID----------------------
+//metodo para autenticarse con Huella o FaceID----------------------
   static Future<void> _autorizar(BuildContext context) async {
     try {
       isAuthorized = await _autenticacion.authenticate(
