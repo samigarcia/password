@@ -17,13 +17,13 @@ class Data {
   static Future<Database> _openDB() async {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, 'user.db');
-    return await openDatabase(path, version: 4, onCreate: _onCreate);
+    return await openDatabase(path, version: 5, onCreate: _onCreate);
   }
 
 //metodo donde se crea la tabla con execute y se lo enviamos a _openDB()
   static void _onCreate(Database db, int newVersion) async {
     String sql =
-        "CREATE TABLE usuario (id INT, name TEXT, password TEXT, rpassword TEXT, res TEXT)";
+        "CREATE TABLE usuario (id INT, name TEXT, password TEXT, rpassword TEXT, pregunta TEXT, res TEXT)";
     await db.execute(sql);
   }
 
@@ -72,6 +72,7 @@ class Data {
         name: maps[i]['name'] ?? '', // Maneja valores nulos aquí
         password: maps[i]['password'] ?? '', // Maneja valores nulos aquí
         rpassword: maps[i]['rpassword'] ?? '', // Maneja valores nulos aquí
+        pregunta: maps[i]['pregunta'] ?? '', // Maneja valores nulos aquí
         res: maps[i]['res'] ?? '', // Maneja valores nulos aquí
       );
     });

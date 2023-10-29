@@ -16,11 +16,14 @@ class _MyAppFormState extends State<MyAppForm> {
   final userin = TextEditingController();
   final password = TextEditingController();
   final password1 = TextEditingController();
+  final pregunta = TextEditingController();
   final respuesta = TextEditingController();
 //--------------------------------------------------------
 
 //variable para validar el formulario muy importante!
   final _keyForm = GlobalKey<FormState>();
+  bool passwordVisible = true;
+  bool passwordVisible2 = true;
 
 //aqui empieza la creacion de los widgets
   @override
@@ -72,10 +75,10 @@ class _MyAppFormState extends State<MyAppForm> {
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF485876),
                                   borderRadius: const BorderRadius.only(
-                                    bottomLeft: Radius.circular(70),
-                                    bottomRight: Radius.circular(70),
+                                    bottomLeft: Radius.circular(65),
+                                    bottomRight: Radius.circular(65),
                                     topLeft: Radius.circular(0),
-                                    topRight: Radius.circular(70),
+                                    topRight: Radius.circular(65),
                                   ),
                                   shape: BoxShape.rectangle,
                                   border: Border.all(
@@ -132,9 +135,8 @@ class _MyAppFormState extends State<MyAppForm> {
               ),
               //se crea la etiqueta usuario
               Container(
-                margin: const EdgeInsets.only(right: 260),
+                margin: const EdgeInsets.only(right: 250),
                 child: const Text(
-                  textAlign: TextAlign.left,
                   style: TextStyle(
                     fontSize: 18.0,
                     color: Colors.black,
@@ -207,19 +209,27 @@ class _MyAppFormState extends State<MyAppForm> {
                         },
                         controller: password,
                         enableInteractiveSelection: false,
-                        obscureText: true,
-                        decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(
+                        obscureText: passwordVisible,
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(
                               vertical: 10, horizontal: 10),
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                           filled: true,
                           fillColor: Colors.white,
-                          suffixIcon: Icon(
-                            Icons.visibility_off_outlined,
-                            color: Colors.black,
+                          suffixIcon: IconButton(
+                            //passworddivisible
+                            icon: Icon(passwordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off),
+                            onPressed: () {
+                              setState(() {
+                                passwordVisible = !passwordVisible;
+                              });
+                            },
+                            //color: Colors.black,
                           ),
                           hintText: 'Password',
-                          hintStyle: TextStyle(color: Colors.black),
+                          hintStyle: const TextStyle(color: Colors.black),
                         ),
                       ),
                     ),
@@ -250,19 +260,27 @@ class _MyAppFormState extends State<MyAppForm> {
                         },
                         controller: password1,
                         enableInteractiveSelection: false,
-                        obscureText: true,
-                        decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(
+                        obscureText: passwordVisible2,
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(
                               vertical: 10, horizontal: 10),
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                           filled: true,
                           fillColor: Colors.white,
-                          suffixIcon: Icon(
-                            Icons.visibility_off_outlined,
-                            color: Colors.black,
+                          suffixIcon: IconButton(
+                            //passworddivisible
+                            icon: Icon(passwordVisible2
+                                ? Icons.visibility
+                                : Icons.visibility_off),
+                            onPressed: () {
+                              setState(() {
+                                passwordVisible2 = !passwordVisible2;
+                              });
+                            },
+                            //color: Colors.black,
                           ),
                           hintText: 'Password',
-                          hintStyle: TextStyle(
+                          hintStyle: const TextStyle(
                             color: Colors.black,
                           ),
                         ),
@@ -275,6 +293,7 @@ class _MyAppFormState extends State<MyAppForm> {
                     // se crea el menu desplegable "dificil por cierto!"
                     DropdownMenu<String>(
                       width: 350,
+                      controller: pregunta,
                       label: const Text('Selecciona una prengunta'),
                       inputDecorationTheme: const InputDecorationTheme(
                         border: OutlineInputBorder(),
@@ -291,6 +310,7 @@ class _MyAppFormState extends State<MyAppForm> {
                         // This is called when the user selects an item.
                         setState(() {
                           dropdownValue = value!;
+                          debugPrint(value);
                         });
                       },
                       dropdownMenuEntries:
@@ -345,10 +365,11 @@ class _MyAppFormState extends State<MyAppForm> {
         name: userin.text,
         password: password.text,
         rpassword: password1.text,
+        pregunta: pregunta.text,
         res: respuesta.text));
     Navigator.pushNamed(context, '/tercero');
   }
-//---------------------------------------------------
+//----------------------------------------------------
 
 //metodo que se ejecuta al dar click en guardar----------
   click() {

@@ -4,6 +4,7 @@ class Persona {
   String name = "";
   String password = "";
   String rpassword = "";
+  String pregunta = "";
   String res = "";
 
   Persona(
@@ -11,6 +12,7 @@ class Persona {
       required this.name,
       required this.password,
       required this.rpassword,
+      required this.pregunta,
       required this.res});
 
   Map<String, dynamic> toMap() {
@@ -19,6 +21,7 @@ class Persona {
       'name': name,
       'password': password,
       'rpassword': rpassword,
+      'pregunta': pregunta,
       'res': res
     };
   }
@@ -28,5 +31,6 @@ class Persona {
       name: 'name',
       password: 'password',
       rpassword: 'rpassword',
+      pregunta: 'pregunta',
       res: 'res');
 }
