@@ -154,7 +154,7 @@ class NoteScreenState extends State<NoteScreen> {
           _selectedCategory =
               category;
           _showAddButton =
-          false;
+          true;
         });
       }
     }
@@ -441,103 +441,106 @@ class NoteScreenState extends State<NoteScreen> {
             children: [
               SizedBox(height: 16.0),
               // Encabezado que muestra el título y la categoría seleccionada.
-              Row(
-                children: [
-                  Text(
-                    'Crea nueva nota',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontFamily: 'Headline Medium',
-                    ),
-                  ),
-                  SizedBox(
-                      width: 8.0),
-                  Row(
-                    children: [
-                      Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          shape: BoxShape
-                              .circle,
-                          color: _selectedColor,
-                        ),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    Text(
+                      'Crea nueva nota',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontFamily: 'Headline Medium',
                       ),
-                      SizedBox(
-                          width:
-                          8.0),
-                      Text(
-                          _selectedCategory), // La categoría se actualiza dinámicamente.
-                    ],
-                  ),
-                  SizedBox(
-                      width: 8.0),
-                  // Botón desplegable para seleccionar una categoría o agregar una nueva.
-                  _showAddButton ? PopupMenuButton<Map<String, dynamic>>(
-                    //se crea un icono
-                    icon: Icon(
-                      Icons.add_circle,
-                      color: Colors.blue, //se le asigna el color
-                      size: 40.0, //tamaño del icono
                     ),
-                    onSelected: (Map<String, dynamic> selection) {
-                      if (selection['category'] == 'Add') {
-                        _showAddCategoryDialog();
-                      } else {
-                        setState(() {
-                          _selectedColor = selection['color'];
-                          _selectedCategory = selection['category'];
-                          _showAddButton =
-                          false; //oculta el botón desplegable después de la selección.
-                        });
-                      }
-                    },
-                    itemBuilder: (BuildContext context) {
-                      List<PopupMenuEntry<Map<String, dynamic>>> items =
-                      _categories.map((category) {
-                        int index = _categories.indexOf(
-                            category);
-                        Color? color = getColorByIndex(
-                            index);
-                        return PopupMenuItem<Map<String, dynamic>>(
-                          value: {
-                            'color': color,
-                            'category': category,
-                          },
-                          child: CategoryMenuItem(
-                            color: color, //
-                            category: category,
+                    SizedBox(
+                        width: 8.0),
+                    Row(
+                      children: [
+                        Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            shape: BoxShape
+                                .circle,
+                            color: _selectedColor,
+                          ),
+                        ),
+                        SizedBox(
+                            width:
+                            8.0),
+                        Text(
+                            _selectedCategory), // La categoría se actualiza dinámicamente.
+                      ],
+                    ),
+                    SizedBox(
+                        width: 8.0),
+                    // Botón desplegable para seleccionar una categoría o agregar una nueva.
+                    _showAddButton ? PopupMenuButton<Map<String, dynamic>>(
+                      //se crea un icono
+                      icon: Icon(
+                        Icons.add_circle,
+                        color: Colors.blue, //se le asigna el color
+                        size: 40.0, //tamaño del icono
+                      ),
+                      onSelected: (Map<String, dynamic> selection) {
+                        if (selection['category'] == 'Add') {
+                          _showAddCategoryDialog();
+                        } else {
+                          setState(() {
+                            _selectedColor = selection['color'];
+                            _selectedCategory = selection['category'];
+                            _showAddButton =
+                            true;
+                          });
+                        }
+                      },
+                      itemBuilder: (BuildContext context) {
+                        List<PopupMenuEntry<Map<String, dynamic>>> items =
+                        _categories.map((category) {
+                          int index = _categories.indexOf(
+                              category);
+                          Color? color = getColorByIndex(
+                              index);
+                          return PopupMenuItem<Map<String, dynamic>>(
+                            value: {
+                              'color': color,
+                              'category': category,
+                            },
+                            child: CategoryMenuItem(
+                              color: color, //
+                              category: category,
+                            ),
+                          );
+                        }).toList();
+                        // Agregar opción para agregar una nueva categoría.
+                        items.add(
+                          PopupMenuItem<Map<String, dynamic>>(
+                            value: {
+                              'color': getColorByIndex(_categories
+                                  .length),
+                              'category':
+                              'Add',
+                            },
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.add_circle,
+                                  color: Colors.grey[800],
+                                ),
+                                SizedBox(
+                                    width: 8.0), //crea un espacio horizontal
+                                Text(
+                                    'Agregar nueva categoría'), //se establece el texto
+                              ],
+                            ),
                           ),
                         );
-                      }).toList();
-                      // Agregar opción para agregar una nueva categoría.
-                      items.add(
-                        PopupMenuItem<Map<String, dynamic>>(
-                          value: {
-                            'color': getColorByIndex(_categories
-                                .length),
-                            'category':
-                            'Add',
-                          },
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.add_circle,
-                                color: Colors.grey[800],
-                              ),
-                              SizedBox(
-                                  width: 8.0), //crea un espacio horzontal
-                              Text(
-                                  'Agregar nueva categoría'), //se establece el texto
-                            ],
-                          ),
-                        ),
-                      );
-                      return items;
-                    },
-                  )
-                      : SizedBox(), //se agrega un espacion vacio sin contenido
-                ],
+                        return items;
+                      },
+                    )
+                        : SizedBox(), //se agrega un espacion vacio sin contenido
+                  ],
+                ),
               ),
               SizedBox(height: 16.0),
               // Campos de entrada para el título y el contenido de la nota.
@@ -623,20 +626,23 @@ class CategoryMenuItem extends StatelessWidget {
   // Esta función se encarga de construir y devolver la interfaz de usuario para un elemento de menú de categoría.
   @override //
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          //Se crea un contenedor rectangular que contiene el círculo de color que representa la categoría.
-          width: 24,
-          height: 24,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          Container(
+            //Se crea un contenedor rectangular que contiene el círculo de color que representa la categoría.
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
+            ),
           ),
-        ),
-        SizedBox(width: 8.0),
-        Text(category), //se muestra el nombre de la categoria
-      ],
+          SizedBox(width: 8.0),
+          Text(category), //se muestra el nombre de la categoria
+        ],
+      ),
     );
   }
 }

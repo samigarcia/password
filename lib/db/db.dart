@@ -79,7 +79,7 @@ class Data {
   }
 
 //este metodo busca en la base de datos el id que le demos.
-  static Future<String?> getPasswordForUser(int userId) async {
+  static Future<String?> getPasswordForUser() async {
     final Database database = await _openDB();
 
     final List<Map<String, dynamic>> maps = await database.query(
@@ -93,6 +93,58 @@ class Data {
     }
 
     return null; // Retorna null si el usuario no se encuentra en la base de datos
+  }
+
+  //este metodo busca en la base de datos el id que le demos.
+  static Future<String?> getAskForUser() async {
+    final Database database = await _openDB();
+
+    final List<Map<String, dynamic>> maps = await database.query(
+      'usuario',
+      where: 'id = ?',
+      whereArgs: [1],
+    );
+
+    if (maps.isNotEmpty) {
+      return maps.first['pregunta'] ?? '';
+    }
+
+    return null; // Retorna null si el usuario no se encuentra en la base de datos
+  }
+
+  //este metodo busca en la base de datos el id que le demos.
+  static Future<String?> getAnswerForUser() async {
+    final Database database = await _openDB();
+
+    final List<Map<String, dynamic>> maps = await database.query(
+      'usuario',
+      where: 'id = ?',
+      whereArgs: [1],
+    );
+
+    if (maps.isNotEmpty) {
+      return maps.first['res'] ?? '';
+    }
+
+    return null; // Retorna null si el usuario no se encuentra en la base de datos
+  }
+  //metodo para actualizar la contraseña del usuario
+  static Future<void> updatePasswordAndRPassword(String newPassword, String newRPassword) async {
+    final Database database = await _openDB();
+
+    // Crea un mapa con las nuevas columnas que deseas actualizar
+    final Map<String, dynamic> updatedData = {
+      'password': newPassword,
+      'rpassword': newRPassword,
+    };
+
+    // Realiza la actualización en la base de datos
+    await database.update(
+      'usuario',
+      updatedData,
+      where: 'id = ?',
+      whereArgs: [1],
+    );
   }
 
 //este metodo cheka en la base de datos si hay registro de usuario

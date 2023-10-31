@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import '../db/databaseCategory.dart';
 import '../Entity/notas.dart';
@@ -297,33 +299,177 @@ class _MyHomePageState extends State<MyHomePage> {
   String hideText(String text, {int defaultLength = 12}) {
     return '* ' * (defaultLength);
   }
-
-  // En el método _showPasswordDialog, cuando la contraseña es incorrecta, muestra un diálogo en lugar de un SnackBar.
-  void _showPasswordDialog(BuildContext context, Notea note) {
+// Función para pedir la contraseña al usuario
+  Future<void> _showPasswordDialog(BuildContext context, Notea note) async {
+    // ocultar y mostrar la contraseña del campo
+    bool obscureText1 = true;
+    // Crear un controlador de texto para la contraseña.
     final TextEditingController passwordController = TextEditingController();
+    // Contador para rastrear los intentos incorrectos de contraseña.
+    int incorrectPasswordAttempts = 0;
+    // Crear un StreamController para manejar mensajes de error.
+    final StreamController<String> errorStreamController = StreamController<String>();
+
     showDialog(
       context: context,
+      // Mostrar un diálogo cuando se llama a _showPasswordDialog.
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          // Utilizar StatefulBuilder para mantener el estado del diálogo.
+          builder: (context, setState) {
+            return Center(
+              child: SingleChildScrollView(
+                child: AlertDialog(
+                  title: Text("Ingrese la contraseña con la que se registró"),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      StreamBuilder<String>(
+                        stream: errorStreamController.stream,
+                        builder: (context, snapshot) {
+                          return TextField(
+                            // Asociar el controlador de texto al campo de contraseña.
+                            controller: passwordController,
+                            // Configurar la visibilidad de la contraseña del primer campo.
+                            obscureText: obscureText1,
+                            decoration: InputDecoration(
+                              labelText: "Contraseña",
+                              border: OutlineInputBorder(),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  obscureText1 ? Icons.visibility : Icons.visibility_off,
+                                  color: Colors.blue,
+                                ),
+                                onPressed: () {
+                                  // Cambiar la visibilidad de la contraseña del campo
+                                  setState(() {
+                                    obscureText1 = !obscureText1;
+                                  });
+                                },
+                              ),
+                              // Mostrar el mensaje de error en función del estado del Stream.
+                              errorText: snapshot.data,
+                              errorStyle: TextStyle(color: Colors.red),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        // Cerrar el diálogo al presionar "Cancelar".
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        "Cancelar",
+                        style: TextStyle(
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        // Obtener la contraseña del usuario desde los datos.
+                        String? userPassword = await Data.getPasswordForUser();
+                        // Obtener la contraseña ingresada por el usuario.
+                        final enteredPassword = passwordController.text;
+
+                        if (userPassword != null && enteredPassword == userPassword) {
+                          // Cerrar el diálogo y mostrar el contenido de la nota.
+                          Navigator.of(context).pop();
+                          _showNoteContentDialog(context, note);
+                        } else {
+                          incorrectPasswordAttempts++;
+
+                          if (incorrectPasswordAttempts >= 3) {
+                            // Mostrar ventana de recuperación de contraseña si se
+                            // excede el número de intentos incorrectos.
+                            _showRecoveryDialog(context);
+                            Navigator.of(context).pop();
+                          } else {
+                            // Actualizar el mensaje de error.
+                            errorStreamController.add("Contraseña incorrecta");
+                            // Limpiar el campo de contraseña para un nuevo intento.
+                            passwordController.clear();
+                          }
+                        }
+                      },
+                      child: Text(
+                        "Aceptar",
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  //Funcion para responder pregunta de seguridad
+  void _showRecoveryDialog(BuildContext context) async {
+    // Crear un controlador de texto para la respuesta a la pregunta de recuperación.
+    final TextEditingController recoveryQuestionController = TextEditingController();
+    // Obtener la pregunta de seguridad del usuario.
+    String? userAsk = await Data.getAskForUser();
+    // Obtener la respuesta a la pregunta de seguridad del usuario.
+    String? userAnswer = await Data.getAnswerForUser();
+    // Variable para rastrear si la respuesta es incorrecta.
+    bool isAnswerIncorrect = false;
+    // Crear un StreamController para manejar mensajes de error.
+    final StreamController<String> errorStreamController = StreamController<String>();
+
+    showDialog(
+      context: context,
+      // Mostrar un diálogo cuando se llama a _showRecoveryDialog.
       builder: (BuildContext context) {
         return Center(
           child: SingleChildScrollView(
             child: AlertDialog(
-              title: Text("Ingrese la contraseña con la que se registró"),
+              title: Text("Recuperación de contraseña"),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  TextField(
-                    controller: passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: "Contraseña",
-                      border: OutlineInputBorder(),
-                    ),
+                  StreamBuilder<String>(
+                      stream: errorStreamController.stream,
+                      builder: (context, snapshot) {
+                        return Column(
+                          children: [
+                            Text("Intentos excedidos. Responde la pregunta de seguridad"),
+                            SizedBox(height: 10),
+                            TextField(
+                              // Asociar el controlador de texto al campo de respuesta.
+                              controller: recoveryQuestionController,
+                              decoration: InputDecoration(
+                                // Utilizar la pregunta de seguridad como etiqueta.
+                                labelText: userAsk,
+                                border: OutlineInputBorder(
+                                  // Cambiar el color del borde si la respuesta es incorrecta.
+                                  borderSide: BorderSide(color: Colors.blue),
+                                ),
+                                // Mostrar el mensaje de error en función del estado del Stream.
+                                errorText: snapshot.data,
+                                errorStyle: TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                   ),
                 ],
               ),
               actions: [
                 TextButton(
                   onPressed: () {
+                    // Cerrar el diálogo al presionar "Cancelar".
                     Navigator.of(context).pop();
                   },
                   child: Text(
@@ -334,34 +480,22 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () async {
-                    String? userPassword =
-                        await Data.getPasswordForUser(_selectedChipIndex);
-                    final enteredPassword = passwordController.text;
-
-                    if (userPassword != null && enteredPassword == userPassword) {
+                  onPressed: () {
+                  // Aquí puedes manejar la respuesta a la pregunta de recuperación
+                    // Obtener la respuesta ingresada por el usuario.
+                    String recoveryAnswer = recoveryQuestionController.text;
+                    // Realiza la validación de la respuesta y la recuperación de la contraseña
+                    // Compara la respuesta con la respuesta del usuario.
+                    if (recoveryAnswer == userAnswer) {
+                      // Mostrar el diálogo de cambio de contraseña.
+                      _showNewPassDialog(context);
+                      // Cerrar el diálogo de recuperación.
                       Navigator.of(context).pop();
-                      _showNoteContentDialog(context, note);
                     } else {
-                      // Contraseña incorrecta: muestra un diálogo de error.
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text("Contraseña incorrecta"),
-                            content: Text(
-                                "La contraseña ingresada es incorrecta. Inténtalo de nuevo."),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: Text("Cerrar"),
-                              ),
-                            ],
-                          );
-                        },
-                      );
+                      // Actualizar el mensaje de error si la respuesta es incorrecta.
+                      errorStreamController.add("Respuesta incorrecta");
+                      // Limpiar el campo de respuesta para un nuevo intento.
+                      recoveryQuestionController.clear();
                     }
                   },
                   child: Text(
@@ -379,6 +513,167 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  //Funcion para actualiza la contraseña
+  void _showNewPassDialog(BuildContext context) async {
+    // Crear un controlador de texto para el primer campo de contraseña.
+    final TextEditingController passController = TextEditingController();
+    // Crear un controlador de texto para el segundo campo de contraseña.
+    final TextEditingController pass2Controller = TextEditingController();
+    String? userAnswer = await Data.getAskForUser();
+    bool obscureText1 = true; // ocultar y mostrar la contraseña del primer campo
+    bool obscureText2 = true; // ocultar y mostrar la contraseña del segundo campo
+    // Crear un StreamController para manejar los mensajes de error del primer campo.
+    final StreamController<String> errorStreamController = StreamController<String>();
+    // Crear un StreamController para manejar los mensajes de error del segundo campo.
+    final StreamController<String> errorStreamController2 = StreamController<String>();
+
+    showDialog(
+      context: context,
+      // Mostrar un diálogo cuando se llama a _showNewPassDialog.
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          // Utilizar StatefulBuilder para mantener el estado del diálogo.
+          builder: (context, setState) {
+            return Center(
+              child: SingleChildScrollView(
+                child: AlertDialog(
+                  title: Center(child: Text("Nueva Contraseña")),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      StreamBuilder<String>(
+                        stream: errorStreamController.stream,
+                        builder: (context, snapshot) {
+                          return Column(
+                            children: [
+                              Text("Ingrese su nueva contraseña"),
+                              SizedBox(height: 10),
+                              TextField(
+                                // Asociar el controlador de texto al campo de contraseña.
+                                controller: passController,
+                                // Configurar la visibilidad de la contraseña del primer campo.
+                                obscureText: obscureText1,
+                                decoration: InputDecoration(
+                                  labelText: "Contraseña",
+                                  border: OutlineInputBorder(),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      obscureText1 ? Icons.visibility : Icons.visibility_off,
+                                      color: Colors.blue,
+                                    ),
+                                    onPressed: () {
+                                      // Cambiar la visibilidad de la contraseña del primer campo
+                                      setState(() {
+                                        obscureText1 = !obscureText1;
+                                      });
+                                    },
+                                  ),
+                                  // Mostrar el mensaje de error en función del estado del Stream.
+                                  errorText: snapshot.data,
+                                  errorStyle: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                            ],
+                          );
+                        },
+                      ),
+                      StreamBuilder<String>(
+                        stream: errorStreamController2.stream,
+                        builder: (context, snapshot) {
+                          return TextField(
+                            // Asociar el controlador de texto al campo de confirmación de contraseña.
+                            controller: pass2Controller,
+                            // Configurar la visibilidad de la contraseña del segundo campo.
+                            obscureText: obscureText2,
+                            decoration: InputDecoration(
+                              labelText: "Confirme su contraseña",
+                              border: OutlineInputBorder(),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  obscureText2 ? Icons.visibility : Icons.visibility_off,
+                                  color: Colors.blue,
+                                ),
+                                onPressed: () {
+                                  // Cambiar la visibilidad de la contraseña del segundo campo
+                                  setState(() {
+                                    obscureText2 = !obscureText2;
+                                  });
+                                },
+                              ),
+                              // Mostrar el mensaje de error en función del estado del Stream.
+                              errorText: snapshot.data,
+                              errorStyle: TextStyle(color: Colors.red),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        // Cerrar el diálogo al presionar "Cancelar".
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        "Cancelar",
+                        style: TextStyle(
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Obtener el valor del primer campo de contraseña.
+                        String newPassword = passController.text;
+                        // Obtener el valor del segundo campo de confirmación de contraseña.
+                        String confirmPassword = pass2Controller.text;
+
+                        if (newPassword.isEmpty) {
+                          // Actualizar el mensaje de error del primer campo si está vacío.
+                          errorStreamController.add("Campo Vacio");
+                          if (confirmPassword.isEmpty) {
+                            // Actualizar el mensaje de error del segundo campo si está vacío.
+                            errorStreamController2.add("Campo Vacio");
+                          }
+                        } else if (newPassword == confirmPassword) {
+                          // Actualizar la contraseña en la base de datos si las contraseñas coinciden.
+                          Data.updatePasswordAndRPassword(newPassword, confirmPassword);
+                          // Cierra la ventana de nueva contraseña
+                          Navigator.of(context).pop();
+                          // Mostrar un mensaje de éxito y cargar las notas desde la base de datos.
+                          Fluttertoast.showToast(
+                            msg: 'Contraseña Actualizada con éxito',
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.green,
+                            textColor: Colors.white,
+                          );
+                        } else {
+                          // Actualizar el mensaje de error si las contraseñas no coinciden
+                          errorStreamController.add("Contraseñas no coinciden");
+                          // Actualizar el mensaje de error en el segundo campo si las contraseñas no coinciden.
+                          errorStreamController2.add("Contraseñas no coinciden");
+                        }
+                      },
+                      child: Text(
+                        "Aceptar",
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   //funcion para mostrar un cuadro de dialogo con el contenido de la nota
   void _showNoteContentDialog(BuildContext context, Notea note) {
@@ -406,7 +701,6 @@ class _MyHomePageState extends State<MyHomePage> {
               fontSize: 14, //tamaño del texto
               fontWeight: FontWeight.normal, //tipo de letra
             ),
-
           ),
           actions: [
             TextButton(
@@ -475,7 +769,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               elevation: 0,
                               color: Colors.transparent,
                               child: CircleAvatar(
-                                backgroundColor: Colors.transparent,
+                                backgroundColor: Colors.blueGrey,
                                 radius: 30,
                                 backgroundImage: _imagePathFromDatabase != null
                                     ? FileImage(File(_imagePathFromDatabase!))
@@ -651,7 +945,6 @@ class _MyHomePageState extends State<MyHomePage> {
                               // Abre un diálogo con detalles de la contraseña
                               // cuando se toca una nota
                               _showPasswordDialog(context, note);
-                              print('Aqui debe abrir el archivo');
                             },
                             child: Padding(
                               padding:
@@ -684,7 +977,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                             ),
                                             Text(
                                               // Texto de la nota, con parte oculta
-                                              hideText(note.content),
+                                              hideText("contenido"),
                                               maxLines: 4,
                                               overflow: TextOverflow.ellipsis,
                                               textAlign: TextAlign.justify,
