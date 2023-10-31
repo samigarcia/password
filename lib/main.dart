@@ -36,16 +36,22 @@ class First extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: const Text('INICIO DE SESION'),
       ),
       body: Column(
         children: [
           Center(
-            child: ElevatedButton(
-                child: const Text('Inicia Sesion'),
-                onPressed: () async {
-                  Data.buscar(context);
-                }),
+            child: Container(
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 50, vertical: 200),
+                width: 100.0,
+                height: 40.0,
+                child: ElevatedButton(
+                    child: const Text('Log In'),
+                    onPressed: () async {
+                      Data.buscar(context);
+                    })),
           ),
         ],
       ),
