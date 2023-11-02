@@ -15,39 +15,6 @@ import '../db/db.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
-// Definición de la clase MyInicio, que es un StatelessWidget
-class MyInicio extends StatelessWidget {
-  // Constructor de MyInicio que toma un parámetro opcional de tipo 'key'
-  const MyInicio({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final brightness = MediaQuery.of(context).platformBrightness;
-    //inicializa el tema que este activado
-    final initialMode = brightness == Brightness.dark
-        ? AdaptiveThemeMode.dark
-        : AdaptiveThemeMode.light;
-    // Devuelve un AdaptiveTheme, que permite cambiar entre temas oscuros y claros
-    return AdaptiveTheme(
-        // Tema oscuro
-        dark: ThemeData.dark(),
-        // Tema claro
-        light: ThemeData.light(),
-        // Modo de tema inicial
-        initial: initialMode,
-        // Builder que configura el tema en función del AdaptiveTheme
-        builder: (theme, darkTheme) {
-          // Devuelve un MaterialApp que utiliza el tema proporcionado
-          return MaterialApp(
-            title: 'Gestory Password',
-            theme: theme,
-            darkTheme: darkTheme,
-            home: MyHomePage(), // Define la página de inicio como MyHomePage
-          );
-        });
-  }
-}
-
 //widget que puede cambiar de estado a lo largo del tiempo
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -242,39 +209,73 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 
-  // Muestra un diálogo para seleccionar entre tomar una foto o
-  // seleccionar desde la galería
+  // Función para mostrar Opciones de foto de perfil
   Future<void> _showImagePickerDialog() async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Seleccionar imagen'), // Título del diálogo
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                GestureDetector(
-                  // Opción para tomar una foto desde la camara
-                  child: Text('Tomar foto'),
-                  onTap: () {
-                    Navigator.of(context).pop(); // Cierra el diálogo
-                    // Llama al método para tomar una foto
-                    _getImageFromCamera();
-                  },
-                ),
-                SizedBox(height: 20), // Espacio en blanco
-                GestureDetector(
-                  // Opción para seleccionar desde la galería
-                  child: Text('Seleccionar desde galería'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    // Llama al método para seleccionar desde la galería
-                    _getImageFromGallery();
-                  },
-                ),
-                SizedBox(height: 20), // Espacio en blanco
-              ],
+          title: Align(
+            alignment: Alignment.center,
+            child: Text('Opciones Foto de Perfil',
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+              )
             ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.camera, color: Colors.blue),
+                title: Text(
+                  'Tomar una foto',
+                  style: TextStyle(fontSize: 16, color: Colors.blue),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _getImageFromCamera();
+                },
+              ),
+              Divider(thickness: 1),
+              ListTile(
+                leading: Icon(Icons.photo, color: Colors.green),
+                title: Text(
+                  'Seleccionar desde la galería',
+                  style: TextStyle(fontSize: 16, color: Colors.green),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _getImageFromGallery();
+                },
+              ),
+              Divider(thickness: 1),
+              ListTile(
+                leading: Icon(Icons.exit_to_app, color: Colors.red),
+                title: Text(
+                  'Cerrar sesión',
+                  style: TextStyle(fontSize: 16, color: Colors.red),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.pushNamed(context, '/');
+                },
+              ),
+              Divider(thickness: 1),
+              ListTile(
+                leading: Icon(Icons.home, color: Colors.orange),
+                title: Text(
+                  'Regresar a la pantalla de inicio',
+                  style: TextStyle(fontSize: 16, color: Colors.orange),
+                ),
+                onTap: () {
+                  // Navegar a la pantalla de inicio
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
           ),
         );
       },
@@ -299,7 +300,9 @@ class _MyHomePageState extends State<MyHomePage> {
   String hideText(String text, {int defaultLength = 12}) {
     return '* ' * (defaultLength);
   }
-// Función para pedir la contraseña al usuario
+
+
+  // Función para pedir la contraseña al usuario
   Future<void> _showPasswordDialog(BuildContext context, Notea note) async {
     // ocultar y mostrar la contraseña del campo
     bool obscureText1 = true;
@@ -341,13 +344,15 @@ class _MyHomePageState extends State<MyHomePage> {
                                   color: Colors.blue,
                                 ),
                                 onPressed: () {
-                                  // Cambiar la visibilidad de la contraseña del campo
+                                  // Cambiar la visibilidad de la contraseña
+                                  // del campo
                                   setState(() {
                                     obscureText1 = !obscureText1;
                                   });
                                 },
                               ),
-                              // Mostrar el mensaje de error en función del estado del Stream.
+                              // Mostrar el mensaje de error en función
+                              // del estado del Stream.
                               errorText: snapshot.data,
                               errorStyle: TextStyle(color: Colors.red),
                             ),
@@ -443,7 +448,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       builder: (context, snapshot) {
                         return Column(
                           children: [
-                            Text("Intentos excedidos. Responde la pregunta de seguridad"),
+                            Text("Intentos excedidos. Responda la pregunta de seguridad"),
                             SizedBox(height: 10),
                             TextField(
                               // Asociar el controlador de texto al campo de respuesta.
@@ -675,48 +680,71 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  //funcion para mostrar un cuadro de dialogo con el contenido de la nota
+  //funcion para visualizar el contenido de la nota
   void _showNoteContentDialog(BuildContext context, Notea note) {
     showDialog(
-      // Muestra el diálogo en el contexto actual de la aplicación.
       context: context,
-      // Define el constructor del cuadro de diálogo.
       builder: (BuildContext context) {
-        return AlertDialog( // Crea un cuadro de diálogo.
-          // Fondo del diálogo basado en la categoría de la nota
-          backgroundColor: catColor.getColorByIndex(note.categoryId),
-          //Titulo de la nota
-          title: Text(note.title,
-            style: TextStyle(
-              // Estilo del texto del título
-              color: Colors.black54, //color
-              fontSize: 19, //Tamaño
-              fontWeight: FontWeight.w500, //tipo de testo
-            ),
+        //ventana para visualizar datos de la nota
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          content: Text(
-            note.content, // Contenido de la nota
-            style: TextStyle(
-              color: Colors.black54, // Estilo del texto del contenido
-              fontSize: 14, //tamaño del texto
-              fontWeight: FontWeight.normal, //tipo de letra
+          elevation: 0,
+          backgroundColor: Colors.transparent,//color
+          // contenedor del dialogo
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color: catColor.getColorByIndex(note.categoryId),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                // Cierra el diálogo cuando se presiona "Cerrar"
-                Navigator.of(context).pop();
-              },
-              //texto cerrar
-              child: Text(
-                "Cerrar", // Texto del botón "Cerrar"
-                style: TextStyle(
-                  color: Colors.black54,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    note.title,//datos del titulo de la nota
+                    style: TextStyle(
+                      color: Colors.black,//color asignado
+                      fontSize: 22,//tamaño del texto
+                      fontWeight: FontWeight.bold,//tipo de fuente (letra)
+                    ),
+                  ),
                 ),
-              ),
+                Divider(
+                  color: Colors.grey,//color del divisor
+                  thickness: 1,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    note.content,//datos del contenido de la nota
+                    style: TextStyle(
+                      color: Colors.black,//color asignado
+                      fontSize: 16, //tamaño del texto
+                      fontWeight: FontWeight.normal, //tipo de fuente (letra)
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16),
+                TextButton(
+                  onPressed: () {
+                    //cierra la ventana
+                    Navigator.of(context).pop();
+                  },
+                  //Texto cerrar del boton
+                  child: Text(
+                    "Cerrar",
+                    style: TextStyle(
+                      color: Colors.blue,//asignacion de color
+                      fontSize: 18,//tamaño de letra
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
@@ -726,6 +754,7 @@ class _MyHomePageState extends State<MyHomePage> {
   NoteScreenState catColor = NoteScreenState();
   @override
   Widget build(BuildContext context) {
+    //final themeMode = AdaptiveTheme.of(context).mode; // Obtener el modo del tema
     // Determina colores según el tema (claro u oscuro)
     Color botonColor = Theme.of(context).brightness == Brightness.light
         ? Color(0xFFFFFFFF)
@@ -743,304 +772,307 @@ class _MyHomePageState extends State<MyHomePage> {
         ? Color(0xFFF1F4F8)
         : Color(0xFF1D2428);
 
-    return Scaffold(
-      backgroundColor:
-          backgroudcolor, // Establece el color de fondo de la pantalla.
-      body: Stack(
-        // Un Stack permite superponer widgets en capas.
-        children: [
-          Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: 20), // Margen de 20 en izquierda y derecha
-                child: Column(
-                  children: [
-                    //padding para el espacio
-                    Padding(
-                      padding: EdgeInsets.only(top: 35),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTap: _showImagePickerDialog,
-                            //child: Padding(
-                            //padding: EdgeInsets.only(left: 20),
-                            child: Card(
-                              elevation: 0,
-                              color: Colors.transparent,
-                              child: CircleAvatar(
-                                backgroundColor: Colors.blueGrey,
-                                radius: 30,
-                                backgroundImage: _imagePathFromDatabase != null
-                                    ? FileImage(File(_imagePathFromDatabase!))
-                                    : null,
-                              ),
-                            ),
-                            //),
-                          ),
-                          Spacer(),
-                          Stack(
-                            children: [
-                              //se valida si el texto ocupa mas espacio se coloca
-                              //en dos lineas
-                              MediaQuery.of(context).size.width < 320.05
-                                  ? Text(
-                                'Gestory\nPassword', // Texto dividido en dos líneas para pantallas pequeñas
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontFamily: 'Title Large',
-                                  fontWeight: FontWeight.w500,
+    return WillPopScope(
+      onWillPop: () async {
+        //Navigator.pushNamed(context, '/'); // Esto regresará a la pantalla LogIn
+        _showImagePickerDialog();
+        return true; // Si retornas false, impedirá la navegación hacia atrás.
+      },
+      child: Scaffold(
+        backgroundColor:
+            backgroudcolor, // Establece el color de fondo de la pantalla.
+        body: Stack(
+          // Un Stack permite superponer widgets en capas.
+          children: [
+            Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 20), // Margen de 20 en izquierda y derecha
+                  child: Column(
+                    children: [
+                      //padding para el espacio
+                      Padding(
+                        padding: EdgeInsets.only(top: 35),
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: _showImagePickerDialog,
+                              //child: Padding(
+                              //padding: EdgeInsets.only(left: 20),
+                              child: Card(
+                                elevation: 0,
+                                color: Colors.transparent,
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.blueGrey,
+                                  radius: 30,
+                                  backgroundImage: _imagePathFromDatabase != null
+                                      ? FileImage(File(_imagePathFromDatabase!))
+                                      : null,
                                 ),
-                              )
-                                  : Container(
-                                alignment: Alignment.center,
-                                    child: Text(
-                                'Gestory Password', // Texto en una sola línea para pantallas más grandes
-                                style: TextStyle(
+                              ),
+                              //),
+                            ),
+                            Spacer(),
+                            Stack(
+                              children: [
+                                //se valida si el texto ocupa mas espacio se coloca
+                                //en dos lineas
+                                MediaQuery.of(context).size.width < 320.05
+                                    ? Text(
+                                  'Gestory\nPassword', // Texto dividido en dos líneas para pantallas pequeñas
+                                  style: TextStyle(
                                     fontSize: 22,
                                     fontFamily: 'Title Large',
                                     fontWeight: FontWeight.w500,
-                                ),
-                              ),
                                   ),
-                            ],
-                          ),
-                          Spacer(),
-                          Container(
-                            //margin: EdgeInsets.only(right: 22),
-                            height: 42,
-                            width: 80,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Color(0xFFE0E3E7), // Color del borde
-                                width: 1.0, // Ancho del borde
-                              ),
-                              borderRadius: BorderRadius.circular(25.0),
+                                )
+                                    : Container(
+                                  alignment: Alignment.center,
+                                      child: Text(
+                                  'Gestory Password', // Texto en una sola línea para pantallas más grandes
+                                  style: TextStyle(
+                                      fontSize: 22,
+                                      fontFamily: 'Title Large',
+                                      fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                    ),
+                              ],
                             ),
-                            padding: EdgeInsets.only(left: 15, right: 15),
-                            child: Stack(
-                              children: [
-                                // Dos íconos de modo (claro y oscuro) con un interruptor para cambiar el tema.
-                                Positioned(
-                                  left: 0,
-                                  top: 8,
-                                  child: Icon(
-                                    Icons.wb_sunny_rounded,
-                                    color: Color(0xFF57636C),
-                                    size: 24.0,
-                                  ),
+                            Spacer(),
+                            Container(
+                              //margin: EdgeInsets.only(right: 22),
+                              height: 42,
+                              width: 80,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Color(0xFFE0E3E7), // Color del borde
+                                  width: 1.0, // Ancho del borde
                                 ),
-                                Positioned(
-                                  right: 0, // Alinea el icono de modo oscuro a la derecha
-                                  top: 8,
-                                  child: Icon(
-                                    Icons.mode_night_rounded,
-                                    color: Colors.white, // Cambia el color según el modo
-                                    size: 24.0,
+                                borderRadius: BorderRadius.circular(25.0),
+                              ),
+                              padding: EdgeInsets.only(left: 15, right: 15),
+                              child: Stack(
+                                children: [
+                                  // Dos íconos de modo (claro y oscuro) con un interruptor para cambiar el tema.
+                                  Positioned(
+                                    left: 0,
+                                    top: 8,
+                                    child: Icon(
+                                      Icons.wb_sunny_rounded,
+                                      color: Color(0xFF57636C),
+                                      size: 24.0,
+                                    ),
                                   ),
+                                  Positioned(
+                                    right: 0, // Alinea el icono de modo oscuro a la derecha
+                                    top: 8,
+                                    child: Icon(
+                                      Icons.mode_night_rounded,
+                                      color: Colors.white, // Cambia el color según el modo
+                                      size: 24.0,
+                                    ),
+                                  ),
+                                  // se utiliza Transform.scale para escalar el interruptor.
+                                  Transform.scale(
+                                    scale: 2.0,
+                                    child: Align(
+                                      alignment: Alignment.bottomRight,
+                                      // El color de los elementos cambia según el modo.
+                                      child: Switch(
+                                        value: AdaptiveTheme.of(context).mode ==
+                                            AdaptiveThemeMode.light,
+                                        onChanged: (bool value) {
+                                          if (value) {// si es verdadero se matiene el modo claro
+                                            AdaptiveTheme.of(context).setLight();
+                                          } else {// si es false se pone el modo nocturno
+                                            AdaptiveTheme.of(context).setDark();
+                                          }
+                                        },
+                                        activeColor: Colors
+                                            .transparent, // Pulgar transparente en modo oscuro y claro
+                                        activeTrackColor: Colors
+                                            .transparent, // Riel transparente en modo oscuro y claro
+                                        inactiveThumbColor: Colors
+                                            .transparent, // Color del pulgar del interruptor cuando está desactivado
+                                        inactiveTrackColor: Colors
+                                            .transparent, // Color del riel cuando el interruptor está desactivado
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Una fila de ChoiceChips para seleccionar una categoría.
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            //SizedBox(width: 20),
+                            for (int index = 0;
+                                index < _categories.length;
+                                index++)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: ChoiceChip(
+                                  label: Text(_categories[index].name,
+                                    style: TextStyle(
+                                      fontSize: 18, // Tamaño de fuente personalizado
+                                    ),
+                                  ),
+                                  // Verifica si este ChoiceChip está seleccionado
+                                  selected: _selectedChipIndex == index,
+                                  backgroundColor: chiocColor,
+                                  labelStyle: TextStyle(
+                                    color: textColor,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                      color: bordeColor, // Color del borde
+                                      width: 1.0, // Ancho del borde
+                                    ),
+                                    // Radio del borde
+                                    borderRadius: BorderRadius.circular(16.0),
+                                  ),
+                                  //maneja la eleccion de categorias
+                                  onSelected: (isSelected) {
+                                    setState(() {
+                                      // Selecciona o deselecciona este ChoiceChip
+                                      _selectedChipIndex =
+                                          isSelected ? index : -1;
+                                      print(
+                                          'Categoria Seleccionada: ${_categories[index].name}');
+                                      print(
+                                          '_selectedChipIndex: $_selectedChipIndex');
+                                    });
+                                  },
                                 ),
-                                // se utiliza Transform.scale para escalar el interruptor.
-                                Transform.scale(
-                                  scale: 2.0,
-                                  child: Align(
-                                    alignment: Alignment.bottomRight,
-                                    // El color de los elementos cambia según el modo.
-                                    child: Switch(
-                                      value: AdaptiveTheme.of(context).mode ==
-                                          AdaptiveThemeMode.light,
-                                      onChanged: (bool value) {
-                                        if (value) {// si es verdadero se matiene el modo claro
-                                          AdaptiveTheme.of(context).setLight();
-                                        } else {// si es false se pone el modo nocturno
-                                          AdaptiveTheme.of(context).setDark();
-                                        }
-                                      },
-                                      activeColor: Colors
-                                          .transparent, // Pulgar transparente en modo oscuro y claro
-                                      activeTrackColor: Colors
-                                          .transparent, // Riel transparente en modo oscuro y claro
-                                      inactiveThumbColor: Colors
-                                          .transparent, // Color del pulgar del interruptor cuando está desactivado
-                                      inactiveTrackColor: Colors
-                                          .transparent, // Color del riel cuando el interruptor está desactivado
+                              ),
+                            //SizedBox(width: 12),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                // Una división visual entre la selección de categoría y las notas.
+                Divider(
+                  color: Color(0xFF2874cf).withOpacity(0.2), // se le asigno un color
+                  thickness: 2,
+                ),
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: getNotesForSelectedCategory().map((note) {
+                        // Verifica si esta es la última nota
+                        final isLastNote =
+                            note == getNotesForSelectedCategory().last;
+                        return Column(
+                          children: [
+                            SizedBox(height: 24),
+                            GestureDetector(
+                              onTap: () {
+                                // Abre un diálogo con detalles de la contraseña
+                                // cuando se toca una nota
+                                _showPasswordDialog(context, note);
+                              },
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.only(left: 20, top: 10, right: 20),
+                                child: Container(
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        catColor.getColorByIndex(note.categoryId),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.only(left: 20, right: 20),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            // Alinea el texto a la izquierda
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                note.title,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: 19,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              Text(
+                                                // Texto de la nota, con parte oculta
+                                                hideText("contenido"),
+                                                maxLines: 4,
+                                                overflow: TextOverflow.ellipsis,
+                                                textAlign: TextAlign.justify,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.normal,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                            // Agrega el espacio después de la última nota
+                            if (isLastNote) SizedBox(height: 24),
+                          ],
+                        );
+                      }).toList(),
                     ),
-                    // Una fila de ChoiceChips para seleccionar una categoría.
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          //SizedBox(width: 20),
-                          for (int index = 0;
-                              index < _categories.length;
-                              index++)
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: ChoiceChip(
-                                label: Text(_categories[index].name,
-                                  style: TextStyle(
-                                    fontSize: 18, // Tamaño de fuente personalizado
-                                  ),
-                                ),
-                                // Verifica si este ChoiceChip está seleccionado
-                                selected: _selectedChipIndex == index,
-                                backgroundColor: chiocColor,
-                                labelStyle: TextStyle(
-                                  color: textColor,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  side: BorderSide(
-                                    color: bordeColor, // Color del borde
-                                    width: 1.0, // Ancho del borde
-                                  ),
-                                  // Radio del borde
-                                  borderRadius: BorderRadius.circular(16.0),
-                                ),
-                                //maneja la eleccion de categorias
-                                onSelected: (isSelected) {
-                                  setState(() {
-                                    // Selecciona o deselecciona este ChoiceChip
-                                    _selectedChipIndex =
-                                        isSelected ? index : -1;
-                                    print(
-                                        'Categoria Seleccionada: ${_categories[index].name}');
-                                    print(
-                                        '_selectedChipIndex: $_selectedChipIndex');
-                                  });
-                                },
-                              ),
-                            ),
-                          //SizedBox(width: 12),
-                        ],
-                      ),
-                    )
-                  ],
+                  ),
                 ),
-              ),
-              // Una división visual entre la selección de categoría y las notas.
-              Divider(
-                color: Color(0xFF2874cf).withOpacity(0.2), // se le asigno un color
-                thickness: 2,
-              ),
-
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: getNotesForSelectedCategory().map((note) {
-                      // Verifica si esta es la última nota
-                      final isLastNote =
-                          note == getNotesForSelectedCategory().last;
-                      return Column(
-                        children: [
-                          SizedBox(height: 24),
-                          GestureDetector(
-                            onTap: () {
-                              // Abre un diálogo con detalles de la contraseña
-                              // cuando se toca una nota
-                              _showPasswordDialog(context, note);
-                            },
-                            child: Padding(
-                              padding:
-                                  EdgeInsets.only(left: 20, top: 10, right: 20),
-                              child: Container(
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  color:
-                                      catColor.getColorByIndex(note.categoryId),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.only(left: 20, right: 20),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          // Alinea el texto a la izquierda
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              note.title,
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 19,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                            Text(
-                                              // Texto de la nota, con parte oculta
-                                              hideText("contenido"),
-                                              maxLines: 4,
-                                              overflow: TextOverflow.ellipsis,
-                                              textAlign: TextAlign.justify,
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.normal,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Agrega el espacio después de la última nota
-                          if (isLastNote) SizedBox(height: 24),
-                        ],
-                      );
-                    }).toList(),
+              ],
+            ),
+            Align(
+              // Alinea el widget en la esquina inferior derecha
+              alignment: Alignment.bottomRight,
+              child: Container(
+                height: 80,
+                width: 100,
+                decoration: BoxDecoration(
+                  // Forma circular del contenedor
+                  shape: BoxShape.circle,
+                  // Color de fondo del botón
+                  color: botonColor,
+                  border: Border.all(
+                    // Color del borde del botón
+                    color: chiocColor,
+                    width: 4.0, // Ancho del borde
+                  ),
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    print('Icono presionado');
+                    Navigator.pushNamed(context, '/notes');
+                  },
+                  child: Icon(
+                    // Ícono de "Agregar" representado por un signo más
+                    Icons.add,
+                    size: 48, // Tamaño del ícono
+                    color: Color(0xFF2874cF), // Color del ícono
                   ),
                 ),
               ),
-            ],
-          ),
-          Align(
-            // Alinea el widget en la esquina inferior derecha
-            alignment: Alignment.bottomRight,
-            child: Container(
-              height: 80,
-              width: 100,
-              decoration: BoxDecoration(
-                // Forma circular del contenedor
-                shape: BoxShape.circle,
-                // Color de fondo del botón
-                color: botonColor,
-                border: Border.all(
-                  // Color del borde del botón
-                  color: chiocColor,
-                  width: 4.0, // Ancho del borde
-                ),
-              ),
-              child: GestureDetector(
-                onTap: () {
-                  print('Icono presionado');
-                  Navigator.push(
-                    // Navega a una nueva pantalla cuando se presiona el botón
-                    context,
-                    MaterialPageRoute(builder: (context) => MyNote()),
-                  );
-                },
-                child: const Icon(
-                  // Ícono de "Agregar" representado por un signo más
-                  Icons.add,
-                  size: 48, // Tamaño del ícono
-                  color: Color(0xFF2874cF), // Color del ícono
-                ),
-              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

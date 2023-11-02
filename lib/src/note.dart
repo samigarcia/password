@@ -14,33 +14,6 @@ class Note {
   Note(this.title, this.content, this.color, this.category);
 }
 
-class MyNote extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final brightness = MediaQuery.of(context).platformBrightness;
-    final initialMode = brightness ==
-        Brightness.dark ? AdaptiveThemeMode.dark : AdaptiveThemeMode.light;
-    //cambia entre temas oscuros y claros
-    return AdaptiveTheme(
-      // Tema oscuro
-        dark: ThemeData.dark(),
-        // Tema claro
-        light: ThemeData.light(),
-        // Modo de tema inicial
-        initial: initialMode,
-        // Builder que configura el tema en función del AdaptiveTheme
-        builder: (theme, darkTheme){
-          // Devuelve un MaterialApp que utiliza el tema proporcionado
-          return MaterialApp(
-            title: 'Gestory Password',
-            theme: theme,
-            darkTheme: darkTheme,
-            home: NoteScreen(),// Define la página de inicio como MyHomePage
-          );
-        }
-    );
-  }
-}
 // Declaración de la clase NoteScreen que extiende StatefulWidget.
 class NoteScreen extends StatefulWidget {
   @override
@@ -164,24 +137,24 @@ class NoteScreenState extends State<NoteScreen> {
     List<Color> availableColors = [
       Color(0xFFFFB6C1),
       Color(0xFFADD8E6),
-      Color(0xFFFFFF66),
-      Color(0xFF98FB98),
       Color(0xFFD8BFD8),
       Color(0xFFFFCC99),
       Color(0xFFAFEEEE),
-      Color(0xFFC0C0C0),
+      Color(0xFFFFB347),
       Color(0xFFF5F5DC),
+      Color(0xFFFF7F50),
       Color(0xFFE6E6FA),
       Color(0xFFB2FFFF),
       Color(0xFFFFFACD),
-      Color(0xFFFF7F50),
       Color(0xFF98FF98),
       Color(0xFFFFE5B4),
       Color(0xFF87CEEB),
       Color(0xFFE6E6FA),
       Color(0xFFADD8E6),
       Color(0xFFFFFF99),
-      Color(0xFFFFB347),
+      Color(0xFFC0C0C0),
+      Color(0xFFFFFF66),
+      Color(0xFF98FB98),
     ];
     return index >= 0 && index < availableColors.length
         ? availableColors[index]
@@ -381,6 +354,68 @@ class NoteScreenState extends State<NoteScreen> {
       }
     }
   }
+
+  Future<void> _showConfirmationDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('¿Desea salir sin guardar?'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'No ha guardado la nota. ¿Desea salir sin guardar?',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary: Colors.redAccent, // Cambia el color del botón
+              ),
+              child: Text(
+                'No guardar',
+                style: TextStyle(color: Colors.white),
+              ),
+              onPressed: () {
+                //redirige a la pantalla de inicio (tercero)
+                Navigator.pushNamed(context, '/tercero');
+              },
+            ),
+            TextButton(
+              child: Text(
+                'Cancelar',
+                style: TextStyle(color: Colors.blue),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(); // Cierra el diálogo sin hacer nada
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Llama a esta función cuando el usuario intenta salir de la pantalla de notas sin guardar
+  void _confirmExit(BuildContext context) {
+    final title = _titleController.text;
+    final content = _contentController.text;
+    if (title.isNotEmpty || content.isNotEmpty || _selectedCategory.isNotEmpty) {
+      _showConfirmationDialog(context);
+    } else {
+      // NOs redirige a la pantalla de notas si no hay cambios
+      Navigator.pushNamed(context, '/tercero');
+    }
+  }
+
+
   // Función para cargar las notas desde la base de datos y asignar colores de categoría.
   void _loadNotesFromDatabase() async {
     // Obtener todas las notas de la base de datos.
@@ -413,194 +448,204 @@ class NoteScreenState extends State<NoteScreen> {
         Brightness.light ? Color(0xFFF1F4F8) : Color(0xFF1D2428);
     // Devuelve una estructura de widget Scaffold que representa la
     // pantalla principal de la aplicación.
-    return Scaffold(
-      backgroundColor: backgroudcolor,
-      appBar: AppBar(
+    return WillPopScope(
+      onWillPop: () async {
+        ///_confirmExit(context); // Llama a la función de confirmación de salida
+        //Navigator.pushNamed(context, '/tercero');
+        _confirmExit(context);
+        return false; // Impide la navegación hacia atrás directamente
+      },
+
+      child: Scaffold(
         backgroundColor: backgroudcolor,
-        leading: IconButton(
-          icon: Icon(
-            Icons.other_houses_outlined,
-            color: Colors.grey[800],
-            size: 38.0,
+        appBar: AppBar(
+          backgroundColor: backgroudcolor,
+          leading: IconButton(
+            icon: Icon(
+              Icons.other_houses_outlined,
+              color: Colors.grey[800],
+              size: 38.0,
+            ),
+            onPressed: () {
+              _confirmExit(context); // Muestra la confirmación de salida
+              // Navega a la pantalla de inicio cuando se presiona el ícono de inicio.
+              /*Navigator.push(
+                context, //obtiene el contexto de la aplicación actual
+                MaterialPageRoute(builder: (context) => MyHomePage()),
+              );*/
+            },
           ),
-          onPressed: () {
-            // Navega a la pantalla de inicio cuando se presiona el ícono de inicio.
-            Navigator.push(
-              context, //obtiene el contexto de la aplicación actual
-              MaterialPageRoute(builder: (context) => MyInicio()),
-            );
-          },
         ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(
-            16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SizedBox(height: 16.0),
-              // Encabezado que muestra el título y la categoría seleccionada.
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    Text(
-                      'Crea nueva nota',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontFamily: 'Headline Medium',
-                      ),
-                    ),
-                    SizedBox(
-                        width: 8.0),
-                    Row(
-                      children: [
-                        Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            shape: BoxShape
-                                .circle,
-                            color: _selectedColor,
-                          ),
+        body: Padding(
+          padding: EdgeInsets.all(
+              16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(height: 16.0),
+                // Encabezado que muestra el título y la categoría seleccionada.
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      Text(
+                        'Crea nueva nota',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontFamily: 'Headline Medium',
                         ),
-                        SizedBox(
-                            width:
-                            8.0),
-                        Text(
-                            _selectedCategory), // La categoría se actualiza dinámicamente.
-                      ],
-                    ),
-                    SizedBox(
-                        width: 8.0),
-                    // Botón desplegable para seleccionar una categoría o agregar una nueva.
-                    _showAddButton ? PopupMenuButton<Map<String, dynamic>>(
-                      //se crea un icono
-                      icon: Icon(
-                        Icons.add_circle,
-                        color: Colors.blue, //se le asigna el color
-                        size: 40.0, //tamaño del icono
                       ),
-                      onSelected: (Map<String, dynamic> selection) {
-                        if (selection['category'] == 'Add') {
-                          _showAddCategoryDialog();
-                        } else {
-                          setState(() {
-                            _selectedColor = selection['color'];
-                            _selectedCategory = selection['category'];
-                            _showAddButton =
-                            true;
-                          });
-                        }
-                      },
-                      itemBuilder: (BuildContext context) {
-                        List<PopupMenuEntry<Map<String, dynamic>>> items =
-                        _categories.map((category) {
-                          int index = _categories.indexOf(
-                              category);
-                          Color? color = getColorByIndex(
-                              index);
-                          return PopupMenuItem<Map<String, dynamic>>(
-                            value: {
-                              'color': color,
-                              'category': category,
-                            },
-                            child: CategoryMenuItem(
-                              color: color, //
-                              category: category,
+                      SizedBox(
+                          width: 8.0),
+                      Row(
+                        children: [
+                          Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              shape: BoxShape
+                                  .circle,
+                              color: _selectedColor,
+                            ),
+                          ),
+                          SizedBox(
+                              width:
+                              8.0),
+                          Text(
+                              _selectedCategory), // La categoría se actualiza dinámicamente.
+                        ],
+                      ),
+                      SizedBox(
+                          width: 8.0),
+                      // Botón desplegable para seleccionar una categoría o agregar una nueva.
+                      _showAddButton ? PopupMenuButton<Map<String, dynamic>>(
+                        //se crea un icono
+                        icon: Icon(
+                          Icons.add_circle,
+                          color: Colors.blue, //se le asigna el color
+                          size: 40.0, //tamaño del icono
+                        ),
+                        onSelected: (Map<String, dynamic> selection) {
+                          if (selection['category'] == 'Add') {
+                            _showAddCategoryDialog();
+                          } else {
+                            setState(() {
+                              _selectedColor = selection['color'];
+                              _selectedCategory = selection['category'];
+                              _showAddButton =
+                              true;
+                            });
+                          }
+                        },
+                        itemBuilder: (BuildContext context) {
+                          List<PopupMenuEntry<Map<String, dynamic>>> items =
+                          _categories.map((category) {
+                            int index = _categories.indexOf(
+                                category);
+                            Color? color = getColorByIndex(
+                                index);
+                            return PopupMenuItem<Map<String, dynamic>>(
+                              value: {
+                                'color': color,
+                                'category': category,
+                              },
+                              child: CategoryMenuItem(
+                                color: color, //
+                                category: category,
+                              ),
+                            );
+                          }).toList();
+                          // Agregar opción para agregar una nueva categoría.
+                          items.add(
+                            PopupMenuItem<Map<String, dynamic>>(
+                              value: {
+                                'color': getColorByIndex(_categories
+                                    .length),
+                                'category':
+                                'Add',
+                              },
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.add_circle,
+                                    color: Colors.grey[800],
+                                  ),
+                                  SizedBox(
+                                      width: 8.0), //crea un espacio horizontal
+                                  Text(
+                                      'Agregar nueva categoría'), //se establece el texto
+                                ],
+                              ),
                             ),
                           );
-                        }).toList();
-                        // Agregar opción para agregar una nueva categoría.
-                        items.add(
-                          PopupMenuItem<Map<String, dynamic>>(
-                            value: {
-                              'color': getColorByIndex(_categories
-                                  .length),
-                              'category':
-                              'Add',
-                            },
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.add_circle,
-                                  color: Colors.grey[800],
-                                ),
-                                SizedBox(
-                                    width: 8.0), //crea un espacio horizontal
-                                Text(
-                                    'Agregar nueva categoría'), //se establece el texto
-                              ],
-                            ),
-                          ),
-                        );
-                        return items;
-                      },
-                    )
-                        : SizedBox(), //se agrega un espacion vacio sin contenido
-                  ],
-                ),
-              ),
-              SizedBox(height: 16.0),
-              // Campos de entrada para el título y el contenido de la nota.
-              TextField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                  labelText: 'título', //titulo de la etiqueta
-                  labelStyle: TextStyle(
-                    fontFamily: 'Headline Small',
-                    fontWeight: FontWeight
-                        .bold,
-                    fontSize: 24.0,
-                  ),
-                ),
-              ),
-              SizedBox(height: 16.0),
-              TextField(
-                controller: _contentController,
-                maxLines: 10,
-                decoration: InputDecoration(
-                  labelText: 'contenido..',
-                  labelStyle: TextStyle(
-                    fontFamily: 'Headline Small',
-                    fontSize: 16.0,
-                  ),
-                ),
-              ),
-              SizedBox(height: 16.0),
-              // Botón para crear una nueva nota.
-              ElevatedButton(
-                onPressed: _addNotea,
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                    BorderRadius.circular(12),
-                  ),
-                ),
-                child: Container(
-                  height: 54,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons
-                            .receipt_long,
-                        size: 32.0,
-                      ),
-                      SizedBox(width: 8.0),
-                      Text(
-                        'crear nota',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16.0,
-                        ),
-                      ),
+                          return items;
+                        },
+                      )
+                          : SizedBox(), //se agrega un espacion vacio sin contenido
                     ],
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: 16.0),
+                // Campos de entrada para el título y el contenido de la nota.
+                TextField(
+                  controller: _titleController,
+                  decoration: InputDecoration(
+                    labelText: 'título', //titulo de la etiqueta
+                    labelStyle: TextStyle(
+                      fontFamily: 'Headline Small',
+                      fontWeight: FontWeight
+                          .bold,
+                      fontSize: 24.0,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16.0),
+                TextField(
+                  controller: _contentController,
+                  maxLines: 10,
+                  decoration: InputDecoration(
+                    labelText: 'contenido..',
+                    labelStyle: TextStyle(
+                      fontFamily: 'Headline Small',
+                      fontSize: 16.0,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16.0),
+                // Botón para crear una nueva nota.
+                ElevatedButton(
+                  onPressed: _addNotea,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                      BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Container(
+                    height: 54,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons
+                              .receipt_long,
+                          size: 32.0,
+                        ),
+                        SizedBox(width: 8.0),
+                        Text(
+                          'crear nota',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
