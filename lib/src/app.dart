@@ -144,13 +144,12 @@ class _MyAppFormState extends State<MyAppForm> {
                   'Usuario',
                 ),
               ),
-              //se crea la caja de texto donde contendra el usuario
+              //se crea el formulario de Registro
               Form(
                 key: _keyForm,
                 child: Column(
                   children: [
                     SizedBox(
-                      height: 45,
                       child: TextFormField(
                         validator: (valor) {
                           if (valor!.isEmpty) {
@@ -182,9 +181,9 @@ class _MyAppFormState extends State<MyAppForm> {
                         ),
                       ),
                     ),
-                    //un divizor
+                    //divisor
                     const Divider(
-                      height: 15.0,
+                      height: 10.0,
                     ),
                     //se crea la etiqueta 'crear contraseña'
                     Container(
@@ -197,12 +196,11 @@ class _MyAppFormState extends State<MyAppForm> {
                         'Crear contraseña',
                       ),
                     ),
-                    //se crea la caja de texto donde contendra la contraseña
+                    //se crea la caja de texto donde se guarda la contraseña
                     SizedBox(
-                      height: 45,
                       child: TextFormField(
-                        validator: (valor) {
-                          if (valor!.isEmpty) {
+                        validator: (valor1) {
+                          if (valor1!.isEmpty) {
                             return "campo vacio!";
                           }
                           return null;
@@ -233,13 +231,13 @@ class _MyAppFormState extends State<MyAppForm> {
                         ),
                       ),
                     ),
-                    //divizor
+                    //divisor
                     const Divider(
-                      height: 15.0,
+                      height: 10.0,
                     ),
                     //se crea la etiqueta 'Confirmar contraseña'
                     Container(
-                      margin: const EdgeInsets.only(right: 150.0),
+                      margin: const EdgeInsets.only(right: 140.0),
                       child: const Text(
                         style: TextStyle(
                           fontSize: 18.0,
@@ -248,17 +246,17 @@ class _MyAppFormState extends State<MyAppForm> {
                         'Confirmar contraseña',
                       ),
                     ),
-                    //se crea el formulario donde se guarda la confirmacion de contraseña
+                    //se crea la caja de texto donde se guarda la Re-contraseña
                     SizedBox(
-                      height: 45,
                       child: TextFormField(
-                        validator: (valor) {
-                          if (valor!.isEmpty) {
+                        validator: (valor2) {
+                          if (valor2!.isEmpty) {
                             return "campo vacio!";
+                          } else if (valor2.compareTo(password.text) == 0) {
+                            return null;
                           }
-                          return null;
+                          return "contraseña no coinside";
                         },
-                        controller: password1,
                         enableInteractiveSelection: false,
                         obscureText: passwordVisible2,
                         decoration: InputDecoration(
@@ -292,7 +290,7 @@ class _MyAppFormState extends State<MyAppForm> {
                     ),
                     // se crea el menu desplegable "dificil por cierto!"
                     DropdownMenu<String>(
-                      width: 350,
+                      width: 335,
                       controller: pregunta,
                       label: const Text('Selecciona una prengunta'),
                       inputDecorationTheme: const InputDecorationTheme(
@@ -325,11 +323,10 @@ class _MyAppFormState extends State<MyAppForm> {
                     ),
                     //se crea la caja de texto donde se guarda la respuesta del usuario
                     SizedBox(
-                      height: 45,
                       width: double.infinity,
                       child: TextFormField(
-                        validator: (valor) {
-                          if (valor!.isEmpty) {
+                        validator: (valor3) {
+                          if (valor3!.isEmpty) {
                             return "campo vacio!";
                           }
                           return null;
@@ -358,7 +355,7 @@ class _MyAppFormState extends State<MyAppForm> {
     );
   }
 
-  //inserccion hacia la labla persona-----------------
+  //hace un llamado a insertar en la tabla persona-----------------
   insercion() async {
     Data.insert(Persona(
         id: 1,
@@ -375,11 +372,8 @@ class _MyAppFormState extends State<MyAppForm> {
   click() {
     //validamos si el formulario tiene los datos completos
     if (_keyForm.currentState!.validate()) {
-      debugPrint('validacion del formulario');
-      //funcion de insertar datos a la BD
+      debugPrint('Validacion del formulario');
       insercion();
-    } else {
-      debugPrint('faltan datos del formulario');
     }
   }
 //--------------------------------------------------------
