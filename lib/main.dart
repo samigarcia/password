@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
       initial: initialMode,
       // Builder que configura el tema en función del AdaptiveTheme
       builder: (theme, darkTheme) {
-      // Devuelve un MaterialApp que utiliza el tema proporcionado
+        // Devuelve un MaterialApp que utiliza el tema proporcionado
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'GESTOR DE PASSWORD',
@@ -53,7 +53,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
 //clase principal que se ejecuta al abrir la aplicacion
 class First extends StatelessWidget {
   const First({super.key});
@@ -67,24 +66,24 @@ class First extends StatelessWidget {
             borderRadius: BorderRadius.circular(60.0),
           ),
           child: Container(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text(
+                const Text(
                   '¿Salir de la aplicación?',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: Text(
+                      child: const Text(
                         'Cancelar',
                         style: TextStyle(
                           color: Colors.blue,
@@ -95,9 +94,10 @@ class First extends StatelessWidget {
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).pop();
-                        SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+                        SystemChannels.platform
+                            .invokeMethod('SystemNavigator.pop');
                       },
-                      child: Text(
+                      child: const Text(
                         'Salir',
                         style: TextStyle(
                           color: Colors.red,
@@ -117,7 +117,6 @@ class First extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return WillPopScope(
       onWillPop: () async {
         // Cierra la aplicación por completo
@@ -129,7 +128,10 @@ class First extends StatelessWidget {
           centerTitle: true,
           title: const Text('INICIO DE SESION'),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, size: 30,),
+            icon: const Icon(
+              Icons.arrow_back,
+              size: 30,
+            ),
             onPressed: () {
               // Cierra la aplicación por completo
               _showExitConfirmationDialog(context);
