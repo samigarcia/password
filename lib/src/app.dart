@@ -104,7 +104,7 @@ class _MyAppFormState extends State<MyAppForm> {
                             child: Text(
                               'Registro',
                               style: TextStyle(
-                                fontSize: 40.0,
+                                fontSize: 35.0,
                                 color: Colors.black,
                                 fontFamily: 'Roboto',
                               ),
@@ -135,7 +135,7 @@ class _MyAppFormState extends State<MyAppForm> {
               ),
               //se crea la etiqueta usuario
               Container(
-                margin: const EdgeInsets.only(right: 250),
+                alignment: Alignment.topLeft,
                 child: const Text(
                   style: TextStyle(
                     fontSize: 18.0,
@@ -187,7 +187,7 @@ class _MyAppFormState extends State<MyAppForm> {
                     ),
                     //se crea la etiqueta 'crear contraseña'
                     Container(
-                      margin: const EdgeInsets.only(right: 180.0),
+                      alignment: Alignment.topLeft,
                       child: const Text(
                         style: TextStyle(
                           fontSize: 18.0,
@@ -237,7 +237,7 @@ class _MyAppFormState extends State<MyAppForm> {
                     ),
                     //se crea la etiqueta 'Confirmar contraseña'
                     Container(
-                      margin: const EdgeInsets.only(right: 140.0),
+                      alignment: Alignment.topLeft,
                       child: const Text(
                         style: TextStyle(
                           fontSize: 18.0,

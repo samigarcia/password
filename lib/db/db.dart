@@ -13,7 +13,8 @@ late bool canCheckBiometrics;
 //---------------------------------------------------------------
 
 class Data {
-// Este metodo sirve para crear y/o llamar la base de datos ya creada y crea una tabla llamada usuario
+// Este metodo sirve para crear y/o llamar la base de datos ya creada
+//y crea una tabla llamada usuario
   static Future<Database> _openDB() async {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, 'user.db');
@@ -22,8 +23,8 @@ class Data {
 
 //metodo donde se crea la tabla con execute y se lo enviamos a _openDB()
   static void _onCreate(Database db, int newVersion) async {
-    String sql =
-        "CREATE TABLE usuario (id INT, name TEXT, password TEXT, rpassword TEXT, pregunta TEXT, res TEXT)";
+    String sql = """CREATE TABLE usuario
+        (id INT, name TEXT, password TEXT, rpassword TEXT, pregunta TEXT, res TEXT)""";
     await db.execute(sql);
   }
 
@@ -128,8 +129,10 @@ class Data {
 
     return null; // Retorna null si el usuario no se encuentra en la base de datos
   }
+
   //metodo para actualizar la contraseña del usuario
-  static Future<void> updatePasswordAndRPassword(String newPassword, String newRPassword) async {
+  static Future<void> updatePasswordAndRPassword(
+      String newPassword, String newRPassword) async {
     final Database database = await _openDB();
 
     // Crea un mapa con las nuevas columnas que deseas actualizar
