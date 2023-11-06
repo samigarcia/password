@@ -292,7 +292,10 @@ class _MyAppFormState extends State<MyAppForm> {
                     DropdownMenu<String>(
                       width: 335,
                       controller: pregunta,
-                      label: const Text('Selecciona una prengunta'),
+                      label: const Text('Selecciona una prengunta',
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 10, 10, 10),
+                          )),
                       inputDecorationTheme: const InputDecorationTheme(
                         border: OutlineInputBorder(),
                         fillColor: Colors.black,
