@@ -219,7 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
             alignment: Alignment.center,
             child: Text('Opciones Foto de Perfil',
               style: TextStyle(
-                  fontSize: 20,
+                  fontSize: MediaQuery.of(context).size.width * 0.044,
                   fontWeight: FontWeight.bold,
               )
             ),
@@ -229,10 +229,17 @@ class _MyHomePageState extends State<MyHomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               ListTile(
-                leading: Icon(Icons.camera, color: Colors.blue),
+                leading: Icon(
+                    Icons.camera,
+                    size: MediaQuery.of(context).size.width * 0.065,
+                    color: Colors.blue
+                ),
                 title: Text(
                   'Tomar una foto',
-                  style: TextStyle(fontSize: 16, color: Colors.blue),
+                  style: TextStyle(
+                      fontSize: MediaQuery.of(context).size.width * 0.04,
+                      color: Colors.blue
+                  ),
                 ),
                 onTap: () {
                   Navigator.of(context).pop();
@@ -241,10 +248,16 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               Divider(thickness: 1),
               ListTile(
-                leading: Icon(Icons.photo, color: Colors.green),
+                leading: Icon(
+                    Icons.photo,
+                    size: MediaQuery.of(context).size.width * 0.065,
+                    color: Colors.green
+                ),
                 title: Text(
                   'Seleccionar desde la galería',
-                  style: TextStyle(fontSize: 16, color: Colors.green),
+                  style: TextStyle(
+                      fontSize: MediaQuery.of(context).size.width * 0.04,
+                      color: Colors.green),
                 ),
                 onTap: () {
                   Navigator.of(context).pop();
@@ -253,10 +266,17 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               Divider(thickness: 1),
               ListTile(
-                leading: Icon(Icons.exit_to_app, color: Colors.red),
+                leading: Icon(
+                    Icons.exit_to_app,
+                    size: MediaQuery.of(context).size.width * 0.065,
+                    color: Colors.red
+                ),
                 title: Text(
                   'Cerrar sesión',
-                  style: TextStyle(fontSize: 16, color: Colors.red),
+                  style: TextStyle(
+                      fontSize: MediaQuery.of(context).size.width * 0.04,
+                      color: Colors.red
+                  ),
                 ),
                 onTap: () {
                   Navigator.of(context).pop();
@@ -265,10 +285,17 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               Divider(thickness: 1),
               ListTile(
-                leading: Icon(Icons.home, color: Colors.orange),
+                leading: Icon(
+                    Icons.home,
+                    size: MediaQuery.of(context).size.width * 0.065,
+                    color: Colors.orange
+                ),
                 title: Text(
                   'Regresar a la pantalla de inicio',
-                  style: TextStyle(fontSize: 16, color: Colors.orange),
+                  style: TextStyle(
+                      fontSize: MediaQuery.of(context).size.width * 0.04,
+                      color: Colors.orange
+                  ),
                 ),
                 onTap: () {
                   // Navegar a la pantalla de inicio
@@ -323,7 +350,11 @@ class _MyHomePageState extends State<MyHomePage> {
             return Center(
               child: SingleChildScrollView(
                 child: AlertDialog(
-                  title: Text("Ingrese la contraseña con la que se registró"),
+                  title: Text("Ingrese la contraseña con la que se registró",
+                    style: TextStyle(
+                      fontSize: MediaQuery.of(context).size.width * 0.044, //Tamaño de letra
+                    ),
+                  ),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
@@ -355,6 +386,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               // del estado del Stream.
                               errorText: snapshot.data,
                               errorStyle: TextStyle(color: Colors.red),
+                              labelStyle: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.04),
                             ),
                           );
                         },
@@ -438,7 +470,11 @@ class _MyHomePageState extends State<MyHomePage> {
         return Center(
           child: SingleChildScrollView(
             child: AlertDialog(
-              title: Text("Recuperación de contraseña"),
+              title: Text("Recuperación de contraseña",
+                style: TextStyle(
+                  fontSize: MediaQuery.of(context).size.width * 0.044, //Tamaño de letra
+                ),
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -448,7 +484,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       builder: (context, snapshot) {
                         return Column(
                           children: [
-                            Text("Intentos excedidos. Responda la pregunta de seguridad"),
+                            Text("Intentos excedidos. Responda la pregunta de seguridad",
+                              style: TextStyle(
+                                fontSize: MediaQuery.of(context).size.width * 0.04,
+                              ),
+                            ),
                             SizedBox(height: 10),
                             TextField(
                               // Asociar el controlador de texto al campo de respuesta.
@@ -463,6 +503,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                 // Mostrar el mensaje de error en función del estado del Stream.
                                 errorText: snapshot.data,
                                 errorStyle: TextStyle(color: Colors.red),
+                                // Establecer el tamaño de fuente para el texto en el TextField.
+                                labelStyle: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.04), // Tamaño de fuente en porcentaje
                               ),
                             ),
                           ],
@@ -542,7 +584,13 @@ class _MyHomePageState extends State<MyHomePage> {
             return Center(
               child: SingleChildScrollView(
                 child: AlertDialog(
-                  title: Center(child: Text("Nueva Contraseña")),
+                  title: Center(
+                      child: Text("Nueva Contraseña",
+                        style: TextStyle(
+                          fontSize: MediaQuery.of(context).size.width * 0.044, //Tamaño de letra
+                        ),
+                      ),
+                  ),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -577,9 +625,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                   // Mostrar el mensaje de error en función del estado del Stream.
                                   errorText: snapshot.data,
                                   errorStyle: TextStyle(color: Colors.red),
+                                  labelStyle: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.04),
                                 ),
                               ),
-                              SizedBox(height: 10),
+                              SizedBox(height: MediaQuery.of(context).size.width * 0.04,),
                             ],
                           );
                         },
@@ -610,6 +659,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               // Mostrar el mensaje de error en función del estado del Stream.
                               errorText: snapshot.data,
                               errorStyle: TextStyle(color: Colors.red),
+                              labelStyle: TextStyle(fontSize:  MediaQuery.of(context).size.width * 0.04),
                             ),
                           );
                         },
@@ -707,7 +757,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     note.title,//datos del titulo de la nota
                     style: TextStyle(
                       color: Colors.black,//color asignado
-                      fontSize: 22,//tamaño del texto
+                      fontSize: MediaQuery.of(context).size.width * 0.044,//tamaño del texto
                       fontWeight: FontWeight.bold,//tipo de fuente (letra)
                     ),
                   ),
@@ -722,7 +772,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     note.content,//datos del contenido de la nota
                     style: TextStyle(
                       color: Colors.black,//color asignado
-                      fontSize: 16, //tamaño del texto
+                      fontSize: MediaQuery.of(context).size.width * 0.04, //tamaño del texto
                       fontWeight: FontWeight.normal, //tipo de fuente (letra)
                     ),
                   ),
@@ -738,7 +788,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     "Cerrar",
                     style: TextStyle(
                       color: Colors.blue,//asignacion de color
-                      fontSize: 18,//tamaño de letra
+                      fontSize: MediaQuery.of(context).size.width * 0.04,//tamaño de letra
                     ),
                   ),
                 ),
@@ -793,58 +843,40 @@ class _MyHomePageState extends State<MyHomePage> {
                     children: [
                       //padding para el espacio
                       Padding(
-                        padding: EdgeInsets.only(top: 35),
+                        padding: EdgeInsets.only(top: MediaQuery.of(context).size.width * 0.085),
                         child: Row(
                           children: [
                             GestureDetector(
                               onTap: _showImagePickerDialog,
-                              //child: Padding(
-                              //padding: EdgeInsets.only(left: 20),
-                              child: Card(
-                                elevation: 0,
-                                color: Colors.transparent,
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.blueGrey,
-                                  radius: 30,
-                                  backgroundImage: _imagePathFromDatabase != null
-                                      ? FileImage(File(_imagePathFromDatabase!))
-                                      : null,
+                                child: Card(
+                                  elevation: 0,
+                                  color: Colors.transparent,
+                                  child: CircleAvatar(
+                                    backgroundColor: Colors.blueGrey,
+                                    radius: MediaQuery.of(context).size.width * 0.075, // La mitad del tamaño del Container,
+                                    backgroundImage: _imagePathFromDatabase != null
+                                        ? FileImage(File(_imagePathFromDatabase!))
+                                        : null,
+                                  ),
                                 ),
-                              ),
-                              //),
                             ),
                             Spacer(),
                             Stack(
                               children: [
-                                //se valida si el texto ocupa mas espacio se coloca
-                                //en dos lineas
-                                MediaQuery.of(context).size.width < 320.05
-                                    ? Text(
-                                  'Gestory\nPassword', // Texto dividido en dos líneas para pantallas pequeñas
+                                Text(
+                                  'Gestory Password',
                                   style: TextStyle(
-                                    fontSize: 22,
+                                    fontSize: MediaQuery.of(context).size.width * 0.055, // Ajusta el tamaño en porcentaje
                                     fontFamily: 'Title Large',
                                     fontWeight: FontWeight.w500,
                                   ),
-                                )
-                                    : Container(
-                                  alignment: Alignment.center,
-                                      child: Text(
-                                  'Gestory Password', // Texto en una sola línea para pantallas más grandes
-                                  style: TextStyle(
-                                      fontSize: 22,
-                                      fontFamily: 'Title Large',
-                                      fontWeight: FontWeight.w500,
-                                  ),
                                 ),
-                                    ),
                               ],
                             ),
                             Spacer(),
                             Container(
-                              //margin: EdgeInsets.only(right: 22),
-                              height: 42,
-                              width: 80,
+                              height: 34,
+                              width: 60,
                               decoration: BoxDecoration(
                                 border: Border.all(
                                   color: Color(0xFFE0E3E7), // Color del borde
@@ -852,31 +884,32 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ),
                                 borderRadius: BorderRadius.circular(25.0),
                               ),
-                              padding: EdgeInsets.only(left: 15, right: 15),
+                              padding: EdgeInsets.only(left: 1.5, right: 1),
                               child: Stack(
                                 children: [
                                   // Dos íconos de modo (claro y oscuro) con un interruptor para cambiar el tema.
                                   Positioned(
-                                    left: 0,
-                                    top: 8,
-                                    child: Icon(
-                                      Icons.wb_sunny_rounded,
-                                      color: Color(0xFF57636C),
-                                      size: 24.0,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    right: 0, // Alinea el icono de modo oscuro a la derecha
-                                    top: 8,
+                                    right: 4, // Alinea el icono de modo oscuro a la derecha
+                                    top: 6,
                                     child: Icon(
                                       Icons.mode_night_rounded,
                                       color: Colors.white, // Cambia el color según el modo
-                                      size: 24.0,
+                                      size: 20.0,
+                                    ),
+                                  ),
+
+                                  Positioned(
+                                    left: 4,
+                                    top: 6,
+                                    child: Icon(
+                                      Icons.wb_sunny_rounded,
+                                      color: Color(0xFF57636C),
+                                      size: 20.0,
                                     ),
                                   ),
                                   // se utiliza Transform.scale para escalar el interruptor.
                                   Transform.scale(
-                                    scale: 2.0,
+                                    scale: 1.5,
                                     child: Align(
                                       alignment: Alignment.bottomRight,
                                       // El color de los elementos cambia según el modo.
@@ -917,11 +950,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                 index < _categories.length;
                                 index++)
                               Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
+                                padding: EdgeInsets.only(
+                                    right: MediaQuery.of(context).size.width * 0.02, // Espacio en porcentaje del ancho de la pantalla
+                                ),
                                 child: ChoiceChip(
                                   label: Text(_categories[index].name,
                                     style: TextStyle(
-                                      fontSize: 18, // Tamaño de fuente personalizado
+                                      //fontSize: 18, // Tamaño de fuente personalizado
+                                      fontSize: MediaQuery.of(context).size.width * 0.044, // Tamaño de fuente en porcentaje
                                     ),
                                   ),
                                   // Verifica si este ChoiceChip está seleccionado
@@ -974,7 +1010,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             note == getNotesForSelectedCategory().last;
                         return Column(
                           children: [
-                            SizedBox(height: 24),
+                            //SizedBox(height: 24),
+                            SizedBox(height: MediaQuery.of(context).size.width * 0.03),
                             GestureDetector(
                               onTap: () {
                                 // Abre un diálogo con detalles de la contraseña
@@ -983,16 +1020,23 @@ class _MyHomePageState extends State<MyHomePage> {
                               },
                               child: Padding(
                                 padding:
-                                    EdgeInsets.only(left: 20, top: 10, right: 20),
+                                    //EdgeInsets.only(left: 20, top: 10, right: 20),
+                                    EdgeInsets.only(
+                                        left: MediaQuery.of(context).size.width * 0.05,
+                                        top: MediaQuery.of(context).size.width * 0.025,
+                                        right: MediaQuery.of(context).size.width * 0.05
+                                    ),
                                 child: Container(
-                                  height: 100,
+                                  //height: 100,
+                                  height: MediaQuery.of(context).size.width * 0.25,
                                   decoration: BoxDecoration(
                                     color:
                                         catColor.getColorByIndex(note.categoryId),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Padding(
-                                    padding: EdgeInsets.only(left: 20, right: 20),
+                                    //padding: EdgeInsets.only(left: 20, right: 20),
+                                    padding: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.05, right: MediaQuery.of(context).size.width * 0.05,),
                                     child: Row(
                                       children: [
                                         Expanded(
@@ -1006,7 +1050,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
-                                                  fontSize: 19,
+                                                  fontSize: MediaQuery.of(context).size.width * 0.044,
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                               ),
@@ -1017,7 +1061,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 overflow: TextOverflow.ellipsis,
                                                 textAlign: TextAlign.justify,
                                                 style: TextStyle(
-                                                  fontSize: 14,
+                                                  fontSize: MediaQuery.of(context).size.width * 0.04,
                                                   fontWeight: FontWeight.normal,
                                                 ),
                                               ),
@@ -1032,6 +1076,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                             // Agrega el espacio después de la última nota
                             if (isLastNote) SizedBox(height: 24),
+                            //if (isLastNote) SizedBox(height: MediaQuery.of(context).size.width * 0.06),
                           ],
                         );
                       }).toList(),
@@ -1044,8 +1089,11 @@ class _MyHomePageState extends State<MyHomePage> {
               // Alinea el widget en la esquina inferior derecha
               alignment: Alignment.bottomRight,
               child: Container(
-                height: 80,
-                width: 100,
+                //height: 80,
+                //width: 100,
+                margin: EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.02), // Espacio de 10 en el lado izquierdo (10% del ancho de la pantalla)
+                height: MediaQuery.of(context).size.height * 0.099, // Altura en porcentaje (10% del alto de la pantalla)
+                width: MediaQuery.of(context).size.width * 0.2, // Ancho en porcentaje (20% del ancho de la pantalla)
                 decoration: BoxDecoration(
                   // Forma circular del contenedor
                   shape: BoxShape.circle,
@@ -1065,7 +1113,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Icon(
                     // Ícono de "Agregar" representado por un signo más
                     Icons.add,
-                    size: 48, // Tamaño del ícono
+                    size: MediaQuery.of(context).size.width * 0.118,
                     color: Color(0xFF2874cF), // Color del ícono
                   ),
                 ),
