@@ -177,9 +177,17 @@ class NoteScreenState extends State<NoteScreen> {
         builder: (context) {
           return AlertDialog(
             title: Text(
-                'No se pueden agregar más categorías'),
+              'No se pueden agregar más categorías',
+              style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width * 0.044,
+              ),
+            ),
             content: Text(
-                'No hay colores disponibles para nuevas categorías.'),
+                'No hay colores disponibles para nuevas categorías.',
+              style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width * 0.04,
+              ),
+            ),
             //es una lista de acciones que se pueden realizar en el cuadro de diálogo.
             actions: [
               TextButton(
@@ -201,7 +209,12 @@ class NoteScreenState extends State<NoteScreen> {
           return AlertDialog(
             //representa el cuadro de diálogo
             title: Text(
-                'Agregar nueva categoría'), //se crea un titulo del cuadro de diálogo como un widget
+                'Agregar nueva categoría',
+              style: TextStyle(
+                //Tamaño del texto
+                fontSize: MediaQuery.of(context).size.width * 0.044,
+              ),
+            ), //se crea un titulo del cuadro de diálogo como un widget
             //establece el contenido principal del cuadro de diálogo como una columna (Column) de widgets
             content: Column(
               //crea un widget Column
@@ -215,7 +228,11 @@ class NoteScreenState extends State<NoteScreen> {
                   _categoryController, //se especifica el controlador de texto
                   decoration: InputDecoration(
                       labelText:
-                      'Nombre de la categoría'),
+                      'Nombre de la categoría',
+                      labelStyle: TextStyle(
+                        fontSize: MediaQuery.of(context).size.width * 0.04,
+                      ),
+                  ),
                   onChanged: (value) {
                     newCategory = value;
                   },
@@ -241,8 +258,16 @@ class NoteScreenState extends State<NoteScreen> {
                         context: context,
                         builder: (context) {
                           return AlertDialog(
-                            title: Text('Error'),
-                            content: Text('La categoría ya existe.'),
+                            title: Text('Error',
+                              style: TextStyle(
+                                fontSize: MediaQuery.of(context).size.width * 0.044,
+                              ),
+                            ),
+                            content: Text('La categoría ya existe.',
+                              style: TextStyle(
+                                fontSize: MediaQuery.of(context).size.width * 0.04,
+                              ),
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () {
@@ -361,7 +386,11 @@ class NoteScreenState extends State<NoteScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('¿Desea salir sin guardar?'),
+          title: Text('¿Desea salir sin guardar?',
+          style: TextStyle(
+            fontSize: MediaQuery.of(context).size.width * 0.044,
+          ),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -369,7 +398,7 @@ class NoteScreenState extends State<NoteScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
                   'No ha guardado la nota. ¿Desea salir sin guardar?',
-                  style: TextStyle(fontSize: 18),
+                  style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.04),
                 ),
               ),
             ],
@@ -450,12 +479,10 @@ class NoteScreenState extends State<NoteScreen> {
     // pantalla principal de la aplicación.
     return WillPopScope(
       onWillPop: () async {
-        ///_confirmExit(context); // Llama a la función de confirmación de salida
-        //Navigator.pushNamed(context, '/tercero');
+        // Llama a la función de confirmación de salida
         _confirmExit(context);
         return false; // Impide la navegación hacia atrás directamente
       },
-
       child: Scaffold(
         backgroundColor: backgroudcolor,
         appBar: AppBar(
@@ -464,26 +491,22 @@ class NoteScreenState extends State<NoteScreen> {
             icon: Icon(
               Icons.other_houses_outlined,
               color: Colors.grey[800],
-              size: 38.0,
+              size: MediaQuery.of(context).size.width * 0.093,
             ),
             onPressed: () {
               _confirmExit(context); // Muestra la confirmación de salida
-              // Navega a la pantalla de inicio cuando se presiona el ícono de inicio.
-              /*Navigator.push(
-                context, //obtiene el contexto de la aplicación actual
-                MaterialPageRoute(builder: (context) => MyHomePage()),
-              );*/
             },
           ),
         ),
         body: Padding(
-          padding: EdgeInsets.all(
-              16.0),
+          //padding: EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(height: 16.0),
+                //SizedBox(height: 16.0),
+                SizedBox(height: MediaQuery.of(context).size.width * 0.04),
                 // Encabezado que muestra el título y la categoría seleccionada.
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -492,39 +515,42 @@ class NoteScreenState extends State<NoteScreen> {
                       Text(
                         'Crea nueva nota',
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: MediaQuery.of(context).size.width * 0.058,
                           fontFamily: 'Headline Medium',
                         ),
                       ),
-                      SizedBox(
-                          width: 8.0),
+                      //SizedBox(width: 8.0),
+                      SizedBox(width: MediaQuery.of(context).size.width * 0.02),
                       Row(
                         children: [
                           Container(
-                            width: 24,
-                            height: 24,
+                            width: MediaQuery.of(context).size.width * 0.058,
+                            height: MediaQuery.of(context).size.width * 0.058,
                             decoration: BoxDecoration(
                               shape: BoxShape
                                   .circle,
                               color: _selectedColor,
                             ),
                           ),
-                          SizedBox(
-                              width:
-                              8.0),
+                          //SizedBox(width: 8.0),
+                          SizedBox(width: MediaQuery.of(context).size.width * 0.02),
                           Text(
-                              _selectedCategory), // La categoría se actualiza dinámicamente.
+                              _selectedCategory,
+                            style: TextStyle(
+                              fontSize: MediaQuery.of(context).size.width * 0.034,
+                            ),
+                          ), // La categoría se actualiza dinámicamente.
                         ],
                       ),
-                      SizedBox(
-                          width: 8.0),
+                      SizedBox(width: MediaQuery.of(context).size.width * 0.02),
                       // Botón desplegable para seleccionar una categoría o agregar una nueva.
                       _showAddButton ? PopupMenuButton<Map<String, dynamic>>(
                         //se crea un icono
                         icon: Icon(
                           Icons.add_circle,
                           color: Colors.blue, //se le asigna el color
-                          size: 40.0, //tamaño del icono
+                          //size: 40.0, //tamaño del icono
+                          size: MediaQuery.of(context).size.width * 0.097,
                         ),
                         onSelected: (Map<String, dynamic> selection) {
                           if (selection['category'] == 'Add') {
@@ -570,11 +596,15 @@ class NoteScreenState extends State<NoteScreen> {
                                   Icon(
                                     Icons.add_circle,
                                     color: Colors.grey[800],
+                                    size: MediaQuery.of(context).size.width * 0.06,
                                   ),
-                                  SizedBox(
-                                      width: 8.0), //crea un espacio horizontal
+                                  SizedBox(width: MediaQuery.of(context).size.width * 0.02), //crea un espacio horizontal
                                   Text(
-                                      'Agregar nueva categoría'), //se establece el texto
+                                      'Agregar nueva categoría',
+                                    style: TextStyle(
+                                      fontSize: MediaQuery.of(context).size.width * 0.039,
+                                    ),
+                                  ), //se establece el texto
                                 ],
                               ),
                             ),
@@ -586,7 +616,8 @@ class NoteScreenState extends State<NoteScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: 16.0),
+                //SizedBox(height: 16.0),
+                SizedBox(height: MediaQuery.of(context).size.width * 0.04),
                 // Campos de entrada para el título y el contenido de la nota.
                 TextField(
                   controller: _titleController,
@@ -596,11 +627,11 @@ class NoteScreenState extends State<NoteScreen> {
                       fontFamily: 'Headline Small',
                       fontWeight: FontWeight
                           .bold,
-                      fontSize: 24.0,
+                      fontSize: MediaQuery.of(context).size.width * 0.058,
                     ),
                   ),
                 ),
-                SizedBox(height: 16.0),
+                SizedBox(height: MediaQuery.of(context).size.width * 0.04),
                 TextField(
                   controller: _contentController,
                   maxLines: 10,
@@ -608,11 +639,12 @@ class NoteScreenState extends State<NoteScreen> {
                     labelText: 'contenido..',
                     labelStyle: TextStyle(
                       fontFamily: 'Headline Small',
-                      fontSize: 16.0,
+                      //fontSize: 16.0,
+                      fontSize: MediaQuery.of(context).size.width * 0.04,
                     ),
                   ),
                 ),
-                SizedBox(height: 16.0),
+                SizedBox(height: MediaQuery.of(context).size.width * 0.04),
                 // Botón para crear una nueva nota.
                 ElevatedButton(
                   onPressed: _addNotea,
@@ -630,14 +662,16 @@ class NoteScreenState extends State<NoteScreen> {
                         Icon(
                           Icons
                               .receipt_long,
-                          size: 32.0,
+                          //size: 32.0,
+                          size: MediaQuery.of(context).size.width * 0.078,
                         ),
                         SizedBox(width: 8.0),
                         Text(
                           'crear nota',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16.0,
+                            //fontSize: 16.0,
+                            fontSize: MediaQuery.of(context).size.width * 0.04,
                           ),
                         ),
                       ],
@@ -677,15 +711,19 @@ class CategoryMenuItem extends StatelessWidget {
         children: [
           Container(
             //Se crea un contenedor rectangular que contiene el círculo de color que representa la categoría.
-            width: 24,
-            height: 24,
+            width: MediaQuery.of(context).size.width * 0.058,
+            height: MediaQuery.of(context).size.width * 0.058,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: color,
             ),
           ),
-          SizedBox(width: 8.0),
-          Text(category), //se muestra el nombre de la categoria
+          SizedBox(width: MediaQuery.of(context).size.width * 0.02),
+          Text(category,
+            style: TextStyle(
+              fontSize: MediaQuery.of(context).size.width * 0.039,
+            ),
+          ), //se muestra el nombre de la categoria
         ],
       ),
     );
