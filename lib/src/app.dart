@@ -208,6 +208,9 @@ class _MyAppFormState extends State<MyAppForm> {
                         controller: password,
                         enableInteractiveSelection: false,
                         obscureText: passwordVisible,
+                        style: const TextStyle(
+                          color: Colors.black,
+                        ),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
                               vertical: 10, horizontal: 10),
@@ -259,6 +262,9 @@ class _MyAppFormState extends State<MyAppForm> {
                         },
                         enableInteractiveSelection: false,
                         obscureText: passwordVisible2,
+                        style: const TextStyle(
+                          color: Colors.black,
+                        ),
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
                               vertical: 10, horizontal: 10),
@@ -335,6 +341,9 @@ class _MyAppFormState extends State<MyAppForm> {
                           return null;
                         },
                         controller: respuesta,
+                        style: const TextStyle(
+                          color: Colors.black,
+                        ),
                         decoration: const InputDecoration(
                           contentPadding: EdgeInsets.symmetric(
                               vertical: 10, horizontal: 10),
