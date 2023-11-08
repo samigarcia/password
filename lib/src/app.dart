@@ -334,6 +334,9 @@ class _MyAppFormState extends State<MyAppForm> {
                     SizedBox(
                       width: double.infinity,
                       child: TextFormField(
+                        style: const TextStyle(
+                          color: Colors.black,
+                        ),
                         validator: (valor3) {
                           if (valor3!.isEmpty) {
                             return "campo vacio!";
@@ -341,9 +344,6 @@ class _MyAppFormState extends State<MyAppForm> {
                           return null;
                         },
                         controller: respuesta,
-                        style: const TextStyle(
-                          color: Colors.black,
-                        ),
                         decoration: const InputDecoration(
                           contentPadding: EdgeInsets.symmetric(
                               vertical: 10, horizontal: 10),
